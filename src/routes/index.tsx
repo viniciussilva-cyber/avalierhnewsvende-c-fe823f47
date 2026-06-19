@@ -33,6 +33,7 @@ function PublicView() {
   const publishedQuery = useQuery({
     queryKey: ["newsletters", "published"],
     queryFn: listPublished,
+    enabled: firebaseConfigured,
   });
 
   const published = publishedQuery.data ?? [];
