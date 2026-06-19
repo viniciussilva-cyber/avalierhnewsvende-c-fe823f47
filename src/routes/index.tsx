@@ -8,6 +8,7 @@ import { Hero } from "@/components/Hero";
 import { EvaluationForm } from "@/components/EvaluationForm";
 import { listPublished } from "@/lib/newsletters";
 import { listEvaluations, averageRating } from "@/lib/evaluations";
+import { firebaseConfigured } from "@/lib/firebase";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
