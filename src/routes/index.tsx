@@ -44,7 +44,7 @@ function PublicView() {
   const evaluationsQuery = useQuery({
     queryKey: ["evaluations", selected?.id],
     queryFn: () => listEvaluations(selected!.id),
-    enabled: !!selected,
+    enabled: !!selected && firebaseConfigured,
   });
 
   const evaluations = evaluationsQuery.data ?? [];
