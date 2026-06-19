@@ -17,6 +17,7 @@ import { ConfigBanner } from "@/components/ConfigBanner";
 import { Hero } from "@/components/Hero";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { isAuthenticated, logout } from "@/lib/auth";
+import { firebaseConfigured } from "@/lib/firebase";
 import { listNewsletters, deleteNewsletter } from "@/lib/newsletters";
 import { listAllEvaluations, averageRating } from "@/lib/evaluations";
 import type { Newsletter } from "@/lib/types";
