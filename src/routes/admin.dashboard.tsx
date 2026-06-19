@@ -48,12 +48,12 @@ function Dashboard() {
   const newslettersQuery = useQuery({
     queryKey: ["newsletters", "all"],
     queryFn: listNewsletters,
-    enabled: ready,
+    enabled: ready && firebaseConfigured,
   });
   const evaluationsQuery = useQuery({
     queryKey: ["evaluations", "all"],
     queryFn: listAllEvaluations,
-    enabled: ready,
+    enabled: ready && firebaseConfigured,
   });
 
   const newsletters = newslettersQuery.data ?? [];
