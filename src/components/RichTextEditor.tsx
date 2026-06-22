@@ -29,6 +29,10 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" },
+      }),
     ],
     content: value,
     editorProps: {
@@ -37,9 +41,44 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
           "tiptap prose prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none",
         "data-placeholder": "Escreva o conteúdo da newsletter…",
       },
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        const images = Array.from(items).filter((item) => item.type.startsWith("image/"));
+        if (images.length === 0) return false;
+        event.preventDefault();
+        images.forEach((item) => {
+          const file = item.getAsFile();
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const src = reader.result as string;
+            editor?.chain().focus().setImage({ src }).run();
+          };
+          reader.readAsDataURL(file);
+        });
+        return true;
+      },
+      handleDrop: (view, event) => {
+        const files = event.dataTransfer?.files;
+        if (!files || files.length === 0) return false;
+        const images = Array.from(files).filter((file) => file.type.startsWith("image/"));
+        if (images.length === 0) return false;
+        event.preventDefault();
+        images.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const src = reader.result as string;
+            editor?.chain().focus().setImage({ src }).run();
+          };
+          reader.readAsDataURL(file);
+        });
+        return true;
+      },
     },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
+
 
   // Keep editor in sync when loading an existing edition into the form.
   useEffect(() => {
