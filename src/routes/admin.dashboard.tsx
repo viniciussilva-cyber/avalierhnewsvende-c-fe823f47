@@ -16,7 +16,7 @@ import {
 import { ConfigBanner } from "@/components/ConfigBanner";
 import { Hero } from "@/components/Hero";
 import { NewsletterForm } from "@/components/NewsletterForm";
-import { isAuthenticated, logout } from "@/lib/auth";
+import { useAuth, logout } from "@/lib/auth";
 import { firebaseConfigured } from "@/lib/firebase";
 import { listNewsletters, deleteNewsletter } from "@/lib/newsletters";
 import { listAllEvaluations, averageRating } from "@/lib/evaluations";
@@ -33,17 +33,17 @@ type Tab = "manage" | "new" | "evaluations";
 function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, loading } = useAuth();
   const [tab, setTab] = useState<Tab>("manage");
   const [editing, setEditing] = useState<Newsletter | null>(null);
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
+    if (!loading && !user) {
       navigate({ to: "/admin", replace: true });
-    } else {
-      setReady(true);
     }
-  }, [navigate]);
+  }, [loading, user, navigate]);
+
+  const ready = !loading && !!user;
 
   const newslettersQuery = useQuery({
     queryKey: ["newsletters", "all"],
