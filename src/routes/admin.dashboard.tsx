@@ -73,8 +73,9 @@ function Dashboard() {
     ? evaluations.filter((e) => e.newsletterId === latestPublished.id)
     : [];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    queryClient.clear();
     navigate({ to: "/admin", replace: true });
   };
 
