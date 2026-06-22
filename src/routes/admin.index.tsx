@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Eye, EyeOff, Lock, Newspaper } from "lucide-react";
-import { login, isAuthenticated } from "@/lib/auth";
+import { Eye, EyeOff, Lock, Newspaper, Loader2 } from "lucide-react";
+import { login, useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -12,24 +12,30 @@ export const Route = createFileRoute("/admin/")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated()) {
+    if (!loading && user) {
       navigate({ to: "/admin/dashboard", replace: true });
     }
-  }, [navigate]);
+  }, [loading, user, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (login(email, password)) {
+    setSubmitting(true);
+    try {
+      await login(email, password);
       navigate({ to: "/admin/dashboard", replace: true });
-    } else {
-      setError("E-mail ou senha inválidos.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "E-mail ou senha inválidos.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
