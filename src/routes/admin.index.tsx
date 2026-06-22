@@ -94,9 +94,11 @@ function LoginPage() {
 
             <button
               type="submit"
-              className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-95"
+              disabled={submitting}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Entrar
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting ? "Entrando…" : "Entrar"}
             </button>
           </form>
         </div>
