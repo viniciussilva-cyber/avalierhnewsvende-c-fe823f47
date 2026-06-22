@@ -126,6 +126,24 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   };
 
+  const addImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const src = reader.result as string;
+        editor.chain().focus().setImage({ src }).run();
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+
+
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-background">
       <div className="flex flex-wrap items-center gap-1 border-b border-border bg-header/60 p-1">
