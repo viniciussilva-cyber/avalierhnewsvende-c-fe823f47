@@ -173,6 +173,10 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         <Btn label="Link" active={editor.isActive("link")} onClick={setLink}>
           <LinkIcon className="h-4 w-4" />
         </Btn>
+        <Btn label="Imagem" onClick={addImage}>
+          <ImageIcon className="h-4 w-4" />
+        </Btn>
+
         <span className="mx-1 h-5 w-px bg-border" />
         <Btn label="Desfazer" onClick={() => editor.chain().focus().undo().run()}>
           <Undo className="h-4 w-4" />
