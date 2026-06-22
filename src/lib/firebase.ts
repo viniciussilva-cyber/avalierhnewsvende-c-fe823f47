@@ -12,12 +12,12 @@ import { getAuth } from "firebase/auth";
  *    Firebase Console → Project settings → General → Your apps → SDK setup.
  */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyDjkQvOgOClV7T1_kYQUgad_5_aaQ7-F_Q",
+  authDomain: "avalie-rh-news.firebaseapp.com",
+  projectId: "avalie-rh-news",
+  storageBucket: "avalie-rh-news.firebasestorage.app",
+  messagingSenderId: "578422633995",
+  appId: "1:578422633995:web:ce98089ed34a83e7d6790e",
 };
 
 export const firebaseConfigured = !firebaseConfig.apiKey.startsWith("YOUR_");
