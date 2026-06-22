@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import { useEffect } from "react";
 import {
   Bold,
@@ -11,6 +12,7 @@ import {
   Heading3,
   Quote,
   Link as LinkIcon,
+  Image as ImageIcon,
   Undo,
   Redo,
 } from "lucide-react";
@@ -27,6 +29,10 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" },
+      }),
     ],
     content: value,
     editorProps: {
@@ -35,9 +41,44 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
           "tiptap prose prose-invert max-w-none min-h-[280px] px-4 py-3 focus:outline-none",
         "data-placeholder": "Escreva o conteúdo da newsletter…",
       },
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        const images = Array.from(items).filter((item) => item.type.startsWith("image/"));
+        if (images.length === 0) return false;
+        event.preventDefault();
+        images.forEach((item) => {
+          const file = item.getAsFile();
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const src = reader.result as string;
+            editor?.chain().focus().setImage({ src }).run();
+          };
+          reader.readAsDataURL(file);
+        });
+        return true;
+      },
+      handleDrop: (view, event) => {
+        const files = event.dataTransfer?.files;
+        if (!files || files.length === 0) return false;
+        const images = Array.from(files).filter((file) => file.type.startsWith("image/"));
+        if (images.length === 0) return false;
+        event.preventDefault();
+        images.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const src = reader.result as string;
+            editor?.chain().focus().setImage({ src }).run();
+          };
+          reader.readAsDataURL(file);
+        });
+        return true;
+      },
     },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   });
+
 
   // Keep editor in sync when loading an existing edition into the form.
   useEffect(() => {
@@ -85,6 +126,24 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   };
 
+  const addImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const src = reader.result as string;
+        editor.chain().focus().setImage({ src }).run();
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+
+
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-background">
       <div className="flex flex-wrap items-center gap-1 border-b border-border bg-header/60 p-1">
@@ -114,6 +173,10 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         <Btn label="Link" active={editor.isActive("link")} onClick={setLink}>
           <LinkIcon className="h-4 w-4" />
         </Btn>
+        <Btn label="Imagem" onClick={addImage}>
+          <ImageIcon className="h-4 w-4" />
+        </Btn>
+
         <span className="mx-1 h-5 w-px bg-border" />
         <Btn label="Desfazer" onClick={() => editor.chain().focus().undo().run()}>
           <Undo className="h-4 w-4" />
