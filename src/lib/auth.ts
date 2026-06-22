@@ -1,36 +1,77 @@
 /**
- * Hardcoded moderator access (front-end only, as requested).
+ * Real moderator authentication backed by Firebase Auth (email/password).
  *
- * NOTE: This is client-side protection. There is no Firebase Auth backing it,
- * so it gates the UI but not direct database writes. Tighten Firestore rules
- * and/or add real auth later if stronger protection is needed.
+ * The previous hardcoded session has been replaced. Accounts must be created
+ * in the Firebase Console → Authentication → Users. Backend protection is
+ * enforced by the Firestore Security Rules (see firestore.rules) which only
+ * allow writes from the approved moderator e-mails.
  */
-const ALLOWED_EMAILS = ["vinicius.silva@vende-c.com", "lucas.izan@vende-c.com"];
-const PASSWORD = "rh2026!";
-const STORAGE_KEY = "rhnews_mod_session";
+import { useEffect, useState } from "react";
+import {
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  type User,
+} from "firebase/auth";
+import { auth, firebaseConfigured } from "./firebase";
 
-export function login(email: string, password: string): boolean {
-  const normalized = email.trim().toLowerCase();
-  if (ALLOWED_EMAILS.includes(normalized) && password === PASSWORD) {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem(STORAGE_KEY, normalized);
+/** Friendly error messages for the most common Firebase Auth error codes. */
+function authErrorMessage(code: string): string {
+  switch (code) {
+    case "auth/invalid-email":
+      return "E-mail inválido.";
+    case "auth/user-disabled":
+      return "Esta conta foi desativada.";
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+    case "auth/invalid-credential":
+      return "E-mail ou senha inválidos.";
+    case "auth/too-many-requests":
+      return "Muitas tentativas. Tente novamente mais tarde.";
+    case "auth/network-request-failed":
+      return "Falha de conexão. Verifique sua internet.";
+    default:
+      return "Não foi possível entrar. Tente novamente.";
+  }
+}
+
+/** Sign in with email/password. Throws an Error with a friendly message. */
+export async function login(email: string, password: string): Promise<void> {
+  if (!firebaseConfigured) {
+    throw new Error("Firebase não configurado.");
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+  } catch (err) {
+    const code = (err as { code?: string })?.code ?? "";
+    throw new Error(authErrorMessage(code));
+  }
+}
+
+export async function logout(): Promise<void> {
+  if (!firebaseConfigured) return;
+  await firebaseSignOut(auth);
+}
+
+/**
+ * React hook exposing the current Firebase Auth state.
+ * `loading` is true until the initial auth state has resolved.
+ */
+export function useAuth(): { user: User | null; loading: boolean } {
+  const [user, setUser] = useState<User | null>(() => auth?.currentUser ?? null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!firebaseConfigured) {
+      setLoading(false);
+      return;
     }
-    return true;
-  }
-  return false;
-}
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
-export function logout(): void {
-  if (typeof window !== "undefined") {
-    sessionStorage.removeItem(STORAGE_KEY);
-  }
-}
-
-export function currentModerator(): string | null {
-  if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(STORAGE_KEY);
-}
-
-export function isAuthenticated(): boolean {
-  return currentModerator() !== null;
+  return { user, loading };
 }
