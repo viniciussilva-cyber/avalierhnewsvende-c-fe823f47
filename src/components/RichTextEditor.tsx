@@ -298,7 +298,12 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     editor.chain().focus().updateAttributes("image", { width }).run();
   };
 
+  const setImageAlign = (align: string) => {
+    editor.chain().focus().updateAttributes("image", { align }).run();
+  };
+
   const imageSelected = editor.isActive("image");
+  const currentImageAlign = (editor.getAttributes("image").align as string) || "block";
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-background">
