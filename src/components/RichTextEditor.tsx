@@ -402,20 +402,38 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         </Btn>
       </div>
 
-      {/* Image size controls — shown only when an image is selected */}
+      {/* Image controls — shown only when an image is selected */}
       {imageSelected && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-secondary/40 px-3 py-2 text-sm">
-          <span className="text-muted-foreground">Tamanho da imagem:</span>
-          {IMAGE_SIZES.map((size) => (
-            <button
-              key={size.value}
-              type="button"
-              onClick={() => setImageWidth(size.value)}
-              className="rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
-            >
-              {size.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-2 border-b border-border bg-secondary/40 px-3 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-28 shrink-0 text-muted-foreground">Tamanho:</span>
+            {IMAGE_SIZES.map((size) => (
+              <button
+                key={size.value}
+                type="button"
+                onClick={() => setImageWidth(size.value)}
+                className="rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+              >
+                {size.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-28 shrink-0 text-muted-foreground">Posição:</span>
+            {IMAGE_ALIGNS.map((align) => (
+              <button
+                key={align.value}
+                type="button"
+                onClick={() => setImageAlign(align.value)}
+                className={cn(
+                  "rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary",
+                  currentImageAlign === align.value && "border-primary bg-primary/15 text-primary"
+                )}
+              >
+                {align.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
