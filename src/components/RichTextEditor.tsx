@@ -4,7 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
-import { Extension } from "@tiptap/core";
+import { Extension, mergeAttributes } from "@tiptap/core";
 import { useEffect, useRef, useState } from "react";
 import {
   Bold,
@@ -55,7 +55,7 @@ const FontSize = Extension.create({
   },
 });
 
-// Extends Image so each image can carry a width (for resizing).
+// Extends Image so each image can carry a width and a placement (align).
 const ResizableImage = Image.extend({
   addAttributes() {
     return {
@@ -63,11 +63,41 @@ const ResizableImage = Image.extend({
       width: {
         default: null,
         parseHTML: (element: HTMLElement) =>
-          element.getAttribute("width") || element.style.width || null,
-        renderHTML: (attributes: { width?: string | null }) =>
-          attributes.width ? { style: `width: ${attributes.width}; height: auto;` } : {},
+          element.style.width || element.getAttribute("width") || null,
+      },
+      align: {
+        default: "block",
+        parseHTML: (element: HTMLElement) => element.getAttribute("data-align") || "block",
       },
     };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { width, align, ...rest } = HTMLAttributes as Record<string, unknown>;
+    let style = "max-width: 100%; height: auto;";
+    if (width) style += ` width: ${width};`;
+    switch (align) {
+      case "left":
+        style += " float: left; margin: 0.25rem 1.25rem 0.75rem 0;";
+        break;
+      case "right":
+        style += " float: right; margin: 0.25rem 0 0.75rem 1.25rem;";
+        break;
+      case "center":
+        style += " display: block; margin: 0.75rem auto;";
+        break;
+      case "inline":
+        style += " display: inline-block; vertical-align: middle; margin: 0 0.35rem;";
+        break;
+      default:
+        style += " display: block; margin: 0.75rem 0;";
+    }
+    return [
+      "img",
+      mergeAttributes(this.options.HTMLAttributes, rest, {
+        "data-align": align as string,
+        style,
+      }),
+    ];
   },
 });
 
@@ -93,6 +123,14 @@ const IMAGE_SIZES = [
   { label: "50%", value: "50%" },
   { label: "75%", value: "75%" },
   { label: "100%", value: "100%" },
+];
+
+const IMAGE_ALIGNS = [
+  { label: "Esquerda (texto ao lado)", value: "left" },
+  { label: "Centro", value: "center" },
+  { label: "Direita (texto ao lado)", value: "right" },
+  { label: "Entre o texto", value: "inline" },
+  { label: "Embaixo (bloco)", value: "block" },
 ];
 
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
@@ -260,7 +298,12 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     editor.chain().focus().updateAttributes("image", { width }).run();
   };
 
+  const setImageAlign = (align: string) => {
+    editor.chain().focus().updateAttributes("image", { align }).run();
+  };
+
   const imageSelected = editor.isActive("image");
+  const currentImageAlign = (editor.getAttributes("image").align as string) || "block";
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-background">
@@ -359,20 +402,38 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         </Btn>
       </div>
 
-      {/* Image size controls — shown only when an image is selected */}
+      {/* Image controls — shown only when an image is selected */}
       {imageSelected && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-secondary/40 px-3 py-2 text-sm">
-          <span className="text-muted-foreground">Tamanho da imagem:</span>
-          {IMAGE_SIZES.map((size) => (
-            <button
-              key={size.value}
-              type="button"
-              onClick={() => setImageWidth(size.value)}
-              className="rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
-            >
-              {size.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-2 border-b border-border bg-secondary/40 px-3 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-28 shrink-0 text-muted-foreground">Tamanho:</span>
+            {IMAGE_SIZES.map((size) => (
+              <button
+                key={size.value}
+                type="button"
+                onClick={() => setImageWidth(size.value)}
+                className="rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+              >
+                {size.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-28 shrink-0 text-muted-foreground">Posição:</span>
+            {IMAGE_ALIGNS.map((align) => (
+              <button
+                key={align.value}
+                type="button"
+                onClick={() => setImageAlign(align.value)}
+                className={cn(
+                  "rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary",
+                  currentImageAlign === align.value && "border-primary bg-primary/15 text-primary"
+                )}
+              >
+                {align.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
