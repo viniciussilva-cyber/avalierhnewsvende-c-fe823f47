@@ -2,7 +2,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-import { useEffect } from "react";
+import TextAlign from "@tiptap/extension-text-align";
+import { useEffect, useRef, useState } from "react";
 import {
   Bold,
   Italic,
@@ -13,6 +14,10 @@ import {
   Quote,
   Link as LinkIcon,
   Image as ImageIcon,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Smile,
   Undo,
   Redo,
 } from "lucide-react";
@@ -23,15 +28,32 @@ interface RichTextEditorProps {
   onChange: (html: string) => void;
 }
 
+const EMOJIS = [
+  "😀", "😁", "😂", "🤣", "😊", "😍", "😎", "🤩", "🥳", "😅",
+  "😉", "🙂", "🤔", "😴", "😇", "🙌", "👏", "👍", "👎", "🙏",
+  "💪", "🤝", "👋", "✌️", "🤞", "❤️", "🧡", "💛", "💚", "💙",
+  "💜", "🔥", "✨", "⭐", "🌟", "💡", "🎉", "🎊", "🎯", "🚀",
+  "📈", "📊", "📌", "📣", "📢", "✅", "❌", "⚠️", "💰", "🏆",
+  "🥇", "🎁", "📅", "⏰", "💼", "🤑", "😃", "💯", "👀", "🫶",
+];
+
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
+  const [showEmojis, setShowEmojis] = useState(false);
+  const emojiRef = useRef<HTMLDivElement>(null);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
       Image.configure({
+        inline: true,
         allowBase64: true,
-        HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" },
+        HTMLAttributes: { class: "inline-block rounded-lg max-w-full h-auto my-3 align-middle" },
+      }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+        alignments: ["left", "center", "right"],
       }),
     ],
     content: value,
@@ -88,6 +110,18 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, editor]);
 
+  // Close emoji picker on outside click.
+  useEffect(() => {
+    if (!showEmojis) return;
+    const handler = (e: MouseEvent) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setShowEmojis(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showEmojis]);
+
   if (!editor) return null;
 
   const Btn = ({
@@ -143,6 +177,11 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     input.click();
   };
 
+  const insertEmoji = (emoji: string) => {
+    editor.chain().focus().insertContent(emoji).run();
+    setShowEmojis(false);
+  };
+
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-background">
@@ -161,6 +200,16 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
           <Heading3 className="h-4 w-4" />
         </Btn>
         <span className="mx-1 h-5 w-px bg-border" />
+        <Btn label="Alinhar à esquerda" active={editor.isActive({ textAlign: "left" })} onClick={() => editor.chain().focus().setTextAlign("left").run()}>
+          <AlignLeft className="h-4 w-4" />
+        </Btn>
+        <Btn label="Centralizar" active={editor.isActive({ textAlign: "center" })} onClick={() => editor.chain().focus().setTextAlign("center").run()}>
+          <AlignCenter className="h-4 w-4" />
+        </Btn>
+        <Btn label="Alinhar à direita" active={editor.isActive({ textAlign: "right" })} onClick={() => editor.chain().focus().setTextAlign("right").run()}>
+          <AlignRight className="h-4 w-4" />
+        </Btn>
+        <span className="mx-1 h-5 w-px bg-border" />
         <Btn label="Lista" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}>
           <List className="h-4 w-4" />
         </Btn>
@@ -176,6 +225,25 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         <Btn label="Imagem" onClick={addImage}>
           <ImageIcon className="h-4 w-4" />
         </Btn>
+        <div className="relative" ref={emojiRef}>
+          <Btn label="Emoji" active={showEmojis} onClick={() => setShowEmojis((s) => !s)}>
+            <Smile className="h-4 w-4" />
+          </Btn>
+          {showEmojis && (
+            <div className="absolute left-0 top-full z-20 mt-1 grid w-64 grid-cols-8 gap-0.5 rounded-lg border border-border bg-card p-2 shadow-lg">
+              {EMOJIS.map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => insertEmoji(emoji)}
+                  className="rounded-md p-1 text-lg leading-none transition-colors hover:bg-secondary"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <span className="mx-1 h-5 w-px bg-border" />
         <Btn label="Desfazer" onClick={() => editor.chain().focus().undo().run()}>
