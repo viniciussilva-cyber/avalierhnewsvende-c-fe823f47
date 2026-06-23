@@ -55,7 +55,7 @@ const FontSize = Extension.create({
   },
 });
 
-// Extends Image so each image can carry a width (for resizing).
+// Extends Image so each image can carry a width and a placement (align).
 const ResizableImage = Image.extend({
   addAttributes() {
     return {
@@ -63,11 +63,41 @@ const ResizableImage = Image.extend({
       width: {
         default: null,
         parseHTML: (element: HTMLElement) =>
-          element.getAttribute("width") || element.style.width || null,
-        renderHTML: (attributes: { width?: string | null }) =>
-          attributes.width ? { style: `width: ${attributes.width}; height: auto;` } : {},
+          element.style.width || element.getAttribute("width") || null,
+      },
+      align: {
+        default: "block",
+        parseHTML: (element: HTMLElement) => element.getAttribute("data-align") || "block",
       },
     };
+  },
+  renderHTML({ HTMLAttributes }) {
+    const { width, align, ...rest } = HTMLAttributes as Record<string, unknown>;
+    let style = "max-width: 100%; height: auto;";
+    if (width) style += ` width: ${width};`;
+    switch (align) {
+      case "left":
+        style += " float: left; margin: 0.25rem 1.25rem 0.75rem 0;";
+        break;
+      case "right":
+        style += " float: right; margin: 0.25rem 0 0.75rem 1.25rem;";
+        break;
+      case "center":
+        style += " display: block; margin: 0.75rem auto;";
+        break;
+      case "inline":
+        style += " display: inline-block; vertical-align: middle; margin: 0 0.35rem;";
+        break;
+      default:
+        style += " display: block; margin: 0.75rem 0;";
+    }
+    return [
+      "img",
+      mergeAttributes(this.options.HTMLAttributes, rest, {
+        "data-align": align as string,
+        style,
+      }),
+    ];
   },
 });
 
