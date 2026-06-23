@@ -125,6 +125,14 @@ const IMAGE_SIZES = [
   { label: "100%", value: "100%" },
 ];
 
+const IMAGE_ALIGNS = [
+  { label: "Esquerda (texto ao lado)", value: "left" },
+  { label: "Centro", value: "center" },
+  { label: "Direita (texto ao lado)", value: "right" },
+  { label: "Entre o texto", value: "inline" },
+  { label: "Embaixo (bloco)", value: "block" },
+];
+
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const [showEmojis, setShowEmojis] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
