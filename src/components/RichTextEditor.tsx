@@ -3,6 +3,8 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
+import TextStyle from "@tiptap/extension-text-style";
+import { Extension } from "@tiptap/core";
 import { useEffect, useRef, useState } from "react";
 import {
   Bold,
@@ -20,6 +22,8 @@ import {
   Smile,
   Undo,
   Redo,
+  Minus,
+  Type,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +31,45 @@ interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
 }
+
+// Adds a `fontSize` attribute to the textStyle mark so text can be resized.
+const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() {
+    return { types: ["textStyle"] };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (element: HTMLElement) => element.style.fontSize || null,
+            renderHTML: (attributes: { fontSize?: string | null }) =>
+              attributes.fontSize ? { style: `font-size: ${attributes.fontSize}` } : {},
+          },
+        },
+      },
+    ];
+  },
+});
+
+// Extends Image so each image can carry a width (for resizing).
+const ResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        parseHTML: (element: HTMLElement) =>
+          element.getAttribute("width") || element.style.width || null,
+        renderHTML: (attributes: { width?: string | null }) =>
+          attributes.width ? { style: `width: ${attributes.width}; height: auto;` } : {},
+      },
+    };
+  },
+});
 
 const EMOJIS = [
   "😀", "😁", "😂", "🤣", "😊", "😍", "😎", "🤩", "🥳", "😅",
@@ -37,19 +80,38 @@ const EMOJIS = [
   "🥇", "🎁", "📅", "⏰", "💼", "🤑", "😃", "💯", "👀", "🫶",
 ];
 
+const FONT_SIZES = [
+  { label: "Pequeno", value: "13px" },
+  { label: "Normal", value: "16px" },
+  { label: "Médio", value: "20px" },
+  { label: "Grande", value: "26px" },
+  { label: "Enorme", value: "34px" },
+];
+
+const IMAGE_SIZES = [
+  { label: "25%", value: "25%" },
+  { label: "50%", value: "50%" },
+  { label: "75%", value: "75%" },
+  { label: "100%", value: "100%" },
+];
+
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const [showEmojis, setShowEmojis] = useState(false);
+  const [showSizes, setShowSizes] = useState(false);
   const emojiRef = useRef<HTMLDivElement>(null);
+  const sizeRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
+      TextStyle,
+      FontSize,
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline" } }),
-      Image.configure({
-        inline: true,
+      ResizableImage.configure({
+        inline: false,
         allowBase64: true,
-        HTMLAttributes: { class: "inline-block rounded-lg max-w-full h-auto my-3 align-middle" },
+        HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-3" },
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -110,17 +172,20 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, editor]);
 
-  // Close emoji picker on outside click.
+  // Close popovers on outside click.
   useEffect(() => {
-    if (!showEmojis) return;
+    if (!showEmojis && !showSizes) return;
     const handler = (e: MouseEvent) => {
       if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
         setShowEmojis(false);
       }
+      if (sizeRef.current && !sizeRef.current.contains(e.target as Node)) {
+        setShowSizes(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [showEmojis]);
+  }, [showEmojis, showSizes]);
 
   if (!editor) return null;
 
@@ -182,6 +247,20 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     setShowEmojis(false);
   };
 
+  const setFontSize = (size: string) => {
+    if (size === "16px") {
+      editor.chain().focus().setMark("textStyle", { fontSize: null }).run();
+    } else {
+      editor.chain().focus().setMark("textStyle", { fontSize: size }).run();
+    }
+    setShowSizes(false);
+  };
+
+  const setImageWidth = (width: string) => {
+    editor.chain().focus().updateAttributes("image", { width }).run();
+  };
+
+  const imageSelected = editor.isActive("image");
 
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-background">
@@ -192,6 +271,29 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         <Btn label="Itálico" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}>
           <Italic className="h-4 w-4" />
         </Btn>
+
+        {/* Text size picker */}
+        <div className="relative" ref={sizeRef}>
+          <Btn label="Tamanho do texto" active={showSizes} onClick={() => setShowSizes((s) => !s)}>
+            <Type className="h-4 w-4" />
+          </Btn>
+          {showSizes && (
+            <div className="absolute left-0 top-full z-20 mt-1 w-40 rounded-lg border border-border bg-card p-1 shadow-lg">
+              {FONT_SIZES.map((size) => (
+                <button
+                  key={size.value}
+                  type="button"
+                  onClick={() => setFontSize(size.value)}
+                  className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-foreground transition-colors hover:bg-secondary"
+                >
+                  <span style={{ fontSize: size.value }}>{size.label}</span>
+                  <span className="text-xs text-muted-foreground">{size.value}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         <span className="mx-1 h-5 w-px bg-border" />
         <Btn label="Título" active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
           <Heading2 className="h-4 w-4" />
@@ -218,6 +320,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         </Btn>
         <Btn label="Citação" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
           <Quote className="h-4 w-4" />
+        </Btn>
+        <Btn label="Linha divisória" onClick={() => editor.chain().focus().setHorizontalRule().run()}>
+          <Minus className="h-4 w-4" />
         </Btn>
         <Btn label="Link" active={editor.isActive("link")} onClick={setLink}>
           <LinkIcon className="h-4 w-4" />
@@ -253,6 +358,24 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
           <Redo className="h-4 w-4" />
         </Btn>
       </div>
+
+      {/* Image size controls — shown only when an image is selected */}
+      {imageSelected && (
+        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-secondary/40 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">Tamanho da imagem:</span>
+          {IMAGE_SIZES.map((size) => (
+            <button
+              key={size.value}
+              type="button"
+              onClick={() => setImageWidth(size.value)}
+              className="rounded-md border border-border bg-background px-2.5 py-1 text-foreground transition-colors hover:bg-primary/15 hover:text-primary"
+            >
+              {size.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       <EditorContent editor={editor} />
     </div>
   );
