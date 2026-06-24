@@ -272,13 +272,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     input.accept = "image/*";
     input.onchange = () => {
       const file = input.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const src = reader.result as string;
-        editor.chain().focus().setImage({ src }).run();
-      };
-      reader.readAsDataURL(file);
+      if (file) uploadAndInsert(file);
     };
     input.click();
   };
