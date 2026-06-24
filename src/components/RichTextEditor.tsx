@@ -173,13 +173,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         event.preventDefault();
         images.forEach((item) => {
           const file = item.getAsFile();
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            const src = reader.result as string;
-            editor?.chain().focus().setImage({ src }).run();
-          };
-          reader.readAsDataURL(file);
+          if (file) uploadAndInsert(file);
         });
         return true;
       },
@@ -189,14 +183,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         const images = Array.from(files).filter((file) => file.type.startsWith("image/"));
         if (images.length === 0) return false;
         event.preventDefault();
-        images.forEach((file) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const src = reader.result as string;
-            editor?.chain().focus().setImage({ src }).run();
-          };
-          reader.readAsDataURL(file);
-        });
+        images.forEach((file) => uploadAndInsert(file));
         return true;
       },
     },
