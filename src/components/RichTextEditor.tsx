@@ -26,6 +26,8 @@ import {
   Type,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { uploadEditorImage } from "@/lib/storage";
+import { toast } from "sonner";
 
 interface RichTextEditorProps {
   value: string;
