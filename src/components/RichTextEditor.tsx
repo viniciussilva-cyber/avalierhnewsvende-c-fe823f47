@@ -26,6 +26,8 @@ import {
   Type,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { uploadEditorImage } from "@/lib/storage";
+import { toast } from "sonner";
 
 interface RichTextEditorProps {
   value: string;
@@ -139,6 +141,20 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const emojiRef = useRef<HTMLDivElement>(null);
   const sizeRef = useRef<HTMLDivElement>(null);
 
+  // Uploads an image to Storage and inserts its URL. Avoids inlining base64,
+  // which would bloat the Firestore document and break saving (and reading).
+  async function uploadAndInsert(file: File) {
+    const toastId = toast.loading("Enviando imagem…");
+    try {
+      const src = await uploadEditorImage(file);
+      editor?.chain().focus().setImage({ src }).run();
+      toast.success("Imagem adicionada!", { id: toastId });
+    } catch {
+      toast.error("Não foi possível enviar a imagem.", { id: toastId });
+    }
+  }
+
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -171,13 +187,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         event.preventDefault();
         images.forEach((item) => {
           const file = item.getAsFile();
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            const src = reader.result as string;
-            editor?.chain().focus().setImage({ src }).run();
-          };
-          reader.readAsDataURL(file);
+          if (file) uploadAndInsert(file);
         });
         return true;
       },
@@ -187,14 +197,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         const images = Array.from(files).filter((file) => file.type.startsWith("image/"));
         if (images.length === 0) return false;
         event.preventDefault();
-        images.forEach((file) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const src = reader.result as string;
-            editor?.chain().focus().setImage({ src }).run();
-          };
-          reader.readAsDataURL(file);
-        });
+        images.forEach((file) => uploadAndInsert(file));
         return true;
       },
     },
@@ -269,13 +272,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     input.accept = "image/*";
     input.onchange = () => {
       const file = input.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const src = reader.result as string;
-        editor.chain().focus().setImage({ src }).run();
-      };
-      reader.readAsDataURL(file);
+      if (file) uploadAndInsert(file);
     };
     input.click();
   };

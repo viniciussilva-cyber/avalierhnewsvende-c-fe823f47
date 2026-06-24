@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// ============================================================================
+// RH NEWS VENDE-C — Firebase Storage Security Rules
+//
+// Newsletter images are uploaded here (instead of being inlined as base64 in
+// the Firestore document, which broke saving and reading). Deploy these in the
+// Firebase Console → Storage → Rules (or via the Firebase CLI).
+//
+// Anyone can read the images (so every reader sees them). Only the approved
+// moderator e-mails (authenticated through Firebase Auth) can upload, and only
+// reasonably sized image files are accepted.
+// ============================================================================
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Approved moderators. Keep this list in sync with firestore.rules.
+    function isModerator() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'vinicius.silva@vende-c.com',
+          'lucas.izan@vende-c.com'
+        ];
+    }
+
+    match /newsletter-images/{imageId} {
+      allow read: if true;
+      allow write: if isModerator()
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
