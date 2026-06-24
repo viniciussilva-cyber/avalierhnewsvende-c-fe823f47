@@ -141,6 +141,20 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   const emojiRef = useRef<HTMLDivElement>(null);
   const sizeRef = useRef<HTMLDivElement>(null);
 
+  // Uploads an image to Storage and inserts its URL. Avoids inlining base64,
+  // which would bloat the Firestore document and break saving (and reading).
+  async function uploadAndInsert(file: File) {
+    const toastId = toast.loading("Enviando imagem…");
+    try {
+      const src = await uploadEditorImage(file);
+      editor?.chain().focus().setImage({ src }).run();
+      toast.success("Imagem adicionada!", { id: toastId });
+    } catch {
+      toast.error("Não foi possível enviar a imagem.", { id: toastId });
+    }
+  }
+
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
