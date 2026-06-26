@@ -31,7 +31,7 @@ export async function uploadEditorImage(file: File): Promise<string> {
 
   const { path } = (await res.json()) as { path: string };
 
-  // Return an absolute URL to our image proxy so it works for every reader.
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  return `${origin}/api/public/newsletter-image?path=${encodeURIComponent(path)}`;
+  // Keep the saved URL relative. Absolute preview/admin URLs can break when
+  // collaborators open the published site from a different domain.
+  return `/api/public/newsletter-image?path=${encodeURIComponent(path)}`;
 }
