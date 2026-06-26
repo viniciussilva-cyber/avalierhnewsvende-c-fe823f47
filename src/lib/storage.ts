@@ -31,6 +31,35 @@ export async function uploadEditorImage(file: File): Promise<string> {
 
   const { path } = (await res.json()) as { path: string };
 
+  return makeNewsletterImageUrl(path);
+}
+
+/** Imports an existing image URL pasted from an e-mail into our private bucket. */
+export async function importEditorImageFromUrl(imageUrl: string): Promise<string> {
+  const idToken = await auth?.currentUser?.getIdToken();
+  if (!idToken) {
+    throw new Error("Você precisa estar autenticado para enviar imagens.");
+  }
+
+  const res = await fetch("/api/public/newsletter-image-upload", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ imageUrl }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Falha ao importar imagem (${res.status}).`);
+  }
+
+  const { path } = (await res.json()) as { path: string };
+
+  return makeNewsletterImageUrl(path);
+}
+
+function makeNewsletterImageUrl(path: string): string {
   // Keep the saved URL relative. Absolute preview/admin URLs can break when
   // collaborators open the published site from a different domain.
   return `/api/public/newsletter-image?path=${encodeURIComponent(path)}`;
