@@ -26,7 +26,7 @@ import {
   Type,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { uploadEditorImage } from "@/lib/storage";
+import { importEditorImageFromUrl, uploadEditorImage } from "@/lib/storage";
 import { toast } from "sonner";
 
 interface RichTextEditorProps {
@@ -154,6 +154,72 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     }
   }
 
+  async function uploadDataUrl(src: string, index: number) {
+    const res = await fetch(src);
+    const blob = await res.blob();
+    const ext = blob.type.split("/")[1]?.split("+")[0] || "png";
+    return uploadEditorImage(new File([blob], `email-image-${index}.${ext}`, { type: blob.type }));
+  }
+
+  async function pasteHtmlWithImages(html: string, files: File[]) {
+    const toastId = toast.loading("Importando imagens do e-mail…");
+    let imported = 0;
+    let skipped = 0;
+    let fileIndex = 0;
+
+    try {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const images = Array.from(doc.querySelectorAll("img"));
+
+      for (const [index, image] of images.entries()) {
+        const src = image.getAttribute("src")?.trim() ?? "";
+        let nextSrc = "";
+
+        try {
+          if (src.startsWith("data:image/")) {
+            nextSrc = await uploadDataUrl(src, index);
+          } else if (src.startsWith("http://") || src.startsWith("https://")) {
+            nextSrc = await importEditorImageFromUrl(src);
+          } else if (src.startsWith("blob:")) {
+            const res = await fetch(src);
+            const blob = await res.blob();
+            const ext = blob.type.split("/")[1]?.split("+")[0] || "png";
+            nextSrc = await uploadEditorImage(
+              new File([blob], `email-image-${index}.${ext}`, { type: blob.type })
+            );
+          } else if (files[fileIndex]) {
+            nextSrc = await uploadEditorImage(files[fileIndex]);
+            fileIndex += 1;
+          }
+        } catch {
+          nextSrc = "";
+        }
+
+        if (nextSrc) {
+          image.setAttribute("src", nextSrc);
+          image.setAttribute("alt", image.getAttribute("alt") || "Imagem da newsletter");
+          imported += 1;
+        } else {
+          image.remove();
+          skipped += 1;
+        }
+      }
+
+      editor?.chain().focus().insertContent(doc.body.innerHTML).run();
+
+      if (skipped > 0) {
+        toast.warning(
+          `${imported} imagem(ns) importada(s). ${skipped} imagem(ns) não vieram no conteúdo copiado.`,
+          { id: toastId }
+        );
+      } else {
+        toast.success(`${imported} imagem(ns) importada(s)!`, { id: toastId });
+      }
+    } catch {
+      toast.error("Não foi possível importar as imagens do e-mail.", { id: toastId });
+    }
+  }
+
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -182,6 +248,16 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       handlePaste: (view, event) => {
         const items = event.clipboardData?.items;
         if (!items) return false;
+        const imageFiles = Array.from(items)
+          .filter((item) => item.type.startsWith("image/"))
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => !!file);
+        const html = event.clipboardData?.getData("text/html") ?? "";
+        if (html && /<img\b/i.test(html)) {
+          event.preventDefault();
+          pasteHtmlWithImages(html, imageFiles);
+          return true;
+        }
         const images = Array.from(items).filter((item) => item.type.startsWith("image/"));
         if (images.length === 0) return false;
         event.preventDefault();
