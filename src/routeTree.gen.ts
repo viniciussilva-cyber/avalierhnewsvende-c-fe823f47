@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
 import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/public/newsletter-image'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,12 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNewsletterImageUploadRoute =
+  ApiPublicNewsletterImageUploadRouteImport.update({
+    id: '/api/public/newsletter-image-upload',
+    path: '/api/public/newsletter-image-upload',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicNewsletterImageRoute =
   ApiPublicNewsletterImageRouteImport.update({
     id: '/api/public/newsletter-image',
@@ -41,12 +48,14 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
+  '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
+  '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -54,6 +63,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
+  '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -62,14 +72,21 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/'
     | '/api/public/newsletter-image'
+    | '/api/public/newsletter-image-upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/dashboard' | '/admin' | '/api/public/newsletter-image'
+  to:
+    | '/'
+    | '/admin/dashboard'
+    | '/admin'
+    | '/api/public/newsletter-image'
+    | '/api/public/newsletter-image-upload'
   id:
     | '__root__'
     | '/'
     | '/admin/dashboard'
     | '/admin/'
     | '/api/public/newsletter-image'
+    | '/api/public/newsletter-image-upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +94,7 @@ export interface RootRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
+  ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/newsletter-image-upload': {
+      id: '/api/public/newsletter-image-upload'
+      path: '/api/public/newsletter-image-upload'
+      fullPath: '/api/public/newsletter-image-upload'
+      preLoaderRoute: typeof ApiPublicNewsletterImageUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/newsletter-image': {
       id: '/api/public/newsletter-image'
       path: '/api/public/newsletter-image'
@@ -117,6 +142,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
+  ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
