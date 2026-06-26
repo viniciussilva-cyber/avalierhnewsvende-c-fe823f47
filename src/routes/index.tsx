@@ -10,6 +10,22 @@ import { listPublished } from "@/lib/newsletters";
 import { listEvaluations, averageRating } from "@/lib/evaluations";
 import { firebaseConfigured } from "@/lib/firebase";
 
+function normalizeNewsletterImages(html: string): string {
+  return html
+    .replace(
+      /src=(['"])https?:\/\/[^'\"]+\/api\/public\/newsletter-image\?path=([^'\"]+)\1/gi,
+      (_match, quote: string, path: string) =>
+        `src=${quote}/api/public/newsletter-image?path=${path}${quote}`
+    )
+    .replace(
+      /src=(['"])https?:\/\/[^'\"]+\/storage\/v1\/object\/(?:public|sign)\/newsletter-images\/([^'\"?]+)(?:\?[^'\"]*)?\1/gi,
+      (_match, quote: string, path: string) =>
+        `src=${quote}/api/public/newsletter-image?path=${encodeURIComponent(
+          decodeURIComponent(path)
+        )}${quote}`
+    );
+}
+
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
     edition: typeof search.edition === "string" ? search.edition : undefined,
@@ -51,6 +67,7 @@ function PublicView() {
   const average = averageRating(evaluations);
 
   const others = published.filter((n) => n.id !== selected?.id);
+  const articleHtml = selected ? normalizeNewsletterImages(selected.content) : "";
 
   const scrollToForm = () =>
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -87,7 +104,7 @@ function PublicView() {
             </div>
 
             <article className="prose prose-invert mt-12 max-w-none prose-headings:text-foreground prose-a:text-primary">
-              <div dangerouslySetInnerHTML={{ __html: selected.content }} />
+              <div dangerouslySetInnerHTML={{ __html: articleHtml }} />
             </article>
           </main>
 
