@@ -113,7 +113,15 @@ function Dashboard() {
       <ConfigBanner />
 
       <div className="flex items-center justify-between border-b border-border bg-header px-6 py-3">
-        <span className="text-sm font-bold text-foreground">Painel do moderador</span>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/app"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Módulos
+          </Link>
+          <span className="text-sm font-bold text-foreground">RH News · Painel</span>
+        </div>
         <button
           onClick={handleLogout}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -121,6 +129,8 @@ function Dashboard() {
           <LogOut className="h-4 w-4" /> Sair
         </button>
       </div>
+
+      <PageTransition>
 
       <Hero
         monthYear={latestPublished?.monthYear}
