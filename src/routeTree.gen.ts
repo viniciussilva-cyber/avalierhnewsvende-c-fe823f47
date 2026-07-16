@@ -10,14 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
+import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
+import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
 import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
 import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/public/newsletter-image'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -28,6 +37,21 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/admin/dashboard',
   path: '/admin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRsIndexRoute = AppRsIndexRouteImport.update({
+  id: '/app/rs/',
+  path: '/app/rs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRsNovoRoute = AppRsNovoRouteImport.update({
+  id: '/app/rs/novo',
+  path: '/app/rs/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRsIdRoute = AppRsIdRouteImport.update({
+  id: '/app/rs/$id',
+  path: '/app/rs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicNewsletterImageUploadRoute =
@@ -47,23 +71,35 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
+  '/app/rs/$id': typeof AppRsIdRoute
+  '/app/rs/novo': typeof AppRsNovoRoute
+  '/app/rs/': typeof AppRsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin': typeof AdminIndexRoute
+  '/app': typeof AppIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
+  '/app/rs/$id': typeof AppRsIdRoute
+  '/app/rs/novo': typeof AppRsNovoRoute
+  '/app/rs': typeof AppRsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
+  '/app/rs/$id': typeof AppRsIdRoute
+  '/app/rs/novo': typeof AppRsNovoRoute
+  '/app/rs/': typeof AppRsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -71,30 +107,46 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/dashboard'
     | '/admin/'
+    | '/app/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
+    | '/app/rs/$id'
+    | '/app/rs/novo'
+    | '/app/rs/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin/dashboard'
     | '/admin'
+    | '/app'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
+    | '/app/rs/$id'
+    | '/app/rs/novo'
+    | '/app/rs'
   id:
     | '__root__'
     | '/'
     | '/admin/dashboard'
     | '/admin/'
+    | '/app/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
+    | '/app/rs/$id'
+    | '/app/rs/novo'
+    | '/app/rs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AppIndexRoute: typeof AppIndexRoute
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
+  AppRsIdRoute: typeof AppRsIdRoute
+  AppRsNovoRoute: typeof AppRsNovoRoute
+  AppRsIndexRoute: typeof AppRsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -104,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -118,6 +177,27 @@ declare module '@tanstack/react-router' {
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rs/': {
+      id: '/app/rs/'
+      path: '/app/rs'
+      fullPath: '/app/rs/'
+      preLoaderRoute: typeof AppRsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rs/novo': {
+      id: '/app/rs/novo'
+      path: '/app/rs/novo'
+      fullPath: '/app/rs/novo'
+      preLoaderRoute: typeof AppRsNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rs/$id': {
+      id: '/app/rs/$id'
+      path: '/app/rs/$id'
+      fullPath: '/app/rs/$id'
+      preLoaderRoute: typeof AppRsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/newsletter-image-upload': {
@@ -141,19 +221,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AppIndexRoute: AppIndexRoute,
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
+  AppRsIdRoute: AppRsIdRoute,
+  AppRsNovoRoute: AppRsNovoRoute,
+  AppRsIndexRoute: AppRsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

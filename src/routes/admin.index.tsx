@@ -21,7 +21,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/admin/dashboard", replace: true });
+      navigate({ to: "/app", replace: true });
     }
   }, [loading, user, navigate]);
 
@@ -31,7 +31,7 @@ function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate({ to: "/admin/dashboard", replace: true });
+      navigate({ to: "/app", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "E-mail ou senha inválidos.");
     } finally {

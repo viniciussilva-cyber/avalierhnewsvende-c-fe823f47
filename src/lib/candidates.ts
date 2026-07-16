@@ -1,0 +1,160 @@
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+} from "firebase/firestore";
+import { db } from "./firebase";
+
+export const CANDIDATE_STATUSES = [
+  { id: "triagem", label: "Triagem" },
+  { id: "entrevista_rh", label: "Entrevista RH" },
+  { id: "avaliacao_gestor", label: "Avaliação do gestor" },
+  { id: "aprovado", label: "Aprovado" },
+  { id: "reprovado", label: "Reprovado" },
+] as const;
+
+export type CandidateStatus = (typeof CANDIDATE_STATUSES)[number]["id"];
+
+export const CANDIDATE_AREAS = [
+  "Administrativo",
+  "Comercial",
+  "Marketing",
+  "Financeiro",
+  "Operações",
+  "Tecnologia",
+  "Atendimento",
+  "Outro",
+];
+
+export interface Candidate {
+  id: string;
+  photoUrl?: string;
+  fullName: string;
+  salaryExpectation: string;
+  area: string;
+  resumeUrl: string;
+  rhSummary: string;
+  experience: string;
+  rhNotes: string;
+  status: CandidateStatus;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface GestorFeedback {
+  gestorUid: string;
+  gestorName: string;
+  gestorEmail: string;
+  feedback: string;
+  /** true = aprova para próxima fase, false = não aprova, null = ainda avaliando */
+  approved: boolean | null;
+  updatedAt: number;
+}
+
+const COL = "candidates";
+
+function fromDoc(id: string, data: Record<string, unknown>): Candidate {
+  return {
+    id,
+    photoUrl: (data.photoUrl as string) || undefined,
+    fullName: (data.fullName as string) ?? "",
+    salaryExpectation: (data.salaryExpectation as string) ?? "",
+    area: (data.area as string) ?? "",
+    resumeUrl: (data.resumeUrl as string) ?? "",
+    rhSummary: (data.rhSummary as string) ?? "",
+    experience: (data.experience as string) ?? "",
+    rhNotes: (data.rhNotes as string) ?? "",
+    status: (data.status as CandidateStatus) ?? "triagem",
+    createdAt: (data.createdAt as number) ?? 0,
+    updatedAt: (data.updatedAt as number) ?? 0,
+  };
+}
+
+export async function listCandidates(): Promise<Candidate[]> {
+  const snap = await getDocs(query(collection(db, COL), orderBy("createdAt", "desc")));
+  return snap.docs.map((d) => fromDoc(d.id, d.data()));
+}
+
+export async function getCandidate(id: string): Promise<Candidate | null> {
+  const snap = await getDoc(doc(db, COL, id));
+  if (!snap.exists()) return null;
+  return fromDoc(snap.id, snap.data());
+}
+
+export type SaveCandidateInput = Omit<Candidate, "createdAt" | "updatedAt"> & {
+  createdAt?: number;
+};
+
+export async function saveCandidate(input: SaveCandidateInput): Promise<void> {
+  const now = Date.now();
+  await setDoc(
+    doc(db, COL, input.id),
+    {
+      photoUrl: input.photoUrl ?? "",
+      fullName: input.fullName,
+      salaryExpectation: input.salaryExpectation,
+      area: input.area,
+      resumeUrl: input.resumeUrl,
+      rhSummary: input.rhSummary,
+      experience: input.experience,
+      rhNotes: input.rhNotes,
+      status: input.status,
+      createdAt: input.createdAt ?? now,
+      updatedAt: now,
+    },
+    { merge: true }
+  );
+}
+
+export async function deleteCandidate(id: string): Promise<void> {
+  await deleteDoc(doc(db, COL, id));
+}
+
+export function newCandidateId(fullName: string): string {
+  const slug = fullName
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const suffix = Math.random().toString(36).slice(2, 6);
+  return `${slug || "candidato"}-${suffix}`;
+}
+
+/* ---------------- Gestor feedback ----------------- */
+
+const FB_SUB = "gestor_feedback";
+
+export async function listGestorFeedback(candidateId: string): Promise<GestorFeedback[]> {
+  const snap = await getDocs(collection(db, COL, candidateId, FB_SUB));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return {
+      gestorUid: (data.gestorUid as string) ?? d.id,
+      gestorName: (data.gestorName as string) ?? "",
+      gestorEmail: (data.gestorEmail as string) ?? "",
+      feedback: (data.feedback as string) ?? "",
+      approved: (data.approved as boolean | null) ?? null,
+      updatedAt: (data.updatedAt as number) ?? 0,
+    };
+  });
+}
+
+export async function saveGestorFeedback(
+  candidateId: string,
+  input: Omit<GestorFeedback, "updatedAt">
+): Promise<void> {
+  await setDoc(
+    doc(db, COL, candidateId, FB_SUB, input.gestorUid),
+    { ...input, updatedAt: Date.now() },
+    { merge: true }
+  );
+}
