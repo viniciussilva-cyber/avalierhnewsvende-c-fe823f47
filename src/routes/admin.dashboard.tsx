@@ -194,6 +194,7 @@ function Dashboard() {
           />
         )}
       </div>
+      </PageTransition>
     </div>
   );
 }
