@@ -49,7 +49,7 @@ function NewCandidate() {
           </p>
         </div>
         <CandidateForm
-          onSaved={(id) => {
+          onSaved={(id: string) => {
             navigate({ to: "/app/rs/$id", params: { id } });
           }}
         />

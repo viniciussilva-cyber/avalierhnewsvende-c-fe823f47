@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -12,7 +12,9 @@ import {
   LogOut,
   Loader2,
   MessageSquare,
+  ArrowLeft,
 } from "lucide-react";
+import { PageTransition } from "@/components/PageTransition";
 import { ConfigBanner } from "@/components/ConfigBanner";
 import { Hero } from "@/components/Hero";
 import { NewsletterForm } from "@/components/NewsletterForm";
