@@ -5,7 +5,7 @@ export function SiteHeader({ showAdminLink = true }: { showAdminLink?: boolean }
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-header/90 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-        <Link to="/" className="flex items-center gap-3">
+        <Link to="/rh-news" className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Newspaper className="h-5 w-5" />
           </span>

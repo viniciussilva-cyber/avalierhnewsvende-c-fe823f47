@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Newspaper, Users, Loader2, LogOut, Sparkles, ArrowRight } from "lucide-react";
+import { Newspaper, Users, Loader2, LogOut, Sparkles, ArrowRight, IdCard } from "lucide-react";
 import { logout, useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,6 +33,17 @@ const modules = [
     gradient: "from-fuchsia-500/25 via-fuchsia-500/5 to-transparent",
     accent: "text-fuchsia-300",
     allowGestor: true,
+  },
+  {
+    id: "dp",
+    to: "/app/dp" as const,
+    label: "DP",
+    tag: "Departamento Pessoal",
+    description: "Cadastro de colaboradores com aniversários e datas de admissão avisadas diariamente.",
+    icon: IdCard,
+    gradient: "from-emerald-500/25 via-emerald-500/5 to-transparent",
+    accent: "text-emerald-300",
+    allowGestor: false,
   },
 ] as const;
 
@@ -86,14 +97,14 @@ function AppHub() {
             {role === "rh" ? "Recrutador (RH)" : "Gestor de área"}
           </span>
           <h1 className="mt-4 text-balance text-4xl font-extrabold leading-tight text-foreground sm:text-5xl">
-            Bem-vindo{user.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}.
+            Seja Bem-vindo{user.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}.
           </h1>
           <p className="mt-3 max-w-xl text-base text-muted-foreground">
-            Escolha um módulo para começar. Novos módulos serão adicionados ao longo do tempo.
+            Tudo que o RH do VENDE-C precisa em um só lugar.
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((m, i) => {
             const disabled = role === "gestor" && !m.allowGestor;
             const card = (

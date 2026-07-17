@@ -5,51 +5,40 @@ import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
 import {
-  CANDIDATE_AREAS,
-  CANDIDATE_STATUSES,
-  newCandidateId,
-  saveCandidate,
-  type Candidate,
-  type CandidateStatus,
-} from "@/lib/candidates";
+  DEPARTMENTS,
+  newEmployeeId,
+  saveEmployee,
+  type Employee,
+} from "@/lib/employees";
 
 const schema = z.object({
   fullName: z.string().trim().min(2, "Informe o nome completo.").max(120),
-  salaryExpectation: z.string().trim().max(60).optional().or(z.literal("")),
-  area: z.string().trim().min(1, "Selecione a área."),
-  resumeUrl: z
+  department: z.string().trim().min(1, "Selecione o departamento."),
+  position: z.string().trim().max(120).optional().or(z.literal("")),
+  birthDate: z
     .string()
     .trim()
-    .max(500)
-    .optional()
-    .or(z.literal(""))
-    .refine(
-      (v) => !v || /^https?:\/\//i.test(v),
-      "Cole um link começando com http(s)://",
-    ),
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Informe uma data de nascimento válida."),
+  admissionDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Informe uma data de admissão válida."),
   photoUrl: z.string().trim().max(600).optional().or(z.literal("")),
-  rhSummary: z.string().max(4000).optional().or(z.literal("")),
-  experience: z.string().max(6000).optional().or(z.literal("")),
-  rhNotes: z.string().max(4000).optional().or(z.literal("")),
-  status: z.enum(["triagem", "entrevista_rh", "avaliacao_gestor", "aprovado", "reprovado"]),
 });
 
 interface Props {
-  existing?: Candidate;
+  existing?: Employee;
   onSaved: (id: string) => void;
 }
 
-export function CandidateForm({ existing, onSaved }: Props) {
+export function EmployeeForm({ existing, onSaved }: Props) {
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState(existing?.fullName ?? "");
-  const [salaryExpectation, setSalaryExpectation] = useState(existing?.salaryExpectation ?? "");
-  const [area, setArea] = useState(existing?.area ?? CANDIDATE_AREAS[0]);
-  const [resumeUrl, setResumeUrl] = useState(existing?.resumeUrl ?? "");
+  const [department, setDepartment] = useState(existing?.department ?? DEPARTMENTS[0]);
+  const [position, setPosition] = useState(existing?.position ?? "");
+  const [birthDate, setBirthDate] = useState(existing?.birthDate ?? "");
+  const [admissionDate, setAdmissionDate] = useState(existing?.admissionDate ?? "");
   const [photoUrl, setPhotoUrl] = useState(existing?.photoUrl ?? "");
-  const [rhSummary, setRhSummary] = useState(existing?.rhSummary ?? "");
-  const [experience, setExperience] = useState(existing?.experience ?? "");
-  const [rhNotes, setRhNotes] = useState(existing?.rhNotes ?? "");
-  const [status, setStatus] = useState<CandidateStatus>(existing?.status ?? "triagem");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,35 +46,29 @@ export function CandidateForm({ existing, onSaved }: Props) {
     mutationFn: async () => {
       const parsed = schema.parse({
         fullName,
-        salaryExpectation,
-        area,
-        resumeUrl,
+        department,
+        position,
+        birthDate,
+        admissionDate,
         photoUrl,
-        rhSummary,
-        experience,
-        rhNotes,
-        status,
       });
-      const id = existing?.id ?? newCandidateId(parsed.fullName);
-      await saveCandidate({
+      const id = existing?.id ?? newEmployeeId(parsed.fullName);
+      await saveEmployee({
         id,
         fullName: parsed.fullName,
-        salaryExpectation: parsed.salaryExpectation || "",
-        area: parsed.area,
-        resumeUrl: parsed.resumeUrl || "",
+        department: parsed.department,
+        position: parsed.position || "",
+        birthDate: parsed.birthDate,
+        admissionDate: parsed.admissionDate,
         photoUrl: parsed.photoUrl || "",
-        rhSummary: parsed.rhSummary || "",
-        experience: parsed.experience || "",
-        rhNotes: parsed.rhNotes || "",
-        status: parsed.status,
         createdAt: existing?.createdAt,
       });
       return id;
     },
     onSuccess: (id) => {
-      queryClient.invalidateQueries({ queryKey: ["candidates"] });
-      queryClient.invalidateQueries({ queryKey: ["candidate", id] });
-      toast.success(existing ? "Candidato atualizado!" : "Candidato cadastrado!");
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["employee", id] });
+      toast.success(existing ? "Colaborador atualizado!" : "Colaborador cadastrado!");
       onSaved(id);
     },
     onError: (err: unknown) => {
@@ -122,7 +105,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
       {/* Foto */}
       <div className="rounded-2xl border border-border bg-card p-5">
         <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Foto de perfil
+          Foto do colaborador
         </label>
         <div className="mt-3 flex items-center gap-4">
           <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-secondary">
@@ -189,77 +172,41 @@ export function CandidateForm({ existing, onSaved }: Props) {
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           />
         </Field>
-        <Field label="Pretensão salarial">
+        <Field label="Cargo">
           <input
-            value={salaryExpectation}
-            onChange={(e) => setSalaryExpectation(e.target.value)}
-            placeholder="R$ 5.000"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            placeholder="Analista, Coordenador, Estagiário…"
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
           />
         </Field>
-        <Field label="Vaga / Área de interesse *">
+        <Field label="Departamento *">
           <select
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           >
-            {CANDIDATE_AREAS.map((a) => (
-              <option key={a} value={a}>{a}</option>
+            {DEPARTMENTS.map((d) => (
+              <option key={d} value={d}>{d}</option>
             ))}
           </select>
         </Field>
-        <Field label="Status do processo *">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as CandidateStatus)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
-          >
-            {CANDIDATE_STATUSES.map((s) => (
-              <option key={s.id} value={s.id}>{s.label}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Link do currículo (Google Drive)" className="sm:col-span-2">
+        <Field label="Data de nascimento *">
           <input
-            type="url"
-            value={resumeUrl}
-            onChange={(e) => setResumeUrl(e.target.value)}
-            placeholder="https://drive.google.com/…"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            required
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           />
         </Field>
-      </div>
-
-      {/* Área do RH */}
-      <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary">
-            Área do RH
-          </span>
-          <span className="text-xs text-muted-foreground">Editável apenas por moderadores</span>
-        </div>
-        <Field label="Resumo/Histórico da conversa de entrevista">
-          <textarea
-            rows={4}
-            value={rhSummary}
-            onChange={(e) => setRhSummary(e.target.value)}
-            className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
-          />
-        </Field>
-        <Field label="Experiências profissionais anteriores">
-          <textarea
-            rows={5}
-            value={experience}
-            onChange={(e) => setExperience(e.target.value)}
-            className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
-          />
-        </Field>
-        <Field label="Observações gerais do RH">
-          <textarea
-            rows={3}
-            value={rhNotes}
-            onChange={(e) => setRhNotes(e.target.value)}
-            className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
+        <Field label="Data de admissão *" className="sm:col-span-2">
+          <input
+            type="date"
+            value={admissionDate}
+            onChange={(e) => setAdmissionDate(e.target.value)}
+            required
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           />
         </Field>
       </div>
@@ -277,7 +224,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.01] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {existing ? "Salvar alterações" : "Cadastrar candidato"}
+          {existing ? "Salvar alterações" : "Cadastrar colaborador"}
         </button>
       </div>
     </form>
