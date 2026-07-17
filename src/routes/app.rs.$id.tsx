@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   XCircle,
   MessageSquare,
+  Link2,
 } from "lucide-react";
 import { AppTopBar } from "@/components/AppTopBar";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
@@ -189,26 +190,40 @@ function CandidateDetail() {
                   </div>
                 </div>
 
-                {role === "rh" && (
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setEditing(true)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary"
-                    >
-                      <Pencil className="h-3.5 w-3.5" /> Editar
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (window.confirm("Remover este candidato? Esta ação não pode ser desfeita.")) {
-                          deleteMutation.mutate();
-                        }
-                      }}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/40 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" /> Apagar
-                    </button>
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/app/rs/${id}`;
+                      navigator.clipboard.writeText(url).then(
+                        () => toast.success("Link copiado!", { description: url }),
+                        () => toast.error("Não foi possível copiar o link.")
+                      );
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary"
+                  >
+                    <Link2 className="h-3.5 w-3.5" /> Copiar link
+                  </button>
+                  {role === "rh" && (
+                    <>
+                      <button
+                        onClick={() => setEditing(true)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary"
+                      >
+                        <Pencil className="h-3.5 w-3.5" /> Editar
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm("Remover este candidato? Esta ação não pode ser desfeita.")) {
+                            deleteMutation.mutate();
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/40 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Apagar
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </motion.header>
 
