@@ -97,10 +97,10 @@ function AppHub() {
             {role === "rh" ? "Recrutador (RH)" : "Gestor de área"}
           </span>
           <h1 className="mt-4 text-balance text-4xl font-extrabold leading-tight text-foreground sm:text-5xl">
-            Bem-vindo{user.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}.
+            Seja Bem-vindo{user.displayName ? `, ${user.displayName.split(" ")[0]}` : ""}.
           </h1>
           <p className="mt-3 max-w-xl text-base text-muted-foreground">
-            Escolha um módulo para começar. Novos módulos serão adicionados ao longo do tempo.
+            Tudo que o RH do VENDE-C precisa em um só lugar.
           </p>
         </motion.div>
 
