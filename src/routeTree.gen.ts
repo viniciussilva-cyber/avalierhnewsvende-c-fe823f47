@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RhNewsRouteImport } from './routes/rh-news'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -22,6 +23,11 @@ import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/publi
 const RhNewsRoute = RhNewsRouteImport.update({
   id: '/rh-news',
   path: '/rh-news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -68,6 +74,7 @@ const ApiPublicNewsletterImageRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/': typeof AdminIndexRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/app/rs/': typeof AppRsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin': typeof AdminIndexRoute
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/': typeof AdminIndexRoute
@@ -104,6 +113,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/rh-news'
     | '/admin/dashboard'
     | '/admin/'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/app/rs/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/rh-news'
     | '/admin/dashboard'
     | '/admin'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/app/rs'
   id:
     | '__root__'
+    | '/'
     | '/rh-news'
     | '/admin/dashboard'
     | '/admin/'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   RhNewsRoute: typeof RhNewsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -156,6 +169,13 @@ declare module '@tanstack/react-router' {
       path: '/rh-news'
       fullPath: '/rh-news'
       preLoaderRoute: typeof RhNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -218,6 +238,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   RhNewsRoute: RhNewsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminIndexRoute: AdminIndexRoute,

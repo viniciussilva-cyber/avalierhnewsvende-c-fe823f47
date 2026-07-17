@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Newspaper, Users, Loader2, LogOut, Sparkles, ArrowRight } from "lucide-react";
+import { Newspaper, Users, Loader2, LogOut, Sparkles, ArrowRight, IdCard } from "lucide-react";
 import { logout, useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,6 +33,17 @@ const modules = [
     gradient: "from-fuchsia-500/25 via-fuchsia-500/5 to-transparent",
     accent: "text-fuchsia-300",
     allowGestor: true,
+  },
+  {
+    id: "dp",
+    to: "/app/dp" as const,
+    label: "DP",
+    tag: "Departamento Pessoal",
+    description: "Cadastro de colaboradores com aniversários e datas de admissão avisadas diariamente.",
+    icon: IdCard,
+    gradient: "from-emerald-500/25 via-emerald-500/5 to-transparent",
+    accent: "text-emerald-300",
+    allowGestor: false,
   },
 ] as const;
 
