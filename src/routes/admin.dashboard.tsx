@@ -82,7 +82,7 @@ function Dashboard() {
   };
 
   const copyLink = (slug: string) => {
-    const url = `${window.location.origin}/?edition=${slug}`;
+    const url = `${window.location.origin}/rh-news?edition=${slug}`;
     navigator.clipboard.writeText(url).then(
       () => toast.success("Link copiado!", { description: url }),
       () => toast.error("Não foi possível copiar o link.")

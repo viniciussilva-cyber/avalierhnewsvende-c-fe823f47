@@ -169,7 +169,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
               )}
             </div>
             <input
-              type="url"
+              type="text"
               value={photoUrl}
               onChange={(e) => setPhotoUrl(e.target.value)}
               placeholder="…ou cole uma URL da foto"
