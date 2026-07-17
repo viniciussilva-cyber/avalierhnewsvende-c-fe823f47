@@ -43,7 +43,7 @@ export const Route = createFileRoute("/rh-news")({
 
 function PublicView() {
   const { edition } = Route.useSearch();
-  const navigate = useNavigate({ from: "/" });
+  const navigate = useNavigate({ from: "/rh-news" });
   const formRef = useRef<HTMLDivElement>(null);
 
   const publishedQuery = useQuery({
