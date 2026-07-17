@@ -26,7 +26,7 @@ function normalizeNewsletterImages(html: string): string {
     );
 }
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/rh-news")({
   validateSearch: (search: Record<string, unknown>) => ({
     edition: typeof search.edition === "string" ? search.edition : undefined,
   }),
