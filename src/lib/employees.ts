@@ -10,17 +10,42 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
+export type EmployeeKind = "interno" | "terceiro";
+
 export const DEPARTMENTS = [
-  "Administrativo",
-  "Comercial",
-  "Marketing",
-  "Financeiro",
-  "Operações",
-  "Tecnologia",
-  "Atendimento",
-  "RH / DP",
-  "Outro",
+  "ADMINISTRATIVO",
+  "AUDIOVISUAL",
+  "COMERCIAL - CORP",
+  "COMERCIAL - SCHAEFER",
+  "COMERCIAL - SOLIA",
+  "COMERCIAL GERAL",
+  "CVFI",
+  "DESIGNER",
+  "EVENTOS",
+  "EXPERIÊNCIA DO CLIENTE",
+  "GERAL",
+  "MARKETING",
+  "OPERAÇÕES",
+  "RECURSOS HUMANOS",
+  "SOCIAL MEDIA",
+  "TREINAMENTOS",
+  "TREINAMENTOS - MAFE",
+  "TREINAMENTOS - ROSSI",
 ];
+
+export const THIRD_PARTY_DEPARTMENTS = [
+  "CARBONO",
+  "FACILITIES",
+  "PATRIMÔNIO",
+  "SEGURANÇA",
+  "TECNOLOGIA",
+  "SELETO",
+  "TERCEIRO",
+];
+
+export function departmentsFor(kind: EmployeeKind): string[] {
+  return kind === "terceiro" ? THIRD_PARTY_DEPARTMENTS : DEPARTMENTS;
+}
 
 export interface Employee {
   id: string;
@@ -28,6 +53,8 @@ export interface Employee {
   fullName: string;
   department: string;
   position: string;
+  /** Vínculo: colaborador interno ou terceiro */
+  kind: EmployeeKind;
   /** ISO date (YYYY-MM-DD) */
   birthDate: string;
   /** ISO date (YYYY-MM-DD) */
@@ -45,12 +72,14 @@ function fromDoc(id: string, data: Record<string, unknown>): Employee {
     fullName: (data.fullName as string) ?? "",
     department: (data.department as string) ?? "",
     position: (data.position as string) ?? "",
+    kind: (data.kind as EmployeeKind) === "terceiro" ? "terceiro" : "interno",
     birthDate: (data.birthDate as string) ?? "",
     admissionDate: (data.admissionDate as string) ?? "",
     createdAt: (data.createdAt as number) ?? 0,
     updatedAt: (data.updatedAt as number) ?? 0,
   };
 }
+
 
 export async function listEmployees(): Promise<Employee[]> {
   const snap = await getDocs(query(collection(db, COL), orderBy("fullName", "asc")));
