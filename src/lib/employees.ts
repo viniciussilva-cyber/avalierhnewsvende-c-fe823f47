@@ -105,6 +105,8 @@ export async function saveEmployee(input: SaveEmployeeInput): Promise<void> {
       fullName: input.fullName,
       department: input.department,
       position: input.position,
+      kind: input.kind,
+
       birthDate: input.birthDate,
       admissionDate: input.admissionDate,
       createdAt: input.createdAt ?? now,
