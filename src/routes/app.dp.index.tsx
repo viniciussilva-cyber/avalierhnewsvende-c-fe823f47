@@ -218,9 +218,11 @@ function DpList() {
         ) : filtered.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              {employees.length === 0
-                ? "Nenhum colaborador cadastrado. Clique em 'Adicionar colaborador' para começar."
-                : "Nenhum colaborador corresponde aos filtros."}
+              {inTab.length === 0
+                ? tab === "terceiro"
+                  ? "Nenhum terceiro cadastrado. Clique em 'Adicionar terceiro' para começar."
+                  : "Nenhum colaborador cadastrado. Clique em 'Adicionar colaborador' para começar."
+                : "Nenhum registro corresponde aos filtros."}
             </p>
           </div>
         ) : (
