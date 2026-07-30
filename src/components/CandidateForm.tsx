@@ -91,8 +91,17 @@ export function CandidateForm({ existing, onSaved }: Props) {
     onError: (err: unknown) => {
       if (err instanceof z.ZodError) {
         setError(err.issues[0]?.message ?? "Verifique os campos.");
+        return;
+      }
+      const code = (err as { code?: string })?.code ?? "";
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("[CandidateForm] save failed", code, err);
+      if (code.includes("permission-denied")) {
+        setError(
+          "Permissão negada pelo banco de dados. As regras do Firestore precisam ser publicadas com a coleção 'candidates' (arquivo firestore.rules do projeto).",
+        );
       } else {
-        setError("Não foi possível salvar. Tente novamente.");
+        setError(`Não foi possível salvar: ${message}`);
       }
     },
   });
