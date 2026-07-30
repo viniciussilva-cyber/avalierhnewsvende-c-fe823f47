@@ -70,8 +70,3 @@ function NewEmployee() {
     </div>
   );
 }
-
-      </PageTransition>
-    </div>
-  );
-}
