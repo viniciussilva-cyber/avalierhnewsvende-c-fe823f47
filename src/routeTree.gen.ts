@@ -9,33 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RhNewsRouteImport } from './routes/rh-news'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as RhNewsRouteImport } from './routes/rh-news'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
-import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
-import { Route as AppDpIndexRouteImport } from './routes/app.dp.index'
-import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
-import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
-import { Route as AppDpNovoRouteImport } from './routes/app.dp.novo'
-import { Route as AppDpIdRouteImport } from './routes/app.dp.$id'
-import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/public/newsletter-image'
+import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
+import { Route as AppDpIndexRouteImport } from './routes/app.dp.index'
+import { Route as AppDpIdRouteImport } from './routes/app.dp.$id'
+import { Route as AppDpNovoRouteImport } from './routes/app.dp.novo'
+import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
+import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
+import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
 
-const RhNewsRoute = RhNewsRouteImport.update({
-  id: '/rh-news',
-  path: '/rh-news',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/app/',
-  path: '/app/',
+const RhNewsRoute = RhNewsRouteImport.update({
+  id: '/rh-news',
+  path: '/rh-news',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -48,29 +43,26 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRsIndexRoute = AppRsIndexRouteImport.update({
-  id: '/app/rs/',
-  path: '/app/rs/',
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNewsletterImageRoute =
+  ApiPublicNewsletterImageRouteImport.update({
+    id: '/api/public/newsletter-image',
+    path: '/api/public/newsletter-image',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicNewsletterImageUploadRoute =
+  ApiPublicNewsletterImageUploadRouteImport.update({
+    id: '/api/public/newsletter-image-upload',
+    path: '/api/public/newsletter-image-upload',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppDpIndexRoute = AppDpIndexRouteImport.update({
   id: '/app/dp/',
   path: '/app/dp/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRsNovoRoute = AppRsNovoRouteImport.update({
-  id: '/app/rs/novo',
-  path: '/app/rs/novo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRsIdRoute = AppRsIdRouteImport.update({
-  id: '/app/rs/$id',
-  path: '/app/rs/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppDpNovoRoute = AppDpNovoRouteImport.update({
-  id: '/app/dp/novo',
-  path: '/app/dp/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppDpIdRoute = AppDpIdRouteImport.update({
@@ -78,18 +70,26 @@ const AppDpIdRoute = AppDpIdRouteImport.update({
   path: '/app/dp/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicNewsletterImageUploadRoute =
-  ApiPublicNewsletterImageUploadRouteImport.update({
-    id: '/api/public/newsletter-image-upload',
-    path: '/api/public/newsletter-image-upload',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicNewsletterImageRoute =
-  ApiPublicNewsletterImageRouteImport.update({
-    id: '/api/public/newsletter-image',
-    path: '/api/public/newsletter-image',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const AppDpNovoRoute = AppDpNovoRouteImport.update({
+  id: '/app/dp/novo',
+  path: '/app/dp/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRsIndexRoute = AppRsIndexRouteImport.update({
+  id: '/app/rs/',
+  path: '/app/rs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRsIdRoute = AppRsIdRouteImport.update({
+  id: '/app/rs/$id',
+  path: '/app/rs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRsNovoRoute = AppRsNovoRouteImport.update({
+  id: '/app/rs/novo',
+  path: '/app/rs/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -203,13 +203,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/rh-news': {
-      id: '/rh-news'
-      path: '/rh-news'
-      fullPath: '/rh-news'
-      preLoaderRoute: typeof RhNewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -217,11 +210,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/app'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
+    '/rh-news': {
+      id: '/rh-news'
+      path: '/rh-news'
+      fullPath: '/rh-news'
+      preLoaderRoute: typeof RhNewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -238,46 +231,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/rs/': {
-      id: '/app/rs/'
-      path: '/app/rs'
-      fullPath: '/app/rs/'
-      preLoaderRoute: typeof AppRsIndexRouteImport
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/dp/': {
-      id: '/app/dp/'
-      path: '/app/dp'
-      fullPath: '/app/dp/'
-      preLoaderRoute: typeof AppDpIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/rs/novo': {
-      id: '/app/rs/novo'
-      path: '/app/rs/novo'
-      fullPath: '/app/rs/novo'
-      preLoaderRoute: typeof AppRsNovoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/rs/$id': {
-      id: '/app/rs/$id'
-      path: '/app/rs/$id'
-      fullPath: '/app/rs/$id'
-      preLoaderRoute: typeof AppRsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/dp/novo': {
-      id: '/app/dp/novo'
-      path: '/app/dp/novo'
-      fullPath: '/app/dp/novo'
-      preLoaderRoute: typeof AppDpNovoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/dp/$id': {
-      id: '/app/dp/$id'
-      path: '/app/dp/$id'
-      fullPath: '/app/dp/$id'
-      preLoaderRoute: typeof AppDpIdRouteImport
+    '/api/public/newsletter-image': {
+      id: '/api/public/newsletter-image'
+      path: '/api/public/newsletter-image'
+      fullPath: '/api/public/newsletter-image'
+      preLoaderRoute: typeof ApiPublicNewsletterImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/newsletter-image-upload': {
@@ -287,11 +252,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicNewsletterImageUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/newsletter-image': {
-      id: '/api/public/newsletter-image'
-      path: '/api/public/newsletter-image'
-      fullPath: '/api/public/newsletter-image'
-      preLoaderRoute: typeof ApiPublicNewsletterImageRouteImport
+    '/app/dp/': {
+      id: '/app/dp/'
+      path: '/app/dp'
+      fullPath: '/app/dp/'
+      preLoaderRoute: typeof AppDpIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/dp/$id': {
+      id: '/app/dp/$id'
+      path: '/app/dp/$id'
+      fullPath: '/app/dp/$id'
+      preLoaderRoute: typeof AppDpIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/dp/novo': {
+      id: '/app/dp/novo'
+      path: '/app/dp/novo'
+      fullPath: '/app/dp/novo'
+      preLoaderRoute: typeof AppDpNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rs/': {
+      id: '/app/rs/'
+      path: '/app/rs'
+      fullPath: '/app/rs/'
+      preLoaderRoute: typeof AppRsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rs/$id': {
+      id: '/app/rs/$id'
+      path: '/app/rs/$id'
+      fullPath: '/app/rs/$id'
+      preLoaderRoute: typeof AppRsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rs/novo': {
+      id: '/app/rs/novo'
+      path: '/app/rs/novo'
+      fullPath: '/app/rs/novo'
+      preLoaderRoute: typeof AppRsNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
