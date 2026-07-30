@@ -5,11 +5,13 @@ import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
 import {
-  DEPARTMENTS,
+  departmentsFor,
   newEmployeeId,
   saveEmployee,
   type Employee,
+  type EmployeeKind,
 } from "@/lib/employees";
+
 
 const schema = z.object({
   fullName: z.string().trim().min(2, "Informe o nome completo.").max(120),
