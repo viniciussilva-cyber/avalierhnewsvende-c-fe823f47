@@ -207,7 +207,7 @@ function DpList() {
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           >
             <option value="all">Todos os departamentos</option>
-            {DEPARTMENTS.map((d) => (
+            {departmentsFor(tab).map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
