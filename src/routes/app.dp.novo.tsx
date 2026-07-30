@@ -8,12 +8,16 @@ import { PageTransition } from "@/components/PageTransition";
 import { EmployeeForm } from "@/components/EmployeeForm";
 
 export const Route = createFileRoute("/app/dp/novo")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tipo: search.tipo === "terceiro" ? ("terceiro" as const) : ("interno" as const),
+  }),
   head: () => ({ meta: [{ title: "Novo colaborador · DP" }] }),
   component: NewEmployee,
 });
 
 function NewEmployee() {
   const navigate = useNavigate();
+  const { tipo } = Route.useSearch();
   const { user, loading } = useAuth();
   const { role, loading: roleLoading } = useRole(user);
 
@@ -35,20 +39,29 @@ function NewEmployee() {
     );
   }
 
+  const isTerceiro = tipo === "terceiro";
+
   return (
     <div className="min-h-screen bg-background">
-      <AppTopBar moduleLabel="DP · Novo colaborador" backTo="/app/dp" backLabel="Colaboradores" />
+      <AppTopBar
+        moduleLabel={isTerceiro ? "DP · Novo terceiro" : "DP · Novo colaborador"}
+        backTo="/app/dp"
+        backLabel="Colaboradores"
+      />
       <PageTransition className="mx-auto max-w-3xl px-6 py-10">
         <div className="mb-8">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-300">
             Novo cadastro
           </span>
-          <h1 className="mt-2 text-3xl font-extrabold text-foreground">Adicionar colaborador</h1>
+          <h1 className="mt-2 text-3xl font-extrabold text-foreground">
+            {isTerceiro ? "Adicionar terceiro" : "Adicionar colaborador"}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Cadastre os dados básicos para gerar avisos automáticos de aniversário e admissão.
           </p>
         </div>
         <EmployeeForm
+          defaultKind={tipo}
           onSaved={(id) => {
             navigate({ to: "/app/dp/$id", params: { id } });
           }}

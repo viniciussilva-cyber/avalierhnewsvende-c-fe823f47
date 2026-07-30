@@ -160,6 +160,11 @@ function EmployeeDetail() {
                   <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
                     {e.department || "sem depto"}
                   </span>
+                  {e.kind === "terceiro" && (
+                    <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+                      terceiro
+                    </span>
+                  )}
                 </div>
                 <h1 className="mt-3 text-3xl font-extrabold text-foreground">{e.fullName}</h1>
                 <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">

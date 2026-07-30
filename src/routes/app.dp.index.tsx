@@ -19,10 +19,11 @@ import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { firebaseConfigured } from "@/lib/firebase";
 import {
-  DEPARTMENTS,
   computeNotices,
+  departmentsFor,
   listEmployees,
   type Employee,
+  type EmployeeKind,
 } from "@/lib/employees";
 
 export const Route = createFileRoute("/app/dp/")({
@@ -34,6 +35,7 @@ function DpList() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { role, loading: roleLoading } = useRole(user);
+  const [tab, setTab] = useState<EmployeeKind>("interno");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
 
@@ -57,17 +59,20 @@ function DpList() {
 
   const employees: Employee[] = query.data ?? [];
 
+  const inTab = useMemo(() => employees.filter((e) => e.kind === tab), [employees, tab]);
+
   const notices = useMemo(() => computeNotices(employees, 14), [employees]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return employees.filter((e) => {
+    return inTab.filter((e) => {
       if (departmentFilter !== "all" && e.department !== departmentFilter) return false;
       if (q && !`${e.fullName} ${e.position} ${e.department}`.toLowerCase().includes(q))
         return false;
       return true;
     });
-  }, [employees, departmentFilter, search]);
+  }, [inTab, departmentFilter, search]);
+
 
   if (!ready) {
     return (
@@ -88,20 +93,53 @@ function DpList() {
               Departamento Pessoal
             </span>
             <h1 className="mt-2 text-3xl font-extrabold text-foreground sm:text-4xl">
-              Colaboradores
+              {tab === "terceiro" ? "Terceiros" : "Colaboradores"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {employees.length}{" "}
-              {employees.length === 1 ? "colaborador cadastrado" : "colaboradores cadastrados"} no total.
+              {inTab.length}{" "}
+              {tab === "terceiro"
+                ? inTab.length === 1
+                  ? "terceiro cadastrado"
+                  : "terceiros cadastrados"
+                : inTab.length === 1
+                  ? "colaborador cadastrado"
+                  : "colaboradores cadastrados"}
+              .
             </p>
           </div>
           <Link
             to="/app/dp/novo"
+            search={{ tipo: tab }}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <Plus className="h-4 w-4" /> Adicionar colaborador
+            <Plus className="h-4 w-4" />
+            {tab === "terceiro" ? "Adicionar terceiro" : "Adicionar colaborador"}
           </Link>
         </div>
+
+        {/* Abas */}
+        <div className="mt-6 inline-flex rounded-xl border border-border bg-card p-1">
+          {(["interno", "terceiro"] as EmployeeKind[]).map((k) => (
+            <button
+              key={k}
+              onClick={() => {
+                setTab(k);
+                setDepartmentFilter("all");
+              }}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                tab === k
+                  ? "bg-emerald-500/15 text-emerald-300"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {k === "interno" ? "Colaboradores" : "Terceiros"}
+              <span className="ml-2 text-xs opacity-70">
+                {employees.filter((e) => e.kind === k).length}
+              </span>
+            </button>
+          ))}
+        </div>
+
 
         {/* Notifications panel */}
         <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5">
@@ -169,7 +207,7 @@ function DpList() {
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           >
             <option value="all">Todos os departamentos</option>
-            {DEPARTMENTS.map((d) => (
+            {departmentsFor(tab).map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
@@ -180,9 +218,11 @@ function DpList() {
         ) : filtered.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
             <p className="text-sm text-muted-foreground">
-              {employees.length === 0
-                ? "Nenhum colaborador cadastrado. Clique em 'Adicionar colaborador' para começar."
-                : "Nenhum colaborador corresponde aos filtros."}
+              {inTab.length === 0
+                ? tab === "terceiro"
+                  ? "Nenhum terceiro cadastrado. Clique em 'Adicionar terceiro' para começar."
+                  : "Nenhum colaborador cadastrado. Clique em 'Adicionar colaborador' para começar."
+                : "Nenhum registro corresponde aos filtros."}
             </p>
           </div>
         ) : (
@@ -242,6 +282,11 @@ function EmployeeCard({ employee }: { employee: Employee }) {
           <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
             {employee.department || "sem depto"}
           </span>
+          {employee.kind === "terceiro" && (
+            <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+              terceiro
+            </span>
+          )}
           <div className="flex items-center gap-3">
             {birth && (
               <span className="inline-flex items-center gap-1">

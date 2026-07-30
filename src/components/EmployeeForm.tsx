@@ -5,11 +5,13 @@ import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
 import {
-  DEPARTMENTS,
+  departmentsFor,
   newEmployeeId,
   saveEmployee,
   type Employee,
+  type EmployeeKind,
 } from "@/lib/employees";
+
 
 const schema = z.object({
   fullName: z.string().trim().min(2, "Informe o nome completo.").max(120),
@@ -28,19 +30,31 @@ const schema = z.object({
 
 interface Props {
   existing?: Employee;
+  defaultKind?: EmployeeKind;
   onSaved: (id: string) => void;
 }
 
-export function EmployeeForm({ existing, onSaved }: Props) {
+export function EmployeeForm({ existing, defaultKind = "interno", onSaved }: Props) {
   const queryClient = useQueryClient();
+  const [kind, setKind] = useState<EmployeeKind>(existing?.kind ?? defaultKind);
   const [fullName, setFullName] = useState(existing?.fullName ?? "");
-  const [department, setDepartment] = useState(existing?.department ?? DEPARTMENTS[0]);
+  const [department, setDepartment] = useState(
+    existing?.department ?? departmentsFor(existing?.kind ?? defaultKind)[0]
+  );
   const [position, setPosition] = useState(existing?.position ?? "");
   const [birthDate, setBirthDate] = useState(existing?.birthDate ?? "");
   const [admissionDate, setAdmissionDate] = useState(existing?.admissionDate ?? "");
   const [photoUrl, setPhotoUrl] = useState(existing?.photoUrl ?? "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const departmentOptions = departmentsFor(kind);
+
+  const handleKindChange = (next: EmployeeKind) => {
+    setKind(next);
+    const opts = departmentsFor(next);
+    if (!opts.includes(department)) setDepartment(opts[0]);
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -58,6 +72,7 @@ export function EmployeeForm({ existing, onSaved }: Props) {
         fullName: parsed.fullName,
         department: parsed.department,
         position: parsed.position || "",
+        kind,
         birthDate: parsed.birthDate,
         admissionDate: parsed.admissionDate,
         photoUrl: parsed.photoUrl || "",
@@ -65,6 +80,7 @@ export function EmployeeForm({ existing, onSaved }: Props) {
       });
       return id;
     },
+
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["employee", id] });
@@ -162,6 +178,29 @@ export function EmployeeForm({ existing, onSaved }: Props) {
         </div>
       </div>
 
+      {/* Vínculo */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <span className="mb-3 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Vínculo
+        </span>
+        <div className="flex gap-2">
+          {(["interno", "terceiro"] as EmployeeKind[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => handleKindChange(k)}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                kind === k
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              {k === "interno" ? "Colaborador" : "Terceiro"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Dados básicos */}
       <div className="grid gap-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-2">
         <Field label="Nome completo *">
@@ -186,11 +225,12 @@ export function EmployeeForm({ existing, onSaved }: Props) {
             onChange={(e) => setDepartment(e.target.value)}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           >
-            {DEPARTMENTS.map((d) => (
+            {departmentOptions.map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
         </Field>
+
         <Field label="Data de nascimento *">
           <input
             type="date"
