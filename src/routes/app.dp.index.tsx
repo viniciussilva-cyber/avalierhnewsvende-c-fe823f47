@@ -93,20 +93,53 @@ function DpList() {
               Departamento Pessoal
             </span>
             <h1 className="mt-2 text-3xl font-extrabold text-foreground sm:text-4xl">
-              Colaboradores
+              {tab === "terceiro" ? "Terceiros" : "Colaboradores"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {employees.length}{" "}
-              {employees.length === 1 ? "colaborador cadastrado" : "colaboradores cadastrados"} no total.
+              {inTab.length}{" "}
+              {tab === "terceiro"
+                ? inTab.length === 1
+                  ? "terceiro cadastrado"
+                  : "terceiros cadastrados"
+                : inTab.length === 1
+                  ? "colaborador cadastrado"
+                  : "colaboradores cadastrados"}
+              .
             </p>
           </div>
           <Link
             to="/app/dp/novo"
+            search={{ tipo: tab }}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-95"
           >
-            <Plus className="h-4 w-4" /> Adicionar colaborador
+            <Plus className="h-4 w-4" />
+            {tab === "terceiro" ? "Adicionar terceiro" : "Adicionar colaborador"}
           </Link>
         </div>
+
+        {/* Abas */}
+        <div className="mt-6 inline-flex rounded-xl border border-border bg-card p-1">
+          {(["interno", "terceiro"] as EmployeeKind[]).map((k) => (
+            <button
+              key={k}
+              onClick={() => {
+                setTab(k);
+                setDepartmentFilter("all");
+              }}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                tab === k
+                  ? "bg-emerald-500/15 text-emerald-300"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {k === "interno" ? "Colaboradores" : "Terceiros"}
+              <span className="ml-2 text-xs opacity-70">
+                {employees.filter((e) => e.kind === k).length}
+              </span>
+            </button>
+          ))}
+        </div>
+
 
         {/* Notifications panel */}
         <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent p-5">
