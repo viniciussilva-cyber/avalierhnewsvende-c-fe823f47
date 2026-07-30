@@ -282,6 +282,11 @@ function EmployeeCard({ employee }: { employee: Employee }) {
           <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
             {employee.department || "sem depto"}
           </span>
+          {employee.kind === "terceiro" && (
+            <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
+              terceiro
+            </span>
+          )}
           <div className="flex items-center gap-3">
             {birth && (
               <span className="inline-flex items-center gap-1">
