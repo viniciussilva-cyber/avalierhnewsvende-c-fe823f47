@@ -30,19 +30,31 @@ const schema = z.object({
 
 interface Props {
   existing?: Employee;
+  defaultKind?: EmployeeKind;
   onSaved: (id: string) => void;
 }
 
-export function EmployeeForm({ existing, onSaved }: Props) {
+export function EmployeeForm({ existing, defaultKind = "interno", onSaved }: Props) {
   const queryClient = useQueryClient();
+  const [kind, setKind] = useState<EmployeeKind>(existing?.kind ?? defaultKind);
   const [fullName, setFullName] = useState(existing?.fullName ?? "");
-  const [department, setDepartment] = useState(existing?.department ?? DEPARTMENTS[0]);
+  const [department, setDepartment] = useState(
+    existing?.department ?? departmentsFor(existing?.kind ?? defaultKind)[0]
+  );
   const [position, setPosition] = useState(existing?.position ?? "");
   const [birthDate, setBirthDate] = useState(existing?.birthDate ?? "");
   const [admissionDate, setAdmissionDate] = useState(existing?.admissionDate ?? "");
   const [photoUrl, setPhotoUrl] = useState(existing?.photoUrl ?? "");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const departmentOptions = departmentsFor(kind);
+
+  const handleKindChange = (next: EmployeeKind) => {
+    setKind(next);
+    const opts = departmentsFor(next);
+    if (!opts.includes(department)) setDepartment(opts[0]);
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -60,6 +72,7 @@ export function EmployeeForm({ existing, onSaved }: Props) {
         fullName: parsed.fullName,
         department: parsed.department,
         position: parsed.position || "",
+        kind,
         birthDate: parsed.birthDate,
         admissionDate: parsed.admissionDate,
         photoUrl: parsed.photoUrl || "",
@@ -67,6 +80,7 @@ export function EmployeeForm({ existing, onSaved }: Props) {
       });
       return id;
     },
+
     onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["employee", id] });
