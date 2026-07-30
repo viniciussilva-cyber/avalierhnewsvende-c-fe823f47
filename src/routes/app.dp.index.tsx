@@ -19,10 +19,11 @@ import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { firebaseConfigured } from "@/lib/firebase";
 import {
-  DEPARTMENTS,
   computeNotices,
+  departmentsFor,
   listEmployees,
   type Employee,
+  type EmployeeKind,
 } from "@/lib/employees";
 
 export const Route = createFileRoute("/app/dp/")({
@@ -34,6 +35,7 @@ function DpList() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { role, loading: roleLoading } = useRole(user);
+  const [tab, setTab] = useState<EmployeeKind>("interno");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
 
@@ -57,17 +59,20 @@ function DpList() {
 
   const employees: Employee[] = query.data ?? [];
 
+  const inTab = useMemo(() => employees.filter((e) => e.kind === tab), [employees, tab]);
+
   const notices = useMemo(() => computeNotices(employees, 14), [employees]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return employees.filter((e) => {
+    return inTab.filter((e) => {
       if (departmentFilter !== "all" && e.department !== departmentFilter) return false;
       if (q && !`${e.fullName} ${e.position} ${e.department}`.toLowerCase().includes(q))
         return false;
       return true;
     });
-  }, [employees, departmentFilter, search]);
+  }, [inTab, departmentFilter, search]);
+
 
   if (!ready) {
     return (
