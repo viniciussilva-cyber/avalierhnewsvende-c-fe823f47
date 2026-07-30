@@ -178,6 +178,29 @@ export function EmployeeForm({ existing, defaultKind = "interno", onSaved }: Pro
         </div>
       </div>
 
+      {/* Vínculo */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <span className="mb-3 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Vínculo
+        </span>
+        <div className="flex gap-2">
+          {(["interno", "terceiro"] as EmployeeKind[]).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => handleKindChange(k)}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                kind === k
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary"
+              }`}
+            >
+              {k === "interno" ? "Colaborador" : "Terceiro"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Dados básicos */}
       <div className="grid gap-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-2">
         <Field label="Nome completo *">
@@ -202,11 +225,12 @@ export function EmployeeForm({ existing, defaultKind = "interno", onSaved }: Pro
             onChange={(e) => setDepartment(e.target.value)}
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           >
-            {DEPARTMENTS.map((d) => (
+            {departmentOptions.map((d) => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
         </Field>
+
         <Field label="Data de nascimento *">
           <input
             type="date"
