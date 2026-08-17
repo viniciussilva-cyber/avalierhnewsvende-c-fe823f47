@@ -16,9 +16,6 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/public/newsletter-image'
 import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
-import { Route as AppDpIndexRouteImport } from './routes/app.dp.index'
-import { Route as AppDpIdRouteImport } from './routes/app.dp.$id'
-import { Route as AppDpNovoRouteImport } from './routes/app.dp.novo'
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
 import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
 import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
@@ -60,21 +57,6 @@ const ApiPublicNewsletterImageUploadRoute =
     path: '/api/public/newsletter-image-upload',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AppDpIndexRoute = AppDpIndexRouteImport.update({
-  id: '/app/dp/',
-  path: '/app/dp/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppDpIdRoute = AppDpIdRouteImport.update({
-  id: '/app/dp/$id',
-  path: '/app/dp/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppDpNovoRoute = AppDpNovoRouteImport.update({
-  id: '/app/dp/novo',
-  path: '/app/dp/novo',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRsIndexRoute = AppRsIndexRouteImport.update({
   id: '/app/rs/',
   path: '/app/rs/',
@@ -99,11 +81,8 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
-  '/app/dp/$id': typeof AppDpIdRoute
-  '/app/dp/novo': typeof AppDpNovoRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/app/rs/novo': typeof AppRsNovoRoute
-  '/app/dp/': typeof AppDpIndexRoute
   '/app/rs/': typeof AppRsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -114,11 +93,8 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
-  '/app/dp/$id': typeof AppDpIdRoute
-  '/app/dp/novo': typeof AppDpNovoRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/app/rs/novo': typeof AppRsNovoRoute
-  '/app/dp': typeof AppDpIndexRoute
   '/app/rs': typeof AppRsIndexRoute
 }
 export interface FileRoutesById {
@@ -130,11 +106,8 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
-  '/app/dp/$id': typeof AppDpIdRoute
-  '/app/dp/novo': typeof AppDpNovoRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/app/rs/novo': typeof AppRsNovoRoute
-  '/app/dp/': typeof AppDpIndexRoute
   '/app/rs/': typeof AppRsIndexRoute
 }
 export interface FileRouteTypes {
@@ -147,11 +120,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
-    | '/app/dp/$id'
-    | '/app/dp/novo'
     | '/app/rs/$id'
     | '/app/rs/novo'
-    | '/app/dp/'
     | '/app/rs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -162,11 +132,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
-    | '/app/dp/$id'
-    | '/app/dp/novo'
     | '/app/rs/$id'
     | '/app/rs/novo'
-    | '/app/dp'
     | '/app/rs'
   id:
     | '__root__'
@@ -177,11 +144,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
-    | '/app/dp/$id'
-    | '/app/dp/novo'
     | '/app/rs/$id'
     | '/app/rs/novo'
-    | '/app/dp/'
     | '/app/rs/'
   fileRoutesById: FileRoutesById
 }
@@ -193,11 +157,8 @@ export interface RootRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
-  AppDpIdRoute: typeof AppDpIdRoute
-  AppDpNovoRoute: typeof AppDpNovoRoute
   AppRsIdRoute: typeof AppRsIdRoute
   AppRsNovoRoute: typeof AppRsNovoRoute
-  AppDpIndexRoute: typeof AppDpIndexRoute
   AppRsIndexRoute: typeof AppRsIndexRoute
 }
 
@@ -252,27 +213,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicNewsletterImageUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/dp/': {
-      id: '/app/dp/'
-      path: '/app/dp'
-      fullPath: '/app/dp/'
-      preLoaderRoute: typeof AppDpIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/dp/$id': {
-      id: '/app/dp/$id'
-      path: '/app/dp/$id'
-      fullPath: '/app/dp/$id'
-      preLoaderRoute: typeof AppDpIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/dp/novo': {
-      id: '/app/dp/novo'
-      path: '/app/dp/novo'
-      fullPath: '/app/dp/novo'
-      preLoaderRoute: typeof AppDpNovoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app/rs/': {
       id: '/app/rs/'
       path: '/app/rs'
@@ -305,13 +245,20 @@ const rootRouteChildren: RootRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
-  AppDpIdRoute: AppDpIdRoute,
-  AppDpNovoRoute: AppDpNovoRoute,
   AppRsIdRoute: AppRsIdRoute,
   AppRsNovoRoute: AppRsNovoRoute,
-  AppDpIndexRoute: AppDpIndexRoute,
   AppRsIndexRoute: AppRsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
