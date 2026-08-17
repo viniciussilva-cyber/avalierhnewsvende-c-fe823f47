@@ -42,16 +42,28 @@ export interface Candidate {
   experience: string;
   rhNotes: string;
   status: CandidateStatus;
+  /** E-mails de gestores liberados manualmente pelo RH (além da área). */
+  assignedManagers: string[];
   createdAt: number;
   updatedAt: number;
 }
+
+/** Decisão do gestor sobre o candidato. */
+export type FeedbackDecision = "aprovado" | "negado" | "espera" | null;
+
+export const FEEDBACK_DECISIONS = [
+  { id: "aprovado", label: "Aprovado" },
+  { id: "negado", label: "Negado" },
+  { id: "espera", label: "Em espera" },
+] as const;
 
 export interface GestorFeedback {
   gestorUid: string;
   gestorName: string;
   gestorEmail: string;
   feedback: string;
-  /** true = aprova para próxima fase, false = não aprova, null = ainda avaliando */
+  decision: FeedbackDecision;
+  /** Compatibilidade com pareceres antigos (true/false/null). */
   approved: boolean | null;
   updatedAt: number;
 }
@@ -70,6 +82,9 @@ function fromDoc(id: string, data: Record<string, unknown>): Candidate {
     experience: (data.experience as string) ?? "",
     rhNotes: (data.rhNotes as string) ?? "",
     status: (data.status as CandidateStatus) ?? "triagem",
+    assignedManagers: Array.isArray(data.assignedManagers)
+      ? (data.assignedManagers as string[])
+      : [],
     createdAt: (data.createdAt as number) ?? 0,
     updatedAt: (data.updatedAt as number) ?? 0,
   };
