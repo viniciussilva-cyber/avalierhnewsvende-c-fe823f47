@@ -34,17 +34,6 @@ const modules = [
     accent: "text-fuchsia-300",
     allowGestor: true,
   },
-  {
-    id: "dp",
-    to: "/app/dp" as const,
-    label: "DP",
-    tag: "Departamento Pessoal",
-    description: "Cadastro de colaboradores com aniversários e datas de admissão avisadas diariamente.",
-    icon: IdCard,
-    gradient: "from-emerald-500/25 via-emerald-500/5 to-transparent",
-    accent: "text-emerald-300",
-    allowGestor: false,
-  },
 ] as const;
 
 function AppHub() {
