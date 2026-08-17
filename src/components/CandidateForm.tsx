@@ -5,7 +5,6 @@ import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
 import {
-  CANDIDATE_AREAS,
   CANDIDATE_STATUSES,
   newCandidateId,
   saveCandidate,
@@ -43,7 +42,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState(existing?.fullName ?? "");
   const [salaryExpectation, setSalaryExpectation] = useState(existing?.salaryExpectation ?? "");
-  const [area, setArea] = useState(existing?.area ?? CANDIDATE_AREAS[0]);
+  const [area, setArea] = useState(existing?.area ?? "");
   const [resumeUrl, setResumeUrl] = useState(existing?.resumeUrl ?? "");
   const [photoUrl, setPhotoUrl] = useState(existing?.photoUrl ?? "");
   const [rhSummary, setRhSummary] = useState(existing?.rhSummary ?? "");
@@ -207,15 +206,13 @@ export function CandidateForm({ existing, onSaved }: Props) {
           />
         </Field>
         <Field label="Vaga / Área de interesse *">
-          <select
+          <input
             value={area}
             onChange={(e) => setArea(e.target.value)}
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
-          >
-            {CANDIDATE_AREAS.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
+            required
+            placeholder="Ex.: Comercial - Corp"
+            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
+          />
         </Field>
         <Field label="Status do processo *">
           <select

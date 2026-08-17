@@ -16,7 +16,6 @@ import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { firebaseConfigured } from "@/lib/firebase";
 import {
-  CANDIDATE_AREAS,
   CANDIDATE_STATUSES,
   listCandidates,
   type Candidate,
@@ -61,6 +60,11 @@ function RsList() {
   });
 
   const candidates: Candidate[] = query.data ?? [];
+
+  const areaOptions = useMemo(
+    () => Array.from(new Set(candidates.map((c) => c.area).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [candidates],
+  );
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -124,7 +128,7 @@ function RsList() {
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           >
             <option value="all">Todas as áreas</option>
-            {CANDIDATE_AREAS.map((a) => (
+            {areaOptions.map((a) => (
               <option key={a} value={a}>{a}</option>
             ))}
           </select>
