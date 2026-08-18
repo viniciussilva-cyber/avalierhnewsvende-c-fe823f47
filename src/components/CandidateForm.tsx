@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
+import { MANAGERS } from "@/lib/managers";
 import {
   CANDIDATE_STATUSES,
   newCandidateId,
@@ -27,9 +28,9 @@ const schema = z.object({
       "Cole um link começando com http(s)://",
     ),
   photoUrl: z.string().trim().max(600).optional().or(z.literal("")),
-  rhSummary: z.string().max(4000).optional().or(z.literal("")),
-  experience: z.string().max(6000).optional().or(z.literal("")),
-  rhNotes: z.string().max(4000).optional().or(z.literal("")),
+  rhSummary: z.string().max(40000).optional().or(z.literal("")),
+  experience: z.string().max(100000, "Texto muito longo.").optional().or(z.literal("")),
+  rhNotes: z.string().max(40000).optional().or(z.literal("")),
   status: z.enum(["triagem", "entrevista_rh", "avaliacao_gestor", "aprovado", "reprovado"]),
 });
 
@@ -49,8 +50,16 @@ export function CandidateForm({ existing, onSaved }: Props) {
   const [experience, setExperience] = useState(existing?.experience ?? "");
   const [rhNotes, setRhNotes] = useState(existing?.rhNotes ?? "");
   const [status, setStatus] = useState<CandidateStatus>(existing?.status ?? "triagem");
+  const [assignedManagers, setAssignedManagers] = useState<string[]>(
+    existing?.assignedManagers ?? [],
+  );
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const toggleManager = (email: string) =>
+    setAssignedManagers((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email],
+    );
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -77,6 +86,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
         experience: parsed.experience || "",
         rhNotes: parsed.rhNotes || "",
         status: parsed.status,
+        assignedManagers,
         createdAt: existing?.createdAt,
       });
       return id;
