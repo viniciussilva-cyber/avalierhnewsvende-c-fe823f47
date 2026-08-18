@@ -296,13 +296,13 @@ function GestorSection({
 }) {
   const own = feedback.find((f) => f.gestorUid === userUid);
   const [text, setText] = useState(own?.feedback ?? "");
-  const [approved, setApproved] = useState<boolean | null>(own?.approved ?? null);
+  const [decision, setDecision] = useState<FeedbackDecision>(own?.decision ?? null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setText(own?.feedback ?? "");
-    setApproved(own?.approved ?? null);
-  }, [own?.feedback, own?.approved]);
+    setDecision(own?.decision ?? null);
+  }, [own?.feedback, own?.decision]);
 
   const canWrite = role === "gestor" || role === "rh";
 
@@ -318,7 +318,7 @@ function GestorSection({
         gestorName: userName,
         gestorEmail: userEmail,
         feedback: text.trim(),
-        approved,
+        decision,
       });
       toast.success("Parecer salvo!");
       onSaved();
@@ -351,16 +351,8 @@ function GestorSection({
             className="w-full resize-y rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
           />
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <ApprovalButton
-              active={approved === true}
-              variant="approve"
-              onClick={() => setApproved(approved === true ? null : true)}
-            />
-            <ApprovalButton
-              active={approved === false}
-              variant="reject"
-              onClick={() => setApproved(approved === false ? null : false)}
-            />
+            <DecisionButtons value={decision} onChange={setDecision} />
+
             <button
               onClick={save}
               disabled={saving}
