@@ -12,14 +12,13 @@ import {
   Pencil,
   Trash2,
   ArrowLeft,
-  CheckCircle2,
-  XCircle,
   MessageSquare,
   Link2,
 } from "lucide-react";
 import { AppTopBar } from "@/components/AppTopBar";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { CandidateForm } from "@/components/CandidateForm";
+import { DecisionBadge, DecisionButtons } from "@/components/FeedbackDecision";
 import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { firebaseConfigured } from "@/lib/firebase";
@@ -30,6 +29,7 @@ import {
   listGestorFeedback,
   saveGestorFeedback,
   type CandidateStatus,
+  type FeedbackDecision,
 } from "@/lib/candidates";
 
 export const Route = createFileRoute("/app/rs/$id")({
@@ -387,23 +387,7 @@ function GestorSection({
                     <p className="text-xs text-muted-foreground">{f.gestorEmail}</p>
                   )}
                 </div>
-                {f.approved !== null && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
-                      f.approved
-                        ? "bg-emerald-500/15 text-emerald-300"
-                        : "bg-destructive/15 text-destructive"
-                    }`}
-                  >
-                    {f.approved ? (
-                      <>
-                        <CheckCircle2 className="h-3 w-3" /> Aprovado
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="h-3 w-3" /> Não aprovado
-                      </>
-                    )}
+                <DecisionBadge value={f.decision} />
                   </span>
                 )}
               </div>
@@ -425,33 +409,5 @@ function GestorSection({
         </ul>
       )}
     </section>
-  );
-}
-
-function ApprovalButton({
-  active,
-  variant,
-  onClick,
-}: {
-  active: boolean;
-  variant: "approve" | "reject";
-  onClick: () => void;
-}) {
-  const isApprove = variant === "approve";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-        active
-          ? isApprove
-            ? "border-emerald-500/60 bg-emerald-500/15 text-emerald-300"
-            : "border-destructive/60 bg-destructive/15 text-destructive"
-          : "border-border text-muted-foreground hover:bg-secondary"
-      }`}
-    >
-      {isApprove ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-      {isApprove ? "Aprovar para próxima fase" : "Não aprovar"}
-    </button>
   );
 }
