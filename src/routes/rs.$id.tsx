@@ -8,6 +8,7 @@ import {
   DollarSign,
   ExternalLink,
   Loader2,
+  Sparkles,
   User as UserIcon,
 } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
@@ -26,10 +27,6 @@ export const Route = createFileRoute("/rs/$id")({
     meta: [
       { title: "Avaliar candidato · R&S VENDE-C" },
       { name: "description", content: "Parecer do gestor sobre o candidato." },
-      { property: "og:title", content: "Avaliar candidato · R&S VENDE-C" },
-      { property: "og:description", content: "Parecer do gestor sobre o candidato." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -59,14 +56,22 @@ function GestorCandidate() {
 
   const uid = session ? managerDocId(session.manager.email) : "";
   const own = feedback?.find((f) => f.gestorUid === uid);
+
   const [text, setText] = useState("");
   const [decision, setDecision] = useState<FeedbackDecision>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Inicializa os estados locais apenas uma vez para evitar reset durante re-renders
   useEffect(() => {
-    setText(own?.feedback ?? "");
-    setDecision(own?.decision ?? null);
-  }, [own?.feedback, own?.decision]);
+    if (feedback && !isInitialized) {
+      if (own) {
+        setText(own.feedback ?? "");
+        setDecision(own.decision ?? null);
+      }
+      setIsInitialized(true);
+    }
+  }, [feedback, own, isInitialized]);
 
   if (loading || isLoading || !session) {
     return (
@@ -100,8 +105,8 @@ function GestorCandidate() {
   }
 
   const save = async () => {
-    if (!text.trim()) {
-      toast.error("Escreva seu parecer antes de salvar.");
+    if (!decision && !text.trim()) {
+      toast.error("Selecione um status ou escreva seu parecer antes de salvar.");
       return;
     }
     setSaving(true);
@@ -113,10 +118,11 @@ function GestorCandidate() {
         feedback: text.trim(),
         decision,
       });
-      toast.success("Parecer salvo!");
-      refetch();
-    } catch {
-      toast.error("Não foi possível salvar o parecer.");
+      toast.success("Parecer salvo com sucesso!");
+      await refetch();
+    } catch (err) {
+      console.error("Erro ao salvar parecer:", err);
+      toast.error("Não foi possível salvar o parecer. Tente novamente.");
     } finally {
       setSaving(false);
     }
@@ -170,6 +176,21 @@ function GestorCandidate() {
         <InfoBlock title="Resumo da entrevista com o RH" content={candidate.rhSummary} />
         <InfoBlock title="Experiências profissionais" content={candidate.experience} />
         <InfoBlock title="Observações do RH" content={candidate.rhNotes} />
+
+        {/* Análise de IA: Visível apenas com permissão prévia do RH (showAiAnalysis === true) */}
+        {candidate.showAiAnalysis && candidate.aiFitAnalysis && (
+          <section className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
+            <div className="flex items-center gap-2 text-amber-500">
+              <Sparkles className="h-4 w-4" />
+              <h2 className="text-xs font-semibold uppercase tracking-wide">
+                Análise Preditiva de Fit Cultural & Liderança (IA)
+              </h2>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
+              {candidate.aiFitAnalysis}
+            </p>
+          </section>
+        )}
 
         <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-6">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
