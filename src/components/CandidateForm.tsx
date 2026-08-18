@@ -280,6 +280,39 @@ export function CandidateForm({ existing, onSaved }: Props) {
         </Field>
       </div>
 
+      {/* Gestores liberados */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Gestores liberados para avaliar
+        </span>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Gestores da mesma área já veem este candidato automaticamente. Marque abaixo para liberar
+          gestores de outras áreas.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {MANAGERS.map((m) => (
+            <label
+              key={m.email}
+              className="flex cursor-pointer items-start gap-2 rounded-lg border border-border px-3 py-2 text-xs text-foreground hover:bg-secondary"
+            >
+              <input
+                type="checkbox"
+                checked={assignedManagers.includes(m.email)}
+                onChange={() => toggleManager(m.email)}
+                className="mt-0.5 h-3.5 w-3.5 accent-[color:var(--color-primary)]"
+              />
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{m.name}</span>
+                <span className="block truncate text-[10px] text-muted-foreground">
+                  {m.areas.join(" · ")}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+
       {error && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
           {error}
