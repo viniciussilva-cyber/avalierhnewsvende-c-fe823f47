@@ -119,6 +119,7 @@ export async function saveCandidate(input: SaveCandidateInput): Promise<void> {
       experience: input.experience,
       rhNotes: input.rhNotes,
       status: input.status,
+      assignedManagers: input.assignedManagers ?? [],
       createdAt: input.createdAt ?? now,
       updatedAt: now,
     },
