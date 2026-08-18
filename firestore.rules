@@ -1,13 +1,13 @@
 rules_version = '2';
 
 // ============================================================================
-// VENDE-C Platform — Firestore Security Rules
+// VENDE-C Platform — Firestore Security Rules (Atualizado R&S + IA)
 // ============================================================================
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Approved moderators (RH). Update this list to add/remove RH access.
+    // Lista de moderadores do RH
     function isModerator() {
       return request.auth != null
         && request.auth.token.email in [
@@ -38,37 +38,27 @@ service cloud.firestore {
     }
 
     // ----- Users (roles) ----------------------------------------------------
-    // Each signed-in user may read their own role doc. Only moderators can
-    // create/update role docs (to promote gestores). The RH allowlist above
-    // is applied client-side as an override, so moderators don't need a doc.
     match /users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isModerator());
       allow create, update, delete: if isModerator();
     }
 
     // ----- R&S Candidates ---------------------------------------------------
-    // Any signed-in user (RH or Gestor) may read candidates. Only moderators
-    // may create/edit/delete the RH-owned data on the candidate document.
     match /candidates/{id} {
-      allow read: if isSignedIn();
+      // Leitura permitida para usuários logados ou acesso à rota pública do gestor
+      allow read: if true; 
       allow create, update, delete: if isModerator();
 
-      // Gestor feedback. The standalone R&S portal (/rs) signs the gestor in
-      // anonymously and keys the doc by their corporate e-mail, so the doc id
-      // is not the auth uid. Any signed-in session may write a parecer.
+      // Subcoleção de Feedback dos Gestores
       match /gestor_feedback/{gestorUid} {
-        allow read: if isSignedIn();
-        allow create, update: if isSignedIn()
-          && request.resource.data.feedback is string
-          && request.resource.data.feedback.size() <= 8000
-          && request.resource.data.gestorEmail is string;
-        allow delete: if isModerator() || request.auth.uid == gestorUid;
+        allow read: if true;
+        // Permite salvar tanto com texto quanto apenas selecionando o status (Aprovado/Negado/Espera)
+        allow create, update: if true; 
+        allow delete: if isModerator();
       }
     }
 
     // ----- DP Employees -----------------------------------------------------
-    // Signed-in users may read the employee roster; only moderators (RH/DP)
-    // may create, update or remove employee records.
     match /employees/{id} {
       allow read: if isSignedIn();
       allow create, update, delete: if isModerator();
