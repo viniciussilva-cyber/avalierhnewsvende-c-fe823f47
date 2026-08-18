@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, LogOut, Search, User as UserIcon, Users } from "lucide-react";
 import { useState } from "react";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
-import { DecisionBadge } from "@/components/FeedbackDecision";
 import { listCandidates, type Candidate } from "@/lib/candidates";
 import { areaMatches } from "@/lib/managers";
 import { gestorSignOut, useGestorSession } from "@/lib/gestor-auth";
@@ -145,7 +144,6 @@ function GestorPanel() {
                       <p className="truncate text-xs text-muted-foreground">{c.area}</p>
                     </div>
                   </div>
-                  <DecisionBadge value={null} />
                 </Link>
               </StaggerItem>
             ))}
