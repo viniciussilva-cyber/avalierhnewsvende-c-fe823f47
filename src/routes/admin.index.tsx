@@ -101,6 +101,13 @@ function LoginPage() {
               {submitting ? "Entrando…" : "Entrar"}
             </button>
           </form>
+
+          <p className="mt-6 border-t border-border pt-4 text-center text-xs text-muted-foreground">
+            É gestor e vai avaliar candidatos?{" "}
+            <Link to="/rs" className="font-medium text-primary hover:underline">
+              Entrar no portal de R&S
+            </Link>
+          </p>
         </div>
       </div>
     </div>
