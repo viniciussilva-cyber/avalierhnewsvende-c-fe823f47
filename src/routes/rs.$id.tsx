@@ -231,3 +231,4 @@ function InfoBlock({ title, content }: { title: string; content: string }) {
     </section>
   );
 }
+
