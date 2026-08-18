@@ -119,6 +119,7 @@ export async function saveCandidate(input: SaveCandidateInput): Promise<void> {
       experience: input.experience,
       rhNotes: input.rhNotes,
       status: input.status,
+      assignedManagers: input.assignedManagers ?? [],
       createdAt: input.createdAt ?? now,
       updatedAt: now,
     },
@@ -152,12 +153,17 @@ export async function listGestorFeedback(candidateId: string): Promise<GestorFee
   const snap = await getDocs(collection(db, COL, candidateId, FB_SUB));
   return snap.docs.map((d) => {
     const data = d.data();
+    const approved = (data.approved as boolean | null) ?? null;
+    const stored = data.decision as FeedbackDecision | undefined;
+    const decision: FeedbackDecision =
+      stored ?? (approved === true ? "aprovado" : approved === false ? "negado" : null);
     return {
       gestorUid: (data.gestorUid as string) ?? d.id,
       gestorName: (data.gestorName as string) ?? "",
       gestorEmail: (data.gestorEmail as string) ?? "",
       feedback: (data.feedback as string) ?? "",
-      approved: (data.approved as boolean | null) ?? null,
+      decision,
+      approved,
       updatedAt: (data.updatedAt as number) ?? 0,
     };
   });
@@ -165,11 +171,16 @@ export async function listGestorFeedback(candidateId: string): Promise<GestorFee
 
 export async function saveGestorFeedback(
   candidateId: string,
-  input: Omit<GestorFeedback, "updatedAt">
+  input: Omit<GestorFeedback, "updatedAt" | "approved"> & { approved?: boolean | null }
 ): Promise<void> {
   await setDoc(
     doc(db, COL, candidateId, FB_SUB, input.gestorUid),
-    { ...input, updatedAt: Date.now() },
+    {
+      ...input,
+      approved:
+        input.decision === "aprovado" ? true : input.decision === "negado" ? false : null,
+      updatedAt: Date.now(),
+    },
     { merge: true }
   );
 }

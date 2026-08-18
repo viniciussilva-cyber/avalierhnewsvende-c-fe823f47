@@ -14,6 +14,9 @@ import { Route as RhNewsRouteImport } from './routes/rh-news'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as RsIndexRouteImport } from './routes/rs.index'
+import { Route as RsIdRouteImport } from './routes/rs.$id'
+import { Route as RsPainelRouteImport } from './routes/rs.painel'
 import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/public/newsletter-image'
 import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
@@ -43,6 +46,21 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RsIndexRoute = RsIndexRouteImport.update({
+  id: '/rs/',
+  path: '/rs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RsIdRoute = RsIdRouteImport.update({
+  id: '/rs/$id',
+  path: '/rs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RsPainelRoute = RsPainelRouteImport.update({
+  id: '/rs/painel',
+  path: '/rs/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicNewsletterImageRoute =
@@ -77,8 +95,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/rs/$id': typeof RsIdRoute
+  '/rs/painel': typeof RsPainelRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/rs/': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
@@ -89,8 +110,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/rs/$id': typeof RsIdRoute
+  '/rs/painel': typeof RsPainelRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/rs': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
@@ -102,8 +126,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/rs/$id': typeof RsIdRoute
+  '/rs/painel': typeof RsPainelRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/rs/': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
@@ -116,8 +143,11 @@ export interface FileRouteTypes {
     | '/'
     | '/rh-news'
     | '/admin/dashboard'
+    | '/rs/$id'
+    | '/rs/painel'
     | '/admin/'
     | '/app/'
+    | '/rs/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
@@ -128,8 +158,11 @@ export interface FileRouteTypes {
     | '/'
     | '/rh-news'
     | '/admin/dashboard'
+    | '/rs/$id'
+    | '/rs/painel'
     | '/admin'
     | '/app'
+    | '/rs'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
@@ -140,8 +173,11 @@ export interface FileRouteTypes {
     | '/'
     | '/rh-news'
     | '/admin/dashboard'
+    | '/rs/$id'
+    | '/rs/painel'
     | '/admin/'
     | '/app/'
+    | '/rs/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
@@ -153,8 +189,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RhNewsRoute: typeof RhNewsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  RsIdRoute: typeof RsIdRoute
+  RsPainelRoute: typeof RsPainelRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
+  RsIndexRoute: typeof RsIndexRoute
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
   AppRsIdRoute: typeof AppRsIdRoute
@@ -199,6 +238,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rs/': {
+      id: '/rs/'
+      path: '/rs'
+      fullPath: '/rs/'
+      preLoaderRoute: typeof RsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rs/$id': {
+      id: '/rs/$id'
+      path: '/rs/$id'
+      fullPath: '/rs/$id'
+      preLoaderRoute: typeof RsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rs/painel': {
+      id: '/rs/painel'
+      path: '/rs/painel'
+      fullPath: '/rs/painel'
+      preLoaderRoute: typeof RsPainelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/newsletter-image': {
       id: '/api/public/newsletter-image'
       path: '/api/public/newsletter-image'
@@ -241,8 +301,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RhNewsRoute: RhNewsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  RsIdRoute: RsIdRoute,
+  RsPainelRoute: RsPainelRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
+  RsIndexRoute: RsIndexRoute,
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
   AppRsIdRoute: AppRsIdRoute,

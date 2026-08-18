@@ -53,14 +53,15 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update, delete: if isModerator();
 
-      // Gestor feedback: each gestor writes their own doc keyed by their uid.
-      // Moderators can read/write any feedback. Everyone signed-in can read.
+      // Gestor feedback. The standalone R&S portal (/rs) signs the gestor in
+      // anonymously and keys the doc by their corporate e-mail, so the doc id
+      // is not the auth uid. Any signed-in session may write a parecer.
       match /gestor_feedback/{gestorUid} {
         allow read: if isSignedIn();
         allow create, update: if isSignedIn()
-          && (request.auth.uid == gestorUid || isModerator())
           && request.resource.data.feedback is string
-          && request.resource.data.feedback.size() <= 4000;
+          && request.resource.data.feedback.size() <= 8000
+          && request.resource.data.gestorEmail is string;
         allow delete: if isModerator() || request.auth.uid == gestorUid;
       }
     }

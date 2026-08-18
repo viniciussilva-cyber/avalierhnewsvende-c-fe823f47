@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
+import { MANAGERS } from "@/lib/managers";
 import {
   CANDIDATE_STATUSES,
   newCandidateId,
@@ -27,9 +28,9 @@ const schema = z.object({
       "Cole um link começando com http(s)://",
     ),
   photoUrl: z.string().trim().max(600).optional().or(z.literal("")),
-  rhSummary: z.string().max(4000).optional().or(z.literal("")),
-  experience: z.string().max(6000).optional().or(z.literal("")),
-  rhNotes: z.string().max(4000).optional().or(z.literal("")),
+  rhSummary: z.string().max(40000).optional().or(z.literal("")),
+  experience: z.string().max(100000, "Texto muito longo.").optional().or(z.literal("")),
+  rhNotes: z.string().max(40000).optional().or(z.literal("")),
   status: z.enum(["triagem", "entrevista_rh", "avaliacao_gestor", "aprovado", "reprovado"]),
 });
 
@@ -49,8 +50,16 @@ export function CandidateForm({ existing, onSaved }: Props) {
   const [experience, setExperience] = useState(existing?.experience ?? "");
   const [rhNotes, setRhNotes] = useState(existing?.rhNotes ?? "");
   const [status, setStatus] = useState<CandidateStatus>(existing?.status ?? "triagem");
+  const [assignedManagers, setAssignedManagers] = useState<string[]>(
+    existing?.assignedManagers ?? [],
+  );
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const toggleManager = (email: string) =>
+    setAssignedManagers((prev) =>
+      prev.includes(email) ? prev.filter((e) => e !== email) : [...prev, email],
+    );
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -77,6 +86,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
         experience: parsed.experience || "",
         rhNotes: parsed.rhNotes || "",
         status: parsed.status,
+        assignedManagers,
         createdAt: existing?.createdAt,
       });
       return id;
@@ -269,6 +279,39 @@ export function CandidateForm({ existing, onSaved }: Props) {
           />
         </Field>
       </div>
+
+      {/* Gestores liberados */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Gestores liberados para avaliar
+        </span>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Gestores da mesma área já veem este candidato automaticamente. Marque abaixo para liberar
+          gestores de outras áreas.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {MANAGERS.map((m) => (
+            <label
+              key={m.email}
+              className="flex cursor-pointer items-start gap-2 rounded-lg border border-border px-3 py-2 text-xs text-foreground hover:bg-secondary"
+            >
+              <input
+                type="checkbox"
+                checked={assignedManagers.includes(m.email)}
+                onChange={() => toggleManager(m.email)}
+                className="mt-0.5 h-3.5 w-3.5 accent-[color:var(--color-primary)]"
+              />
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{m.name}</span>
+                <span className="block truncate text-[10px] text-muted-foreground">
+                  {m.areas.join(" · ")}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
+
 
       {error && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
