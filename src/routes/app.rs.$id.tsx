@@ -388,8 +388,7 @@ function GestorSection({
                   )}
                 </div>
                 <DecisionBadge value={f.decision} />
-                  </span>
-                )}
+
               </div>
               <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
                 {f.feedback}
