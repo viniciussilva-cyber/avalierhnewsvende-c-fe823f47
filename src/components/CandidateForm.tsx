@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
 import { MANAGERS } from "@/lib/managers";
+import { AiReviewButton } from "@/components/AiReviewButton";
 import {
   CANDIDATE_STATUSES,
   newCandidateId,
@@ -261,6 +262,9 @@ export function CandidateForm({ existing, onSaved }: Props) {
             onChange={(e) => setRhSummary(e.target.value)}
             className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           />
+          <div className="mt-2">
+            <AiReviewButton kind="rhSummary" value={rhSummary} onChange={setRhSummary} />
+          </div>
         </Field>
         <Field label="Experiências profissionais anteriores">
           <textarea
@@ -277,6 +281,9 @@ export function CandidateForm({ existing, onSaved }: Props) {
             onChange={(e) => setRhNotes(e.target.value)}
             className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
           />
+          <div className="mt-2">
+            <AiReviewButton kind="rhNotes" value={rhNotes} onChange={setRhNotes} />
+          </div>
         </Field>
       </div>
 
