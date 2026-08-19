@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      candidate_ai: {
+        Row: {
+          analysis: string
+          candidate_id: string
+          created_at: string
+          job_profile: string
+          score: number | null
+          shared: boolean
+          updated_at: string
+        }
+        Insert: {
+          analysis?: string
+          candidate_id: string
+          created_at?: string
+          job_profile?: string
+          score?: number | null
+          shared?: boolean
+          updated_at?: string
+        }
+        Update: {
+          analysis?: string
+          candidate_id?: string
+          created_at?: string
+          job_profile?: string
+          score?: number | null
+          shared?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      candidate_feedback: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          decision: string | null
+          feedback: string
+          gestor_email: string
+          gestor_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          decision?: string | null
+          feedback?: string
+          gestor_email: string
+          gestor_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          decision?: string | null
+          feedback?: string
+          gestor_email?: string
+          gestor_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

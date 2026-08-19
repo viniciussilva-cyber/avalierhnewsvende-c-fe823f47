@@ -9,6 +9,8 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { listFeedback, saveFeedback } from "./rs.functions";
+
 
 export const CANDIDATE_STATUSES = [
   { id: "triagem", label: "Triagem" },
@@ -145,42 +147,39 @@ export function newCandidateId(fullName: string): string {
   return `${slug || "candidato"}-${suffix}`;
 }
 
-/* ---------------- Gestor feedback ----------------- */
-
-const FB_SUB = "gestor_feedback";
+/* ---------------- Gestor feedback (Lovable Cloud) ----------------- */
 
 export async function listGestorFeedback(candidateId: string): Promise<GestorFeedback[]> {
-  const snap = await getDocs(collection(db, COL, candidateId, FB_SUB));
-  return snap.docs.map((d) => {
-    const data = d.data();
-    const approved = (data.approved as boolean | null) ?? null;
-    const stored = data.decision as FeedbackDecision | undefined;
-    const decision: FeedbackDecision =
-      stored ?? (approved === true ? "aprovado" : approved === false ? "negado" : null);
-    return {
-      gestorUid: (data.gestorUid as string) ?? d.id,
-      gestorName: (data.gestorName as string) ?? "",
-      gestorEmail: (data.gestorEmail as string) ?? "",
-      feedback: (data.feedback as string) ?? "",
-      decision,
-      approved,
-      updatedAt: (data.updatedAt as number) ?? 0,
-    };
-  });
+  const rows = await listFeedback({ data: { candidateId } });
+  return rows.map((r) => ({
+    gestorUid: r.gestorEmail,
+    gestorName: r.gestorName,
+    gestorEmail: r.gestorEmail,
+    feedback: r.feedback,
+    decision: r.decision,
+    approved: r.decision === "aprovado" ? true : r.decision === "negado" ? false : null,
+    updatedAt: r.updatedAt,
+  }));
 }
 
 export async function saveGestorFeedback(
   candidateId: string,
-  input: Omit<GestorFeedback, "updatedAt" | "approved"> & { approved?: boolean | null }
+  input: {
+    gestorUid?: string;
+    gestorName: string;
+    gestorEmail: string;
+    feedback: string;
+    decision: FeedbackDecision;
+  }
 ): Promise<void> {
-  await setDoc(
-    doc(db, COL, candidateId, FB_SUB, input.gestorUid),
-    {
-      ...input,
-      approved:
-        input.decision === "aprovado" ? true : input.decision === "negado" ? false : null,
-      updatedAt: Date.now(),
+  await saveFeedback({
+    data: {
+      candidateId,
+      gestorEmail: input.gestorEmail,
+      gestorName: input.gestorName,
+      feedback: input.feedback,
+      decision: input.decision,
     },
-    { merge: true }
-  );
+  });
 }
+

@@ -14,11 +14,16 @@ import {
   ArrowLeft,
   MessageSquare,
   Link2,
+  Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { AppTopBar } from "@/components/AppTopBar";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { CandidateForm } from "@/components/CandidateForm";
 import { DecisionBadge, DecisionButtons } from "@/components/FeedbackDecision";
+import { AiReviewButton } from "@/components/AiReviewButton";
+import { generateAiAnalysis, getAiAnalysis, setAiShared } from "@/lib/rs.functions";
 import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { firebaseConfigured } from "@/lib/firebase";
@@ -239,6 +244,10 @@ function CandidateDetail() {
               </StaggerItem>
             </div>
 
+            <StaggerItem delay={0.18}>
+              <AiPanel candidate={c} />
+            </StaggerItem>
+
             <StaggerItem delay={0.2}>
               <GestorSection
                 candidateId={id}
@@ -351,6 +360,7 @@ function GestorSection({
             className="w-full resize-y rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
           />
           <div className="mt-3 flex flex-wrap items-center gap-2">
+            <AiReviewButton kind="parecer" value={text} onChange={setText} />
             <DecisionButtons value={decision} onChange={setDecision} />
 
             <button
@@ -406,6 +416,137 @@ function GestorSection({
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+/** Painel de análise de IA — visível apenas para o RH. */
+function AiPanel({ candidate }: { candidate: import("@/lib/candidates").Candidate }) {
+  const queryClient = useQueryClient();
+  const [profile, setProfile] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  const aiQuery = useQuery({
+    queryKey: ["candidate-ai", candidate.id],
+    queryFn: () => getAiAnalysis({ data: { candidateId: candidate.id } }),
+  });
+
+  useEffect(() => {
+    if (!touched && aiQuery.data?.jobProfile) setProfile(aiQuery.data.jobProfile);
+  }, [aiQuery.data?.jobProfile, touched]);
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["candidate-ai", candidate.id] });
+
+  const generate = useMutation({
+    mutationFn: () =>
+      generateAiAnalysis({
+        data: {
+          candidateId: candidate.id,
+          jobProfile: profile,
+          candidate: {
+            fullName: candidate.fullName,
+            area: candidate.area,
+            salaryExpectation: candidate.salaryExpectation,
+            rhSummary: candidate.rhSummary,
+            experience: candidate.experience,
+            rhNotes: candidate.rhNotes,
+          },
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Análise gerada pela IA.");
+      invalidate();
+    },
+    onError: (err) =>
+      toast.error(err instanceof Error ? err.message : "Não foi possível gerar a análise."),
+  });
+
+  const share = useMutation({
+    mutationFn: (shared: boolean) =>
+      setAiShared({ data: { candidateId: candidate.id, shared } }),
+    onSuccess: (_d, shared) => {
+      toast.success(shared ? "Análise liberada para o gestor." : "Análise ocultada do gestor.");
+      invalidate();
+    },
+    onError: () => toast.error("Não foi possível alterar a liberação."),
+  });
+
+  const ai = aiQuery.data;
+
+  return (
+    <section className="mt-8 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-transparent p-6">
+      <div className="mb-2 flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-amber-400" />
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-amber-400">
+          Análise de compatibilidade (IA) · só o RH vê
+        </h3>
+      </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Descreva o perfil ideal da vaga: time em que a pessoa entra, cultura da VENDE-C, líder
+        direto, hard e soft skills, desafios do cargo. A IA compara com os dados do candidato.
+      </p>
+
+      <textarea
+        value={profile}
+        onChange={(e) => {
+          setTouched(true);
+          setProfile(e.target.value);
+        }}
+        rows={5}
+        placeholder="Ex.: Vaga de Analista Comercial no time Corp, líder direto Gabriela (perfil analítico e exigente com processo). Cultura: alta performance, autonomia, ritmo acelerado…"
+        className="w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-amber-400/40 placeholder:text-muted-foreground focus:ring-2"
+      />
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => generate.mutate()}
+          disabled={generate.isPending}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-xs font-semibold text-black disabled:opacity-60"
+        >
+          {generate.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5" />
+          )}
+          {ai?.analysis ? "Gerar novamente" : "Gerar análise"}
+        </button>
+
+        {ai?.analysis && (
+          <button
+            onClick={() => share.mutate(!ai.shared)}
+            disabled={share.isPending}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-secondary disabled:opacity-60"
+          >
+            {ai.shared ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            {ai.shared ? "Ocultar do gestor" : "Liberar para o gestor"}
+          </button>
+        )}
+      </div>
+
+      {aiQuery.isLoading ? (
+        <Loader2 className="mt-4 h-5 w-5 animate-spin text-amber-400" />
+      ) : ai?.analysis ? (
+        <div className="mt-4 rounded-xl border border-border bg-card p-4">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            {typeof ai.score === "number" && (
+              <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                Compatibilidade {ai.score}/100
+              </span>
+            )}
+            <span className="rounded-full border border-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {ai.shared ? "Visível para o gestor" : "Somente RH"}
+            </span>
+          </div>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+            {ai.analysis}
+          </p>
+        </div>
+      ) : (
+        <p className="mt-4 text-sm italic text-muted-foreground/60">
+          Nenhuma análise gerada ainda.
+        </p>
       )}
     </section>
   );
