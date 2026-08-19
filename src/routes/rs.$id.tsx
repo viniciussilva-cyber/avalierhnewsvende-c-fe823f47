@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
 import { DecisionButtons } from "@/components/FeedbackDecision";
+import { AiReviewButton } from "@/components/AiReviewButton";
+import { getAiAnalysis } from "@/lib/rs.functions";
 import {
   getCandidate,
   listGestorFeedback,
@@ -45,6 +47,12 @@ function GestorCandidate() {
   const { data: candidate, isLoading } = useQuery({
     queryKey: ["candidate", id],
     queryFn: () => getCandidate(id),
+    enabled: !!session,
+  });
+
+  const { data: ai } = useQuery({
+    queryKey: ["candidate-ai", id, "gestor"],
+    queryFn: () => getAiAnalysis({ data: { candidateId: id, forGestor: true } }),
     enabled: !!session,
   });
 
@@ -122,7 +130,11 @@ function GestorCandidate() {
       await refetch();
     } catch (err) {
       console.error("Erro ao salvar parecer:", err);
-      toast.error("Não foi possível salvar o parecer. Tente novamente.");
+      toast.error(
+        err instanceof Error && err.message
+          ? err.message
+          : "Não foi possível salvar o parecer. Tente novamente.",
+      );
     } finally {
       setSaving(false);
     }
@@ -177,18 +189,21 @@ function GestorCandidate() {
         <InfoBlock title="Experiências profissionais" content={candidate.experience} />
         <InfoBlock title="Observações do RH" content={candidate.rhNotes} />
 
-        {/* Análise de IA: Visível apenas com permissão prévia do RH (showAiAnalysis === true) */}
-        {candidate.showAiAnalysis && candidate.aiFitAnalysis && (
+        {/* Análise de IA: aparece só quando o RH libera para o gestor */}
+        {ai?.analysis && (
           <section className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6">
-            <div className="flex items-center gap-2 text-amber-500">
+            <div className="flex flex-wrap items-center gap-2 text-amber-500">
               <Sparkles className="h-4 w-4" />
               <h2 className="text-xs font-semibold uppercase tracking-wide">
-                Análise Preditiva de Fit Cultural & Liderança (IA)
+                Análise de compatibilidade com a vaga (IA)
               </h2>
+              {typeof ai.score === "number" && (
+                <span className="rounded-full border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold">
+                  {ai.score}/100
+                </span>
+              )}
             </div>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">
-              {candidate.aiFitAnalysis}
-            </p>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{ai.analysis}</p>
           </section>
         )}
 
@@ -204,6 +219,7 @@ function GestorCandidate() {
             className="mt-3 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
           />
           <div className="mt-3 flex flex-wrap items-center gap-2">
+            <AiReviewButton kind="parecer" value={text} onChange={setText} />
             <DecisionButtons value={decision} onChange={setDecision} />
             <button
               onClick={save}
