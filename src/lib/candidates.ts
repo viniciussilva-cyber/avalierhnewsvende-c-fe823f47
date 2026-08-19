@@ -9,6 +9,8 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { listFeedback, saveFeedback } from "./rs.functions";
+
 
 export const CANDIDATE_STATUSES = [
   { id: "triagem", label: "Triagem" },
