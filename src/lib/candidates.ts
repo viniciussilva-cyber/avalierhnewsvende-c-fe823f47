@@ -35,6 +35,8 @@ export const CANDIDATE_AREAS = [
 
 export interface Candidate {
   id: string;
+  /** Vaga a que o candidato pertence. */
+  jobId: string;
   photoUrl?: string;
   fullName: string;
   salaryExpectation: string;
@@ -75,6 +77,7 @@ const COL = "candidates";
 function fromDoc(id: string, data: Record<string, unknown>): Candidate {
   return {
     id,
+    jobId: (data.jobId as string) ?? "",
     photoUrl: (data.photoUrl as string) || undefined,
     fullName: (data.fullName as string) ?? "",
     salaryExpectation: (data.salaryExpectation as string) ?? "",
@@ -112,6 +115,7 @@ export async function saveCandidate(input: SaveCandidateInput): Promise<void> {
   await setDoc(
     doc(db, COL, input.id),
     {
+      jobId: input.jobId ?? "",
       photoUrl: input.photoUrl ?? "",
       fullName: input.fullName,
       salaryExpectation: input.salaryExpectation,
