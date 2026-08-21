@@ -6,6 +6,8 @@ import { Loader2, Upload, User as UserIcon, X } from "lucide-react";
 import { uploadEditorImage } from "@/lib/storage";
 import { MANAGERS } from "@/lib/managers";
 import { AiReviewButton } from "@/components/AiReviewButton";
+import { generateAiAnalysis } from "@/lib/rs.functions";
+import type { Job } from "@/lib/jobs";
 import {
   CANDIDATE_STATUSES,
   newCandidateId,
@@ -37,14 +39,16 @@ const schema = z.object({
 
 interface Props {
   existing?: Candidate;
+  /** Vaga em que o candidato está sendo cadastrado. */
+  job?: Job;
   onSaved: (id: string) => void;
 }
 
-export function CandidateForm({ existing, onSaved }: Props) {
+export function CandidateForm({ existing, job, onSaved }: Props) {
   const queryClient = useQueryClient();
   const [fullName, setFullName] = useState(existing?.fullName ?? "");
   const [salaryExpectation, setSalaryExpectation] = useState(existing?.salaryExpectation ?? "");
-  const [area, setArea] = useState(existing?.area ?? "");
+  const [area, setArea] = useState(existing?.area ?? job?.title ?? "");
   const [resumeUrl, setResumeUrl] = useState(existing?.resumeUrl ?? "");
   const [photoUrl, setPhotoUrl] = useState(existing?.photoUrl ?? "");
   const [rhSummary, setRhSummary] = useState(existing?.rhSummary ?? "");
@@ -52,8 +56,9 @@ export function CandidateForm({ existing, onSaved }: Props) {
   const [rhNotes, setRhNotes] = useState(existing?.rhNotes ?? "");
   const [status, setStatus] = useState<CandidateStatus>(existing?.status ?? "triagem");
   const [assignedManagers, setAssignedManagers] = useState<string[]>(
-    existing?.assignedManagers ?? [],
+    existing?.assignedManagers ?? job?.managerEmails ?? [],
   );
+  const [analyzing, setAnalyzing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,6 +83,7 @@ export function CandidateForm({ existing, onSaved }: Props) {
       const id = existing?.id ?? newCandidateId(parsed.fullName);
       await saveCandidate({
         id,
+        jobId: job?.id ?? existing?.jobId ?? "",
         fullName: parsed.fullName,
         salaryExpectation: parsed.salaryExpectation || "",
         area: parsed.area,
@@ -92,10 +98,39 @@ export function CandidateForm({ existing, onSaved }: Props) {
       });
       return id;
     },
-    onSuccess: (id) => {
+    onSuccess: async (id) => {
       queryClient.invalidateQueries({ queryKey: ["candidates"] });
       queryClient.invalidateQueries({ queryKey: ["candidate", id] });
       toast.success(existing ? "Candidato atualizado!" : "Candidato cadastrado!");
+
+      // Análise automática de compatibilidade com o perfil ideal da vaga.
+      if (job?.idealProfile?.trim()) {
+        setAnalyzing(true);
+        toast.info("A IA está analisando a compatibilidade com a vaga…");
+        try {
+          await generateAiAnalysis({
+            data: {
+              candidateId: id,
+              jobProfile: job.idealProfile,
+              candidate: {
+                fullName,
+                area: area || job.title,
+                salaryExpectation,
+                rhSummary,
+                experience,
+                rhNotes,
+              },
+            },
+          });
+          queryClient.invalidateQueries({ queryKey: ["candidate-ai", id] });
+          toast.success("Análise de compatibilidade gerada pela IA.");
+        } catch {
+          toast.error("Candidato salvo, mas a IA não conseguiu gerar a análise agora.");
+        } finally {
+          setAnalyzing(false);
+        }
+      }
+
       onSaved(id);
     },
     onError: (err: unknown) => {
@@ -216,13 +251,16 @@ export function CandidateForm({ existing, onSaved }: Props) {
             className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
           />
         </Field>
-        <Field label="Vaga / Área de interesse *">
+        <Field label={job ? "Vaga" : "Vaga / Área de interesse *"}>
           <input
             value={area}
             onChange={(e) => setArea(e.target.value)}
             required
+            readOnly={!!job}
             placeholder="Ex.: Comercial - Corp"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
+            className={`w-full rounded-lg border border-input px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2 ${
+              job ? "bg-secondary/60 text-muted-foreground" : "bg-background"
+            }`}
           />
         </Field>
         <Field label="Status do processo *">
@@ -288,37 +326,59 @@ export function CandidateForm({ existing, onSaved }: Props) {
       </div>
 
       {/* Gestores liberados */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Gestores liberados para avaliar
-        </span>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Gestores da mesma área já veem este candidato automaticamente. Marque abaixo para liberar
-          gestores de outras áreas.
-        </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {MANAGERS.map((m) => (
-            <label
-              key={m.email}
-              className="flex cursor-pointer items-start gap-2 rounded-lg border border-border px-3 py-2 text-xs text-foreground hover:bg-secondary"
-            >
-              <input
-                type="checkbox"
-                checked={assignedManagers.includes(m.email)}
-                onChange={() => toggleManager(m.email)}
-                className="mt-0.5 h-3.5 w-3.5 accent-[color:var(--color-primary)]"
-              />
-              <span className="min-w-0">
-                <span className="block truncate font-medium">{m.name}</span>
-                <span className="block truncate text-[10px] text-muted-foreground">
-                  {m.areas.join(" · ")}
-                </span>
+      {job ? (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Gestores desta vaga
+          </span>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Definidos na vaga. Para alterar, edite a vaga.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(job.managerEmails ?? []).length === 0 ? (
+              <span className="text-xs italic text-muted-foreground/60">
+                Nenhum gestor vinculado — apenas gestores da área verão este candidato.
               </span>
-            </label>
-          ))}
+            ) : (
+              job.managerEmails.map((email) => (
+                <span
+                  key={email}
+                  className="rounded-full border border-border px-3 py-1 text-[11px] text-muted-foreground"
+                >
+                  {MANAGERS.find((m) => m.email === email)?.name ?? email}
+                </span>
+              ))
+            )}
+          </div>
         </div>
-      </div>
-
+      ) : (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Gestores liberados para avaliar
+          </span>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {MANAGERS.map((m) => (
+              <label
+                key={m.email}
+                className="flex cursor-pointer items-start gap-2 rounded-lg border border-border px-3 py-2 text-xs text-foreground hover:bg-secondary"
+              >
+                <input
+                  type="checkbox"
+                  checked={assignedManagers.includes(m.email)}
+                  onChange={() => toggleManager(m.email)}
+                  className="mt-0.5 h-3.5 w-3.5 accent-[color:var(--color-primary)]"
+                />
+                <span className="min-w-0">
+                  <span className="block truncate font-medium">{m.name}</span>
+                  <span className="block truncate text-[10px] text-muted-foreground">
+                    {m.areas.join(" · ")}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {error && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
@@ -329,11 +389,15 @@ export function CandidateForm({ existing, onSaved }: Props) {
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={mutation.isPending}
+          disabled={mutation.isPending || analyzing}
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.01] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {existing ? "Salvar alterações" : "Cadastrar candidato"}
+          {(mutation.isPending || analyzing) && <Loader2 className="h-4 w-4 animate-spin" />}
+          {analyzing
+            ? "Analisando com IA…"
+            : existing
+              ? "Salvar alterações"
+              : "Cadastrar candidato"}
         </button>
       </div>
     </form>
