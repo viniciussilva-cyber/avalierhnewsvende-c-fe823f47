@@ -24,6 +24,7 @@ import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
 import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
 import { Route as AppRsVagaJobIdRouteImport } from './routes/app.rs.vaga.$jobId'
 import { Route as AppRsVagaNovaRouteImport } from './routes/app.rs.vaga.nova'
+import { Route as AppRsVagaJobIdNovoRouteImport } from './routes/app.rs.vaga.$jobId_.novo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -102,6 +103,11 @@ const AppRsVagaNovaRoute = AppRsVagaNovaRouteImport.update({
   path: '/app/rs/vaga/nova',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRsVagaJobIdNovoRoute = AppRsVagaJobIdNovoRouteImport.update({
+  id: '/app/rs/vaga/$jobId_/novo',
+  path: '/app/rs/vaga/$jobId/novo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/app/rs/': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
   '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
+  '/app/rs/vaga/$jobId/novo': typeof AppRsVagaJobIdNovoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/app/rs': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
   '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
+  '/app/rs/vaga/$jobId/novo': typeof AppRsVagaJobIdNovoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/app/rs/': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
   '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
+  '/app/rs/vaga/$jobId_/novo': typeof AppRsVagaJobIdNovoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/app/rs/'
     | '/app/rs/vaga/$jobId'
     | '/app/rs/vaga/nova'
+    | '/app/rs/vaga/$jobId/novo'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/app/rs'
     | '/app/rs/vaga/$jobId'
     | '/app/rs/vaga/nova'
+    | '/app/rs/vaga/$jobId/novo'
   id:
     | '__root__'
     | '/'
@@ -207,6 +218,7 @@ export interface FileRouteTypes {
     | '/app/rs/'
     | '/app/rs/vaga/$jobId'
     | '/app/rs/vaga/nova'
+    | '/app/rs/vaga/$jobId_/novo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,6 +237,7 @@ export interface RootRouteChildren {
   AppRsIndexRoute: typeof AppRsIndexRoute
   AppRsVagaJobIdRoute: typeof AppRsVagaJobIdRoute
   AppRsVagaNovaRoute: typeof AppRsVagaNovaRoute
+  AppRsVagaJobIdNovoRoute: typeof AppRsVagaJobIdNovoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -334,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRsVagaNovaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/rs/vaga/$jobId_/novo': {
+      id: '/app/rs/vaga/$jobId_/novo'
+      path: '/app/rs/vaga/$jobId/novo'
+      fullPath: '/app/rs/vaga/$jobId/novo'
+      preLoaderRoute: typeof AppRsVagaJobIdNovoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -353,6 +373,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRsIndexRoute: AppRsIndexRoute,
   AppRsVagaJobIdRoute: AppRsVagaJobIdRoute,
   AppRsVagaNovaRoute: AppRsVagaNovaRoute,
+  AppRsVagaJobIdNovoRoute: AppRsVagaJobIdNovoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
