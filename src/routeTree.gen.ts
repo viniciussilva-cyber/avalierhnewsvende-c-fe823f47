@@ -22,6 +22,7 @@ import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
 import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
 import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
+import { Route as AppRsVagaNovaRouteImport } from './routes/app.rs.vaga.nova'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -90,6 +91,11 @@ const AppRsNovoRoute = AppRsNovoRouteImport.update({
   path: '/app/rs/novo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRsVagaNovaRoute = AppRsVagaNovaRouteImport.update({
+  id: '/app/rs/vaga/nova',
+  path: '/app/rs/vaga/nova',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/app/rs/$id': typeof AppRsIdRoute
   '/app/rs/novo': typeof AppRsNovoRoute
   '/app/rs/': typeof AppRsIndexRoute
+  '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/app/rs/$id': typeof AppRsIdRoute
   '/app/rs/novo': typeof AppRsNovoRoute
   '/app/rs': typeof AppRsIndexRoute
+  '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/app/rs/$id': typeof AppRsIdRoute
   '/app/rs/novo': typeof AppRsNovoRoute
   '/app/rs/': typeof AppRsIndexRoute
+  '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/app/rs/$id'
     | '/app/rs/novo'
     | '/app/rs/'
+    | '/app/rs/vaga/nova'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/app/rs/$id'
     | '/app/rs/novo'
     | '/app/rs'
+    | '/app/rs/vaga/nova'
   id:
     | '__root__'
     | '/'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/app/rs/$id'
     | '/app/rs/novo'
     | '/app/rs/'
+    | '/app/rs/vaga/nova'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   AppRsIdRoute: typeof AppRsIdRoute
   AppRsNovoRoute: typeof AppRsNovoRoute
   AppRsIndexRoute: typeof AppRsIndexRoute
+  AppRsVagaNovaRoute: typeof AppRsVagaNovaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -294,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRsNovoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/rs/vaga/nova': {
+      id: '/app/rs/vaga/nova'
+      path: '/app/rs/vaga/nova'
+      fullPath: '/app/rs/vaga/nova'
+      preLoaderRoute: typeof AppRsVagaNovaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -311,6 +331,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRsIdRoute: AppRsIdRoute,
   AppRsNovoRoute: AppRsNovoRoute,
   AppRsIndexRoute: AppRsIndexRoute,
+  AppRsVagaNovaRoute: AppRsVagaNovaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
