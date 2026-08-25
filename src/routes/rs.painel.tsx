@@ -63,7 +63,7 @@ function GestorPanel() {
 
   const visible = useMemo(() => {
     if (!session || !jobs) return [];
-    const all = session.mode === "geral" || session.manager.allAreas;
+    const all = session.mode === "geral" || !!session.manager.allAreas;
     const list = jobs.filter((j: Job) => jobVisibleToManager(j, session.manager, all));
     const q = term.trim().toLowerCase();
     return q
