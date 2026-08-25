@@ -5,14 +5,16 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   Briefcase,
+  CheckCircle2,
   DollarSign,
   ExternalLink,
   Loader2,
+  Pencil,
   Sparkles,
   User as UserIcon,
 } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
-import { DecisionButtons } from "@/components/FeedbackDecision";
+import { DecisionBadge, DecisionButtons } from "@/components/FeedbackDecision";
 import { AiReviewButton } from "@/components/AiReviewButton";
 import { getAiAnalysis } from "@/lib/rs.functions";
 import {
@@ -22,13 +24,14 @@ import {
   type FeedbackDecision,
 } from "@/lib/candidates";
 import { areaMatches, managerDocId } from "@/lib/managers";
+import { getJob, jobVisibleToManager } from "@/lib/jobs";
 import { useGestorSession } from "@/lib/gestor-auth";
 
 export const Route = createFileRoute("/rs/$id")({
   head: () => ({
     meta: [
       { title: "Avaliar candidato · R&S VENDE-C" },
-      { name: "description", content: "Parecer do gestor sobre o candidato." },
+      { name: "description", content: "Avaliação do gestor sobre o candidato." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -56,6 +59,12 @@ function GestorCandidate() {
     enabled: !!session,
   });
 
+  const { data: job } = useQuery({
+    queryKey: ["job", candidate?.jobId],
+    queryFn: () => getJob(candidate!.jobId),
+    enabled: !!session && !!candidate?.jobId,
+  });
+
   const { data: feedback, refetch } = useQuery({
     queryKey: ["candidate-feedback", id],
     queryFn: () => listGestorFeedback(id),
@@ -69,6 +78,7 @@ function GestorCandidate() {
   const [decision, setDecision] = useState<FeedbackDecision>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   // Inicializa os estados locais apenas uma vez para evitar reset durante re-renders
   useEffect(() => {
@@ -89,10 +99,11 @@ function GestorCandidate() {
     );
   }
 
+  const allAccess = session.mode === "geral" || !!session.manager.allAreas;
   const allowed =
     !!candidate &&
-    (session.mode === "geral" ||
-      session.manager.allAreas ||
+    (allAccess ||
+      (!!job && jobVisibleToManager(job, session.manager, allAccess)) ||
       areaMatches(session.manager.areas, candidate.area) ||
       (candidate.assignedManagers ?? []).includes(session.manager.email));
 
@@ -114,7 +125,7 @@ function GestorCandidate() {
 
   const save = async () => {
     if (!decision && !text.trim()) {
-      toast.error("Selecione um status ou escreva seu parecer antes de salvar.");
+      toast.error("Selecione um status ou escreva sua avaliação antes de enviar.");
       return;
     }
     setSaving(true);
@@ -126,14 +137,15 @@ function GestorCandidate() {
         feedback: text.trim(),
         decision,
       });
-      toast.success("Parecer salvo com sucesso!");
+      toast.success("Avaliação enviada ao RH!");
+      setEditing(false);
       await refetch();
     } catch (err) {
-      console.error("Erro ao salvar parecer:", err);
+      console.error("Erro ao salvar avaliação:", err);
       toast.error(
         err instanceof Error && err.message
           ? err.message
-          : "Não foi possível salvar o parecer. Tente novamente.",
+          : "Não foi possível enviar a avaliação. Tente novamente.",
       );
     } finally {
       setSaving(false);
@@ -147,7 +159,7 @@ function GestorCandidate() {
           to="/rs/painel"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Voltar aos candidatos
+          <ArrowLeft className="h-3.5 w-3.5" /> Voltar às vagas
         </Link>
 
         <div className="mt-5 flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-background p-6">
@@ -207,30 +219,63 @@ function GestorCandidate() {
           </section>
         )}
 
-        <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
-            Seu parecer
-          </h2>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={5}
-            placeholder="O que você achou do candidato?"
-            className="mt-3 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
-          />
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <AiReviewButton kind="parecer" value={text} onChange={setText} />
-            <DecisionButtons value={decision} onChange={setDecision} />
+        {own && !editing ? (
+          <section className="mt-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-6">
+            <div className="flex flex-wrap items-center gap-2 text-emerald-300">
+              <CheckCircle2 className="h-4 w-4" />
+              <h2 className="text-sm font-semibold">Sua avaliação foi enviada ao RH</h2>
+              <DecisionBadge value={own.decision} />
+            </div>
+            {own.feedback && (
+              <p className="mt-3 whitespace-pre-wrap rounded-xl border border-border bg-background p-4 text-sm text-foreground">
+                {own.feedback}
+              </p>
+            )}
             <button
-              onClick={save}
-              disabled={saving}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+              onClick={() => {
+                setText(own.feedback ?? "");
+                setDecision(own.decision ?? null);
+                setEditing(true);
+              }}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-4 py-2 text-xs font-semibold text-foreground hover:bg-secondary"
             >
-              {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              Salvar parecer
+              <Pencil className="h-3.5 w-3.5" /> Editar avaliação
             </button>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <section className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-6">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+              {own ? "Editar sua avaliação" : "Sua avaliação"}
+            </h2>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={5}
+              placeholder="O que você achou do candidato?"
+              className="mt-3 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
+            />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <AiReviewButton kind="parecer" value={text} onChange={setText} />
+              <DecisionButtons value={decision} onChange={setDecision} />
+              {own && (
+                <button
+                  onClick={() => setEditing(false)}
+                  className="rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-secondary"
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                onClick={save}
+                disabled={saving}
+                className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                Enviar avaliação ao RH
+              </button>
+            </div>
+          </section>
+        )}
       </PageTransition>
     </div>
   );
