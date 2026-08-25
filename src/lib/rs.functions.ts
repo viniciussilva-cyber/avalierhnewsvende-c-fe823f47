@@ -59,7 +59,7 @@ export const saveFeedback = createServerFn({ method: "POST" })
     const isManager = !!findManager(email);
     const isRh = email.endsWith("@vende-c.com");
     if (!email || (!isManager && !isRh)) {
-      throw new Error("E-mail não autorizado a registrar parecer.");
+      throw new Error("E-mail não autorizado a registrar avaliação.");
     }
     if (!data.candidateId) throw new Error("Candidato inválido.");
 

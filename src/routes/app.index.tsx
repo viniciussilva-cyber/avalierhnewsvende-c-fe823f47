@@ -28,7 +28,7 @@ const modules = [
     to: "/app/rs" as const,
     label: "R&S",
     tag: "Recrutamento & Seleção",
-    description: "Cadastre candidatos, acompanhe entrevistas e receba o parecer dos gestores da área.",
+    description: "Crie vagas, cadastre candidatos e receba a avaliação dos gestores da área.",
     icon: Users,
     gradient: "from-fuchsia-500/25 via-fuchsia-500/5 to-transparent",
     accent: "text-fuchsia-300",
