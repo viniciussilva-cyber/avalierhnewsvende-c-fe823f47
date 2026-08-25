@@ -21,7 +21,7 @@ import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/publi
 import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
 import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
-import { Route as AppRsNovoRouteImport } from './routes/app.rs.novo'
+import { Route as RsVagaJobIdRouteImport } from './routes/rs.vaga.$jobId'
 import { Route as AppRsVagaJobIdRouteImport } from './routes/app.rs.vaga.$jobId'
 import { Route as AppRsVagaNovaRouteImport } from './routes/app.rs.vaga.nova'
 import { Route as AppRsVagaJobIdNovoRouteImport } from './routes/app.rs.vaga.$jobId_.novo'
@@ -88,9 +88,9 @@ const AppRsIdRoute = AppRsIdRouteImport.update({
   path: '/app/rs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRsNovoRoute = AppRsNovoRouteImport.update({
-  id: '/app/rs/novo',
-  path: '/app/rs/novo',
+const RsVagaJobIdRoute = RsVagaJobIdRouteImport.update({
+  id: '/rs/vaga/$jobId',
+  path: '/rs/vaga/$jobId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRsVagaJobIdRoute = AppRsVagaJobIdRouteImport.update({
@@ -121,7 +121,7 @@ export interface FileRoutesByFullPath {
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
-  '/app/rs/novo': typeof AppRsNovoRoute
+  '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/rs/': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
   '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
@@ -139,7 +139,7 @@ export interface FileRoutesByTo {
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
-  '/app/rs/novo': typeof AppRsNovoRoute
+  '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/rs': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
   '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
@@ -158,7 +158,7 @@ export interface FileRoutesById {
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
-  '/app/rs/novo': typeof AppRsNovoRoute
+  '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/rs/': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
   '/app/rs/vaga/nova': typeof AppRsVagaNovaRoute
@@ -178,7 +178,7 @@ export interface FileRouteTypes {
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
-    | '/app/rs/novo'
+    | '/rs/vaga/$jobId'
     | '/app/rs/'
     | '/app/rs/vaga/$jobId'
     | '/app/rs/vaga/nova'
@@ -196,7 +196,7 @@ export interface FileRouteTypes {
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
-    | '/app/rs/novo'
+    | '/rs/vaga/$jobId'
     | '/app/rs'
     | '/app/rs/vaga/$jobId'
     | '/app/rs/vaga/nova'
@@ -214,7 +214,7 @@ export interface FileRouteTypes {
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
-    | '/app/rs/novo'
+    | '/rs/vaga/$jobId'
     | '/app/rs/'
     | '/app/rs/vaga/$jobId'
     | '/app/rs/vaga/nova'
@@ -233,7 +233,7 @@ export interface RootRouteChildren {
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
   AppRsIdRoute: typeof AppRsIdRoute
-  AppRsNovoRoute: typeof AppRsNovoRoute
+  RsVagaJobIdRoute: typeof RsVagaJobIdRoute
   AppRsIndexRoute: typeof AppRsIndexRoute
   AppRsVagaJobIdRoute: typeof AppRsVagaJobIdRoute
   AppRsVagaNovaRoute: typeof AppRsVagaNovaRoute
@@ -326,11 +326,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/rs/novo': {
-      id: '/app/rs/novo'
-      path: '/app/rs/novo'
-      fullPath: '/app/rs/novo'
-      preLoaderRoute: typeof AppRsNovoRouteImport
+    '/rs/vaga/$jobId': {
+      id: '/rs/vaga/$jobId'
+      path: '/rs/vaga/$jobId'
+      fullPath: '/rs/vaga/$jobId'
+      preLoaderRoute: typeof RsVagaJobIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/rs/vaga/$jobId': {
@@ -369,7 +369,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
   AppRsIdRoute: AppRsIdRoute,
-  AppRsNovoRoute: AppRsNovoRoute,
+  RsVagaJobIdRoute: RsVagaJobIdRoute,
   AppRsIndexRoute: AppRsIndexRoute,
   AppRsVagaJobIdRoute: AppRsVagaJobIdRoute,
   AppRsVagaNovaRoute: AppRsVagaNovaRoute,

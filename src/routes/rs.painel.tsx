@@ -1,25 +1,24 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, LogOut, Search, User as UserIcon, Users } from "lucide-react";
-import { useState } from "react";
+import { Briefcase, DollarSign, Loader2, LogOut, Search, Users } from "lucide-react";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
-import { listCandidates, type Candidate } from "@/lib/candidates";
-import { areaMatches } from "@/lib/managers";
+import { listCandidates } from "@/lib/candidates";
+import { jobVisibleToManager, JOB_STATUSES, listJobs, type Job, type JobStatus } from "@/lib/jobs";
 import { gestorSignOut, useGestorSession } from "@/lib/gestor-auth";
 
 export const Route = createFileRoute("/rs/painel")({
   head: () => ({
     meta: [
-      { title: "Candidatos para avaliar · R&S VENDE-C" },
+      { title: "Vagas para avaliar · R&S VENDE-C" },
       {
         name: "description",
-        content: "Lista de candidatos da sua área aguardando parecer do gestor.",
+        content: "Vagas da sua área e candidatos aguardando a sua avaliação.",
       },
-      { property: "og:title", content: "Candidatos para avaliar · R&S VENDE-C" },
+      { property: "og:title", content: "Vagas para avaliar · R&S VENDE-C" },
       {
         property: "og:description",
-        content: "Lista de candidatos da sua área aguardando parecer do gestor.",
+        content: "Vagas da sua área e candidatos aguardando a sua avaliação.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -27,6 +26,10 @@ export const Route = createFileRoute("/rs/painel")({
   }),
   component: GestorPanel,
 });
+
+const JOB_STATUS_LABEL: Record<JobStatus, string> = Object.fromEntries(
+  JOB_STATUSES.map((s) => [s.id, s.label]),
+) as Record<JobStatus, string>;
 
 function GestorPanel() {
   const navigate = useNavigate();
@@ -37,31 +40,36 @@ function GestorPanel() {
     if (!loading && !session) navigate({ to: "/rs", replace: true });
   }, [loading, session, navigate]);
 
-  const { data: candidates, isLoading } = useQuery({
+  const { data: jobs, isLoading } = useQuery({
+    queryKey: ["jobs"],
+    queryFn: listJobs,
+    enabled: !!session,
+  });
+
+  const { data: candidates } = useQuery({
     queryKey: ["candidates"],
     queryFn: listCandidates,
     enabled: !!session,
   });
 
+  const countByJob = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of candidates ?? []) {
+      if (!c.jobId) continue;
+      map.set(c.jobId, (map.get(c.jobId) ?? 0) + 1);
+    }
+    return map;
+  }, [candidates]);
+
   const visible = useMemo(() => {
-    if (!session || !candidates) return [];
-    const { manager, mode } = session;
-    const all = mode === "geral" || manager.allAreas;
-    const list = all
-      ? candidates
-      : candidates.filter(
-          (c: Candidate) =>
-            areaMatches(manager.areas, c.area) ||
-            (c.assignedManagers ?? []).includes(manager.email),
-        );
+    if (!session || !jobs) return [];
+    const all = session.mode === "geral" || !!session.manager.allAreas;
+    const list = jobs.filter((j: Job) => jobVisibleToManager(j, session.manager, all));
     const q = term.trim().toLowerCase();
     return q
-      ? list.filter(
-          (c) =>
-            c.fullName.toLowerCase().includes(q) || (c.area ?? "").toLowerCase().includes(q),
-        )
+      ? list.filter((j) => `${j.title} ${j.team}`.toLowerCase().includes(q))
       : list;
-  }, [session, candidates, term]);
+  }, [session, jobs, term]);
 
   if (loading || !session) {
     return (
@@ -97,9 +105,9 @@ function GestorPanel() {
       </header>
 
       <PageTransition className="mx-auto max-w-5xl px-6 py-8">
-        <h1 className="text-2xl font-bold text-foreground">Candidatos para avaliar</h1>
+        <h1 className="text-2xl font-bold text-foreground">Suas vagas</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Escreva seu parecer e defina se aprova, nega ou deixa em espera.
+          Abra uma vaga para ver os candidatos e enviar sua avaliação ao RH.
         </p>
 
         <div className="relative mt-6">
@@ -107,7 +115,7 @@ function GestorPanel() {
           <input
             value={term}
             onChange={(e) => setTerm(e.target.value)}
-            placeholder="Buscar por nome ou vaga…"
+            placeholder="Buscar por cargo ou time…"
             className="w-full rounded-lg border border-input bg-background py-2.5 pl-9 pr-3 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
           />
         </div>
@@ -118,31 +126,39 @@ function GestorPanel() {
           </div>
         ) : visible.length === 0 ? (
           <p className="mt-10 rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-            Nenhum candidato liberado para você no momento.
+            Nenhuma vaga disponível para o seu acesso no momento.
           </p>
         ) : (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((c) => (
-              <StaggerItem key={c.id}>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {visible.map((j, i) => (
+              <StaggerItem key={j.id} delay={Math.min(i * 0.05, 0.4)}>
                 <Link
-                  to="/rs/$id"
-                  params={{ id: c.id }}
-                  className="flex h-full flex-col gap-3 rounded-2xl border border-border bg-background p-5 transition-colors hover:border-primary/60"
+                  to="/rs/vaga/$jobId"
+                  params={{ jobId: j.id }}
+                  className="block h-full rounded-2xl border border-border bg-background p-5 transition-colors hover:border-primary/50"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-border bg-secondary">
-                      {c.photoUrl ? (
-                        <img src={c.photoUrl} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                          <UserIcon className="h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
+                  <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-foreground">{c.fullName}</p>
-                      <p className="truncate text-xs text-muted-foreground">{c.area}</p>
+                      <p className="truncate text-base font-bold text-foreground">{j.title}</p>
+                      <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+                        <Briefcase className="h-3 w-3" /> {j.team}
+                      </p>
                     </div>
+                    <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      {JOB_STATUS_LABEL[j.status]}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5 text-primary" />
+                      {countByJob.get(j.id) ?? 0}{" "}
+                      {(countByJob.get(j.id) ?? 0) === 1 ? "candidato" : "candidatos"}
+                    </span>
+                    {j.salary && (
+                      <span className="inline-flex items-center gap-1">
+                        <DollarSign className="h-3.5 w-3.5" /> {j.salary}
+                      </span>
+                    )}
                   </div>
                 </Link>
               </StaggerItem>
