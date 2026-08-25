@@ -43,6 +43,12 @@ service cloud.firestore {
       allow create, update, delete: if isModerator();
     }
 
+    // ----- R&S Jobs (vagas) -------------------------------------------------
+    match /jobs/{id} {
+      allow read: if true;
+      allow create, update, delete: if isModerator();
+    }
+
     // ----- R&S Candidates ---------------------------------------------------
     match /candidates/{id} {
       // Leitura permitida para usuários logados ou acesso à rota pública do gestor
