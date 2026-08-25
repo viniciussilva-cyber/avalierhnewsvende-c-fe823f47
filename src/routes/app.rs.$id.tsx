@@ -96,7 +96,7 @@ function CandidateDetail() {
   if (candQuery.isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <AppTopBar moduleLabel="R&S · Candidato" backTo="/app/rs" backLabel="Candidatos" />
+        <AppTopBar moduleLabel="R&S · Candidato" backTo="/app/rs" backLabel="Vagas" />
         <Loader2 className="mx-auto mt-20 h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -105,7 +105,7 @@ function CandidateDetail() {
   if (!c) {
     return (
       <div className="min-h-screen bg-background">
-        <AppTopBar moduleLabel="R&S · Candidato" backTo="/app/rs" backLabel="Candidatos" />
+        <AppTopBar moduleLabel="R&S · Candidato" backTo="/app/rs" backLabel="Vagas" />
         <div className="mx-auto mt-20 max-w-md text-center">
           <p className="text-muted-foreground">Candidato não encontrado.</p>
           <Link
@@ -121,7 +121,7 @@ function CandidateDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppTopBar moduleLabel="R&S · Candidato" backTo="/app/rs" backLabel="Candidatos" />
+      <AppTopBar moduleLabel="R&S · Candidato" backTo="/app/rs" backLabel="Vagas" />
 
       <PageTransition className="mx-auto max-w-4xl px-6 py-10">
         {editing && role === "rh" ? (
@@ -172,6 +172,15 @@ function CandidateDetail() {
                     </span>
                   </div>
                   <h1 className="mt-3 text-3xl font-extrabold text-foreground">{c.fullName}</h1>
+                  {c.jobId && (
+                    <Link
+                      to="/app/rs/vaga/$jobId"
+                      params={{ jobId: c.jobId }}
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" /> Voltar para a vaga
+                    </Link>
+                  )}
                   <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
                     {c.salaryExpectation && (
                       <span className="inline-flex items-center gap-1.5">
