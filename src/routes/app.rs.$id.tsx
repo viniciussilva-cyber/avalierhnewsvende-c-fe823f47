@@ -24,6 +24,7 @@ import { CandidateForm } from "@/components/CandidateForm";
 import { DecisionBadge, DecisionButtons } from "@/components/FeedbackDecision";
 import { AiReviewButton } from "@/components/AiReviewButton";
 import { generateAiAnalysis, getAiAnalysis, setAiShared } from "@/lib/rs.functions";
+import { getJob } from "@/lib/jobs";
 import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { firebaseConfigured } from "@/lib/firebase";
@@ -317,7 +318,7 @@ function GestorSection({
 
   const save = async () => {
     if (!text.trim()) {
-      toast.error("Escreva seu parecer antes de salvar.");
+      toast.error("Escreva sua avaliação antes de salvar.");
       return;
     }
     setSaving(true);
@@ -329,10 +330,10 @@ function GestorSection({
         feedback: text.trim(),
         decision,
       });
-      toast.success("Parecer salvo!");
+      toast.success("Avaliação salva!");
       onSaved();
     } catch {
-      toast.error("Não foi possível salvar o parecer.");
+      toast.error("Não foi possível salvar a avaliação.");
     } finally {
       setSaving(false);
     }
@@ -343,14 +344,14 @@ function GestorSection({
       <div className="mb-4 flex items-center gap-2">
         <MessageSquare className="h-4 w-4 text-fuchsia-300" />
         <h3 className="text-sm font-semibold uppercase tracking-wide text-fuchsia-300">
-          Parecer do gestor
+          Avaliação do gestor
         </h3>
       </div>
 
       {canWrite && (
         <div className="mb-6 rounded-xl border border-border bg-background/60 p-4">
           <p className="mb-2 text-xs font-medium text-muted-foreground">
-            {own ? "Editando seu parecer" : "Escreva sua avaliação sobre o candidato"}
+            {own ? "Editando sua avaliação" : "Escreva sua avaliação sobre o candidato"}
           </p>
           <textarea
             value={text}
@@ -369,7 +370,7 @@ function GestorSection({
               className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-60"
             >
               {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              Salvar parecer
+              Enviar avaliação ao RH
             </button>
           </div>
         </div>
@@ -379,7 +380,7 @@ function GestorSection({
         <Loader2 className="mx-auto h-5 w-5 animate-spin text-primary" />
       ) : feedback.length === 0 ? (
         <p className="text-sm italic text-muted-foreground/60">
-          Nenhum parecer ainda.
+          Nenhuma avaliação ainda.
         </p>
       ) : (
         <ul className="space-y-3">
@@ -432,9 +433,17 @@ function AiPanel({ candidate }: { candidate: import("@/lib/candidates").Candidat
     queryFn: () => getAiAnalysis({ data: { candidateId: candidate.id } }),
   });
 
+  const jobQuery = useQuery({
+    queryKey: ["job", candidate.jobId],
+    queryFn: () => getJob(candidate.jobId),
+    enabled: !!candidate.jobId,
+  });
+
   useEffect(() => {
-    if (!touched && aiQuery.data?.jobProfile) setProfile(aiQuery.data.jobProfile);
-  }, [aiQuery.data?.jobProfile, touched]);
+    if (touched) return;
+    const next = aiQuery.data?.jobProfile || jobQuery.data?.idealProfile || "";
+    if (next) setProfile(next);
+  }, [aiQuery.data?.jobProfile, jobQuery.data?.idealProfile, touched]);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["candidate-ai", candidate.id] });
@@ -484,8 +493,8 @@ function AiPanel({ candidate }: { candidate: import("@/lib/candidates").Candidat
         </h3>
       </div>
       <p className="mb-4 text-xs text-muted-foreground">
-        Descreva o perfil ideal da vaga: time em que a pessoa entra, cultura da VENDE-C, líder
-        direto, hard e soft skills, desafios do cargo. A IA compara com os dados do candidato.
+        O perfil ideal vem da vaga do candidato e pode ser ajustado aqui antes de gerar uma nova
+        análise. A IA compara esse perfil com os dados do candidato.
       </p>
 
       <textarea
