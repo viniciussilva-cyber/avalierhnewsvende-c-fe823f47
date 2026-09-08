@@ -1,60 +1,67 @@
-# RH NEWS VENDE-C — Plano de Implementação
+# Plano de migração: unir a VENDE-C Profiler ao sistema atual
 
-Plataforma de leitura e avaliação de newsletters internas, com tema dark, integração Firebase/Firestore, tela pública para colaboradores e painel protegido para moderadores.
+## Objetivo
+Traz o módulo **VENDE-C Profiler** (avaliação comportamental DISC de colaboradores) da conta `vendec-profile-pro.lovable.app` para dentro deste projeto, como mais um módulo acessível pelo hub `/app`. Os dados e telas passam a conviver com RH News e R&S.
 
-## Pré-requisito: configuração do Firebase
-Para conectar ao seu Firestore, vou precisar das chaves de configuração web do seu projeto Firebase (`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`). Essas chaves são publicáveis e ficam no código com segurança — a proteção real virá das **Regras do Firestore**. Você poderá colar essa config quando começarmos a build.
+## Como obter o material da outra plataforma
+1. **Código-fonte:** na outra conta, copie manualmente os arquivos principais (`src/lib/hr.functions.ts`, `src/routes/rh.dashboard.tsx`, `src/routes/resultado.$employeeId.tsx`, `src/components/ResultReport.tsx`, `src/components/EmployeeForm.tsx`, `src/lib/gate.server.ts`, etc.) para um arquivo texto/zip.
+2. **Banco de dados:** no outro projeto, vá em **Cloud → Advanced settings → Export data** e baixe as tabelas (`employees`, `assessments`, `user_roles`, etc.).
+3. **Alternativa:** convidar este usuário/agente para o outro projeto no Lovable, se a funcionalidade de convite estiver disponível.
 
-## Design System (Dark Mode)
-- Tipografia: **Inter** (via `@fontsource/inter`).
-- Tokens de cor (em `src/styles.css`, sem cores hardcoded nos componentes):
-  - `--background` → `#0a0a0a`
-  - `--card` / seções internas → `#111111`
-  - `--header` → `#050505`
-  - `--accent` (Vende-C) → `#FF0055`
-  - Textos: branco puro, `#e5e5e5` (títulos), `#9ca3af` / `#6b7280` (secundários)
-- Tipografia `prose` adaptada para dark mode no conteúdo da newsletter.
+## Estratégia de integração
+- O módulo Profiler vira um card no hub `/app`, ao lado de "RH News" e "R&S".
+- As rotas do Profiler ficam sob `/app/profiler/*`, mantendo URLs separadas mas dentro do mesmo domínio/login.
+- O design segue o sistema atual: fundo `#0a0a0a`, cards `#111111`, cor de marca rosa `#ff0055`/`#ff006a` (já é a cor primária deste projeto).
+- A autenticação unifica no Firebase Auth atual: quem entra como `rh` vê o dashboard de RH; quem entra como `gestor` vê a visão de líder/time.
 
-## Estrutura de dados (Firestore)
-- Coleção `newsletters`: `id` (slug, ex. `julho-2026`), `title`, `monthYear`, `content` (HTML string), `status` (`draft` | `published`), `createdAt`.
-- Coleção `evaluations`: `newsletterId`, `rating` (0–10), `name`, `role`, `comment` (opcional), `date`.
+## Passos de implementação
 
-## Rotas (TanStack Router)
-- `/` — Tela pública (lê `?edition=slug`).
-- `/admin` — Login do moderador.
-- `/admin/dashboard` — Painel (protegido por estado de login).
+### 1. Preparação do banco de dados
+- Criar as tabelas necessárias no Supabase deste projeto, espelhando o schema da outra plataforma:
+  - `employees` (dados dos colaboradores)
+  - `assessments` (resultados DISC)
+  - `user_roles` (papéis, se for usar RLS futuramente)
+  - Funções auxiliares como `has_role`, `can_view_employee`, etc.
+- Aplicar `GRANT` e RLS/policies conforme as regras do Lovable Cloud.
+- Criar triggers de `updated_at` para as novas tabelas.
 
-## 1. Tela Pública (Colaborador) — `/`
-- Lê `?edition=slug`; sem parâmetro, carrega a edição `published` mais recente.
-- **Header:** ícone de jornal (Lucide `Newspaper`), título "RH News", subtítulo "Newsletter interno".
-- **Hero:** imagem de fundo `vende-c.jpg` (você fornecerá) + overlay `bg-black/50` e gradiente para baixo. Exibe: tag mês/ano, título da edição, **Nota Média Geral** (média das `evaluations` da edição) e botão "Ler e avaliar".
-- **Botão "Ler e avaliar":** faz *smooth scroll* até o formulário de avaliação.
-- **Formulário de Avaliação** (posicionado ANTES do conteúdo):
-  - "De 0 a 10, que nota você dá?" (seletor de nota).
-  - Nome Completo (obrigatório), Cargo (obrigatório), Comentário/melhorias (textarea opcional).
-  - Validação com Zod; ao enviar grava em `evaluations` e exibe mensagem de agradecimento.
-- **Conteúdo da Newsletter:** renderiza o HTML rico com `prose` dark.
-- **Outras Edições (footer):** grid das edições `published` anteriores; clicar atualiza `?edition=...` e recarrega a visualização.
+### 2. Migração dos dados
+- Importar os dados exportados da outra conta para as novas tabelas deste projeto.
+- Validar se os IDs e relacionamentos (`employee_id`, `assessment_id`) permanecem consistentes.
 
-## 2. Login do Moderador — `/admin`
-- Fundo `#111`, layout simples.
-- Acesso hardcoded: e-mails `vinicius.silva@vende-c.com` e `lucas.izan@vende-c.com`, senha única `rh2026!`.
-- Input de senha com mostrar/ocultar (ícone Lucide `Eye` / `EyeOff`). Sem redefinição de senha.
-- Sessão mantida em estado local (sessionStorage) para acesso ao dashboard.
+### 3. Replicação e adaptação do código
+- Criar `src/lib/profiler.functions.ts` com as server functions equivalentes ao `hr.functions.ts` da outra plataforma.
+- Criar/adaptar componentes:
+  - `EmployeeForm.tsx` para cadastro/edição de colaboradores.
+  - `ResultReport.tsx` para o relatório DISC (mantendo gráficos, radar, mapa de talentos e exportação PDF via `window.print()`).
+- Criar rotas:
+  - `/app/profiler` → dashboard de colaboradores (visão RH).
+  - `/app/profiler/colaborador/$employeeId` → relatório individual.
+  - `/app/profiler/lider` → visão de líder/time (visão gestor).
 
-## 3. Painel do Moderador — `/admin/dashboard`
-Hero idêntica à pública + menu de 3 abas:
-- **Gerenciar Edições:** cards com mês/ano, título e status; botões **Apagar**, **Editar** e **Link** (copia `…?edition=slug` para a área de transferência).
-- **Nova Edição:** formulário com Mês/Ano, Título, slug, status (draft/published) e **editor visual rich text** (negrito, itálico, listas, títulos, links) que produz o HTML salvo em `content`. Reaproveitado para edição.
-- **Ver Avaliações:** lista as avaliações recebidas por edição (nota, nome, cargo, comentário, data) com a média calculada.
+### 4. Autenticação unificada
+- Reaproveitar `src/lib/auth.ts` e `src/lib/roles.ts`.
+- Mapear papéis:
+  - `rh` do sistema atual → acesso total ao Profiler (dashboard RH).
+  - `gestor` do sistema atual → visão de líder/time.
+- Remover a senha compartilhada do Profiler; o acesso passa a ser controlado pelo login unificado.
 
-## Detalhes Técnicos
-- `bun add firebase` + `@fontsource/inter`; editor rich text via `@tiptap/react` (+ starter-kit) com toolbar customizada no tema dark.
-- `src/lib/firebase.ts`: inicializa o app e exporta o Firestore.
-- `src/lib/newsletters.ts` / `src/lib/evaluations.ts`: funções de leitura/escrita (queries por status, slug, média de notas) usadas via TanStack Query.
-- Hero usa imagem local em `src/assets/vende-c.jpg` (placeholder até você enviar a sua).
-- Guarda de rota: `/admin/dashboard` redireciona para `/admin` se não autenticado.
-- **Regras do Firestore:** recomendo permitir leitura pública de `newsletters published` e criação pública de `evaluations`, restringindo escrita de `newsletters`. Como o login é hardcoded (sem Firebase Auth), a proteção de escrita no painel é client-side; posso documentar isso e sugerir regras condizentes.
+### 5. Integração no hub
+- Adicionar um novo card "Profiler / DISC" em `/app/index.tsx`.
+- O card fica disponível para `rh` e `gestor` (gestor acessa apenas a visão de líder).
 
-## Observação de segurança
-O login hardcoded e a escrita no Firestore sem Firebase Auth significam que a proteção do painel é apenas no front-end. Implemento exatamente como pedido, mas posso, em uma etapa futura, reforçar com Firebase Auth/regras se desejar.
+### 6. Ajustes e testes
+- Verificar conflitos de nomes de rotas e componentes.
+- Testar o fluxo de cadastro de colaborador, visualização do relatório e exportação PDF.
+- Garantir que as cores e tipografia do Profiler conversem com o design system atual.
+
+## Decisões pendentes
+- A tela "Meu resultado" da outra plataforma está quebrada. Decidir se será removida, transformada em seletor de colaborador ou corrigida com login individual no futuro.
+- O questionário DISC hoje só pode ser preenchido inserindo dados direto no banco. Decidir se queremos construir a tela de aplicação do questionário agora ou manter a carga manual de avaliações.
+
+## Entregáveis
+- Novas tabelas no Supabase deste projeto.
+- Dados da outra plataforma importados.
+- Módulo Profiler acessível pelo hub `/app`.
+- Login unificado com Firebase Auth.
+- Rotas: `/app/profiler`, `/app/profiler/colaborador/$id`, `/app/profiler/lider`.
