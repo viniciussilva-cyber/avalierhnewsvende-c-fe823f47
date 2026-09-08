@@ -39,6 +39,16 @@ Traz o módulo **VENDE-C Profiler** (avaliação comportamental DISC de colabora
   - `/app/profiler/colaborador/$employeeId` → relatório individual.
   - `/app/profiler/lider` → visão de líder/time (visão gestor).
 
+### 3b. Personagens no final do resultado
+- Recortar a imagem enviada em quatro personagens individuais: **Analista**, **Planejador**, **Executor** e **Comunicador**.
+- Publicar cada personagem como asset do projeto e exibir ao final do relatório da avaliação, destacando o perfil predominante do colaborador.
+- Cada personagem acompanha o selo colorido e a frase correspondente:
+  - Analista — roxo — "Observa, analisa e encontra o que outros não veem."
+  - Planejador — azul — "Pensa no hoje, projeta o amanhã."
+  - Executor — verde — "Tira do papel e faz acontecer."
+  - Comunicador — laranja — "Conecta pessoas, compartilha ideias e gera movimento."
+- O personagem do perfil predominante aparece em destaque; os demais aparecem menores como referência.
+
 ### 4. Autenticação unificada
 - Reaproveitar `src/lib/auth.ts` e `src/lib/roles.ts`.
 - Mapear papéis:
