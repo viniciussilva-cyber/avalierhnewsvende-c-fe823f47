@@ -77,6 +77,104 @@ export type Database = {
         }
         Relationships: []
       }
+      profiler_assessments: {
+        Row: {
+          answers: Json
+          competencies: Json
+          created_at: string
+          dominant: string
+          employee_id: string
+          id: string
+          indicators: Json
+          notes: string
+          score_analista: number
+          score_comunicador: number
+          score_executor: number
+          score_planejador: number
+          talent_zones: Json
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          competencies?: Json
+          created_at?: string
+          dominant?: string
+          employee_id: string
+          id?: string
+          indicators?: Json
+          notes?: string
+          score_analista?: number
+          score_comunicador?: number
+          score_executor?: number
+          score_planejador?: number
+          talent_zones?: Json
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          competencies?: Json
+          created_at?: string
+          dominant?: string
+          employee_id?: string
+          id?: string
+          indicators?: Json
+          notes?: string
+          score_analista?: number
+          score_comunicador?: number
+          score_executor?: number
+          score_planejador?: number
+          talent_zones?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiler_assessments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiler_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiler_employees: {
+        Row: {
+          active: boolean
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          leader_email: string
+          photo_url: string
+          position: string
+          sector: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          full_name: string
+          id?: string
+          leader_email?: string
+          photo_url?: string
+          position?: string
+          sector?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          leader_email?: string
+          photo_url?: string
+          position?: string
+          sector?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
