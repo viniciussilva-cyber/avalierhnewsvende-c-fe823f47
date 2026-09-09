@@ -21,6 +21,7 @@ import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/publi
 import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
 import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
+import { Route as ProfilerAvaliacaoEmployeeIdRouteImport } from './routes/profiler.avaliacao.$employeeId'
 import { Route as RsVagaJobIdRouteImport } from './routes/rs.vaga.$jobId'
 import { Route as AppRsVagaJobIdRouteImport } from './routes/app.rs.vaga.$jobId'
 import { Route as AppRsVagaNovaRouteImport } from './routes/app.rs.vaga.nova'
@@ -88,6 +89,12 @@ const AppRsIdRoute = AppRsIdRouteImport.update({
   path: '/app/rs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilerAvaliacaoEmployeeIdRoute =
+  ProfilerAvaliacaoEmployeeIdRouteImport.update({
+    id: '/profiler/avaliacao/$employeeId',
+    path: '/profiler/avaliacao/$employeeId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RsVagaJobIdRoute = RsVagaJobIdRouteImport.update({
   id: '/rs/vaga/$jobId',
   path: '/rs/vaga/$jobId',
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
+  '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
   '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/rs/': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
@@ -139,6 +147,7 @@ export interface FileRoutesByTo {
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
+  '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
   '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/rs': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
@@ -158,6 +167,7 @@ export interface FileRoutesById {
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
   '/app/rs/$id': typeof AppRsIdRoute
+  '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
   '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/rs/': typeof AppRsIndexRoute
   '/app/rs/vaga/$jobId': typeof AppRsVagaJobIdRoute
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
+    | '/profiler/avaliacao/$employeeId'
     | '/rs/vaga/$jobId'
     | '/app/rs/'
     | '/app/rs/vaga/$jobId'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
+    | '/profiler/avaliacao/$employeeId'
     | '/rs/vaga/$jobId'
     | '/app/rs'
     | '/app/rs/vaga/$jobId'
@@ -214,6 +226,7 @@ export interface FileRouteTypes {
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
     | '/app/rs/$id'
+    | '/profiler/avaliacao/$employeeId'
     | '/rs/vaga/$jobId'
     | '/app/rs/'
     | '/app/rs/vaga/$jobId'
@@ -233,6 +246,7 @@ export interface RootRouteChildren {
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
   AppRsIdRoute: typeof AppRsIdRoute
+  ProfilerAvaliacaoEmployeeIdRoute: typeof ProfilerAvaliacaoEmployeeIdRoute
   RsVagaJobIdRoute: typeof RsVagaJobIdRoute
   AppRsIndexRoute: typeof AppRsIndexRoute
   AppRsVagaJobIdRoute: typeof AppRsVagaJobIdRoute
@@ -326,6 +340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profiler/avaliacao/$employeeId': {
+      id: '/profiler/avaliacao/$employeeId'
+      path: '/profiler/avaliacao/$employeeId'
+      fullPath: '/profiler/avaliacao/$employeeId'
+      preLoaderRoute: typeof ProfilerAvaliacaoEmployeeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rs/vaga/$jobId': {
       id: '/rs/vaga/$jobId'
       path: '/rs/vaga/$jobId'
@@ -369,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
   AppRsIdRoute: AppRsIdRoute,
+  ProfilerAvaliacaoEmployeeIdRoute: ProfilerAvaliacaoEmployeeIdRoute,
   RsVagaJobIdRoute: RsVagaJobIdRoute,
   AppRsIndexRoute: AppRsIndexRoute,
   AppRsVagaJobIdRoute: AppRsVagaJobIdRoute,
