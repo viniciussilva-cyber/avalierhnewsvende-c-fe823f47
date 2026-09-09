@@ -23,6 +23,11 @@ export interface ProfilerAssessment {
   updatedAt: number;
 }
 
+/** Serializa valores para colunas jsonb sem brigar com os tipos gerados. */
+function toJson(value: unknown) {
+  return JSON.parse(JSON.stringify(value)) as never;
+}
+
 function norm(v: string | null | undefined): string {
   return (v ?? "").trim().toLowerCase();
 }
