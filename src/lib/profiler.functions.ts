@@ -249,7 +249,7 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
       score_planejador: scores.planejador,
       score_analista: scores.analista,
       dominant,
-      answers: data.answers,
+      answers: data.answers as unknown as Record<string, string>,
       competencies: competencies(pct),
       indicators: indicators(dominant),
       talent_zones: talentZones(pct),
