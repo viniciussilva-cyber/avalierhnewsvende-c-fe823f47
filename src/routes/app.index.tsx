@@ -34,6 +34,18 @@ const modules = [
     accent: "text-fuchsia-300",
     allowGestor: true,
   },
+  {
+    id: "profiler",
+    to: "/app/profiler" as const,
+    label: "Profiler",
+    tag: "Perfil comportamental",
+    description:
+      "Aplique a avaliação de perfil e acompanhe o relatório comportamental de cada colaborador.",
+    icon: IdCard,
+    gradient: "from-violet-500/25 via-violet-500/5 to-transparent",
+    accent: "text-violet-300",
+    allowGestor: true,
+  },
 ] as const;
 
 function AppHub() {
