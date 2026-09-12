@@ -15,6 +15,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as ProfilerIndexRouteImport } from './routes/profiler.index'
+import { Route as ProfilerTimeRouteImport } from './routes/profiler.time'
 import { Route as RsIndexRouteImport } from './routes/rs.index'
 import { Route as RsIdRouteImport } from './routes/rs.$id'
 import { Route as RsPainelRouteImport } from './routes/rs.painel'
@@ -25,6 +26,7 @@ import { Route as AppProfilerLiderRouteImport } from './routes/app.profiler.lide
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
 import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
 import { Route as ProfilerAvaliacaoEmployeeIdRouteImport } from './routes/profiler.avaliacao.$employeeId'
+import { Route as ProfilerRelatorioEmployeeIdRouteImport } from './routes/profiler.relatorio.$employeeId'
 import { Route as RsVagaJobIdRouteImport } from './routes/rs.vaga.$jobId'
 import { Route as AppProfilerColaboradorEmployeeIdRouteImport } from './routes/app.profiler.colaborador.$employeeId'
 import { Route as AppRsVagaJobIdRouteImport } from './routes/app.rs.vaga.$jobId'
@@ -59,6 +61,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const ProfilerIndexRoute = ProfilerIndexRouteImport.update({
   id: '/profiler/',
   path: '/profiler/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilerTimeRoute = ProfilerTimeRouteImport.update({
+  id: '/profiler/time',
+  path: '/profiler/time',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RsIndexRoute = RsIndexRouteImport.update({
@@ -114,6 +121,12 @@ const ProfilerAvaliacaoEmployeeIdRoute =
     path: '/profiler/avaliacao/$employeeId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ProfilerRelatorioEmployeeIdRoute =
+  ProfilerRelatorioEmployeeIdRouteImport.update({
+    id: '/profiler/relatorio/$employeeId',
+    path: '/profiler/relatorio/$employeeId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RsVagaJobIdRoute = RsVagaJobIdRouteImport.update({
   id: '/rs/vaga/$jobId',
   path: '/rs/vaga/$jobId',
@@ -145,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/profiler/time': typeof ProfilerTimeRoute
   '/rs/$id': typeof RsIdRoute
   '/rs/painel': typeof RsPainelRoute
   '/admin/': typeof AdminIndexRoute
@@ -156,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/app/profiler/lider': typeof AppProfilerLiderRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
+  '/profiler/relatorio/$employeeId': typeof ProfilerRelatorioEmployeeIdRoute
   '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/profiler/': typeof AppProfilerIndexRoute
   '/app/rs/': typeof AppRsIndexRoute
@@ -168,6 +183,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/profiler/time': typeof ProfilerTimeRoute
   '/rs/$id': typeof RsIdRoute
   '/rs/painel': typeof RsPainelRoute
   '/admin': typeof AdminIndexRoute
@@ -179,6 +195,7 @@ export interface FileRoutesByTo {
   '/app/profiler/lider': typeof AppProfilerLiderRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
+  '/profiler/relatorio/$employeeId': typeof ProfilerRelatorioEmployeeIdRoute
   '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/profiler': typeof AppProfilerIndexRoute
   '/app/rs': typeof AppRsIndexRoute
@@ -192,6 +209,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/rh-news': typeof RhNewsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/profiler/time': typeof ProfilerTimeRoute
   '/rs/$id': typeof RsIdRoute
   '/rs/painel': typeof RsPainelRoute
   '/admin/': typeof AdminIndexRoute
@@ -203,6 +221,7 @@ export interface FileRoutesById {
   '/app/profiler/lider': typeof AppProfilerLiderRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
+  '/profiler/relatorio/$employeeId': typeof ProfilerRelatorioEmployeeIdRoute
   '/rs/vaga/$jobId': typeof RsVagaJobIdRoute
   '/app/profiler/': typeof AppProfilerIndexRoute
   '/app/rs/': typeof AppRsIndexRoute
@@ -217,6 +236,7 @@ export interface FileRouteTypes {
     | '/'
     | '/rh-news'
     | '/admin/dashboard'
+    | '/profiler/time'
     | '/rs/$id'
     | '/rs/painel'
     | '/admin/'
@@ -228,6 +248,7 @@ export interface FileRouteTypes {
     | '/app/profiler/lider'
     | '/app/rs/$id'
     | '/profiler/avaliacao/$employeeId'
+    | '/profiler/relatorio/$employeeId'
     | '/rs/vaga/$jobId'
     | '/app/profiler/'
     | '/app/rs/'
@@ -240,6 +261,7 @@ export interface FileRouteTypes {
     | '/'
     | '/rh-news'
     | '/admin/dashboard'
+    | '/profiler/time'
     | '/rs/$id'
     | '/rs/painel'
     | '/admin'
@@ -251,6 +273,7 @@ export interface FileRouteTypes {
     | '/app/profiler/lider'
     | '/app/rs/$id'
     | '/profiler/avaliacao/$employeeId'
+    | '/profiler/relatorio/$employeeId'
     | '/rs/vaga/$jobId'
     | '/app/profiler'
     | '/app/rs'
@@ -263,6 +286,7 @@ export interface FileRouteTypes {
     | '/'
     | '/rh-news'
     | '/admin/dashboard'
+    | '/profiler/time'
     | '/rs/$id'
     | '/rs/painel'
     | '/admin/'
@@ -274,6 +298,7 @@ export interface FileRouteTypes {
     | '/app/profiler/lider'
     | '/app/rs/$id'
     | '/profiler/avaliacao/$employeeId'
+    | '/profiler/relatorio/$employeeId'
     | '/rs/vaga/$jobId'
     | '/app/profiler/'
     | '/app/rs/'
@@ -287,6 +312,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RhNewsRoute: typeof RhNewsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  ProfilerTimeRoute: typeof ProfilerTimeRoute
   RsIdRoute: typeof RsIdRoute
   RsPainelRoute: typeof RsPainelRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -298,6 +324,7 @@ export interface RootRouteChildren {
   AppProfilerLiderRoute: typeof AppProfilerLiderRoute
   AppRsIdRoute: typeof AppRsIdRoute
   ProfilerAvaliacaoEmployeeIdRoute: typeof ProfilerAvaliacaoEmployeeIdRoute
+  ProfilerRelatorioEmployeeIdRoute: typeof ProfilerRelatorioEmployeeIdRoute
   RsVagaJobIdRoute: typeof RsVagaJobIdRoute
   AppProfilerIndexRoute: typeof AppProfilerIndexRoute
   AppRsIndexRoute: typeof AppRsIndexRoute
@@ -349,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/profiler'
       fullPath: '/profiler/'
       preLoaderRoute: typeof ProfilerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiler/time': {
+      id: '/profiler/time'
+      path: '/profiler/time'
+      fullPath: '/profiler/time'
+      preLoaderRoute: typeof ProfilerTimeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rs/': {
@@ -421,6 +455,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilerAvaliacaoEmployeeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profiler/relatorio/$employeeId': {
+      id: '/profiler/relatorio/$employeeId'
+      path: '/profiler/relatorio/$employeeId'
+      fullPath: '/profiler/relatorio/$employeeId'
+      preLoaderRoute: typeof ProfilerRelatorioEmployeeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rs/vaga/$jobId': {
       id: '/rs/vaga/$jobId'
       path: '/rs/vaga/$jobId'
@@ -463,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RhNewsRoute: RhNewsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  ProfilerTimeRoute: ProfilerTimeRoute,
   RsIdRoute: RsIdRoute,
   RsPainelRoute: RsPainelRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -474,6 +516,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppProfilerLiderRoute: AppProfilerLiderRoute,
   AppRsIdRoute: AppRsIdRoute,
   ProfilerAvaliacaoEmployeeIdRoute: ProfilerAvaliacaoEmployeeIdRoute,
+  ProfilerRelatorioEmployeeIdRoute: ProfilerRelatorioEmployeeIdRoute,
   RsVagaJobIdRoute: RsVagaJobIdRoute,
   AppProfilerIndexRoute: AppProfilerIndexRoute,
   AppRsIndexRoute: AppRsIndexRoute,
