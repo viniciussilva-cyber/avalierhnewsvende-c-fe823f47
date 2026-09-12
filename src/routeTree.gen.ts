@@ -14,6 +14,7 @@ import { Route as RhNewsRouteImport } from './routes/rh-news'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as ProfilerIndexRouteImport } from './routes/profiler.index'
 import { Route as RsIndexRouteImport } from './routes/rs.index'
 import { Route as RsIdRouteImport } from './routes/rs.$id'
 import { Route as RsPainelRouteImport } from './routes/rs.painel'
@@ -53,6 +54,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilerIndexRoute = ProfilerIndexRouteImport.update({
+  id: '/profiler/',
+  path: '/profiler/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RsIndexRoute = RsIndexRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/rs/painel': typeof RsPainelRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/profiler/': typeof ProfilerIndexRoute
   '/rs/': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/rs/painel': typeof RsPainelRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/profiler': typeof ProfilerIndexRoute
   '/rs': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/rs/painel': typeof RsPainelRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/profiler/': typeof ProfilerIndexRoute
   '/rs/': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/rs/painel'
     | '/admin/'
     | '/app/'
+    | '/profiler/'
     | '/rs/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/rs/painel'
     | '/admin'
     | '/app'
+    | '/profiler'
     | '/rs'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/rs/painel'
     | '/admin/'
     | '/app/'
+    | '/profiler/'
     | '/rs/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   RsPainelRoute: typeof RsPainelRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
+  ProfilerIndexRoute: typeof ProfilerIndexRoute
   RsIndexRoute: typeof RsIndexRoute
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiler/': {
+      id: '/profiler/'
+      path: '/profiler'
+      fullPath: '/profiler/'
+      preLoaderRoute: typeof ProfilerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rs/': {
@@ -447,6 +467,7 @@ const rootRouteChildren: RootRouteChildren = {
   RsPainelRoute: RsPainelRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
+  ProfilerIndexRoute: ProfilerIndexRoute,
   RsIndexRoute: RsIndexRoute,
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
