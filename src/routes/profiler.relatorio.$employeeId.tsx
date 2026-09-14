@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Home, Loader2 } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
 import { ProfilerReport } from "@/components/profiler/ProfilerReport";
 import { getProfilerAssessment, getProfilerEmployee } from "@/lib/profiler.functions";
