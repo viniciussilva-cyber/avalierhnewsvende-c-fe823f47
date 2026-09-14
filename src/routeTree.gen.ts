@@ -22,7 +22,6 @@ import { Route as RsPainelRouteImport } from './routes/rs.painel'
 import { Route as ApiPublicNewsletterImageRouteImport } from './routes/api/public/newsletter-image'
 import { Route as ApiPublicNewsletterImageUploadRouteImport } from './routes/api/public/newsletter-image-upload'
 import { Route as AppProfilerIndexRouteImport } from './routes/app.profiler.index'
-import { Route as AppProfilerLiderRouteImport } from './routes/app.profiler.lider'
 import { Route as AppRsIndexRouteImport } from './routes/app.rs.index'
 import { Route as AppRsIdRouteImport } from './routes/app.rs.$id'
 import { Route as ProfilerAvaliacaoEmployeeIdRouteImport } from './routes/profiler.avaliacao.$employeeId'
@@ -100,11 +99,6 @@ const AppProfilerIndexRoute = AppProfilerIndexRouteImport.update({
   path: '/app/profiler/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppProfilerLiderRoute = AppProfilerLiderRouteImport.update({
-  id: '/app/profiler/lider',
-  path: '/app/profiler/lider',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRsIndexRoute = AppRsIndexRouteImport.update({
   id: '/app/rs/',
   path: '/app/rs/',
@@ -167,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/rs/': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
-  '/app/profiler/lider': typeof AppProfilerLiderRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
   '/profiler/relatorio/$employeeId': typeof ProfilerRelatorioEmployeeIdRoute
@@ -192,7 +185,6 @@ export interface FileRoutesByTo {
   '/rs': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
-  '/app/profiler/lider': typeof AppProfilerLiderRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
   '/profiler/relatorio/$employeeId': typeof ProfilerRelatorioEmployeeIdRoute
@@ -218,7 +210,6 @@ export interface FileRoutesById {
   '/rs/': typeof RsIndexRoute
   '/api/public/newsletter-image': typeof ApiPublicNewsletterImageRoute
   '/api/public/newsletter-image-upload': typeof ApiPublicNewsletterImageUploadRoute
-  '/app/profiler/lider': typeof AppProfilerLiderRoute
   '/app/rs/$id': typeof AppRsIdRoute
   '/profiler/avaliacao/$employeeId': typeof ProfilerAvaliacaoEmployeeIdRoute
   '/profiler/relatorio/$employeeId': typeof ProfilerRelatorioEmployeeIdRoute
@@ -245,7 +236,6 @@ export interface FileRouteTypes {
     | '/rs/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
-    | '/app/profiler/lider'
     | '/app/rs/$id'
     | '/profiler/avaliacao/$employeeId'
     | '/profiler/relatorio/$employeeId'
@@ -270,7 +260,6 @@ export interface FileRouteTypes {
     | '/rs'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
-    | '/app/profiler/lider'
     | '/app/rs/$id'
     | '/profiler/avaliacao/$employeeId'
     | '/profiler/relatorio/$employeeId'
@@ -295,7 +284,6 @@ export interface FileRouteTypes {
     | '/rs/'
     | '/api/public/newsletter-image'
     | '/api/public/newsletter-image-upload'
-    | '/app/profiler/lider'
     | '/app/rs/$id'
     | '/profiler/avaliacao/$employeeId'
     | '/profiler/relatorio/$employeeId'
@@ -321,7 +309,6 @@ export interface RootRouteChildren {
   RsIndexRoute: typeof RsIndexRoute
   ApiPublicNewsletterImageRoute: typeof ApiPublicNewsletterImageRoute
   ApiPublicNewsletterImageUploadRoute: typeof ApiPublicNewsletterImageUploadRoute
-  AppProfilerLiderRoute: typeof AppProfilerLiderRoute
   AppRsIdRoute: typeof AppRsIdRoute
   ProfilerAvaliacaoEmployeeIdRoute: typeof ProfilerAvaliacaoEmployeeIdRoute
   ProfilerRelatorioEmployeeIdRoute: typeof ProfilerRelatorioEmployeeIdRoute
@@ -427,13 +414,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfilerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/profiler/lider': {
-      id: '/app/profiler/lider'
-      path: '/app/profiler/lider'
-      fullPath: '/app/profiler/lider'
-      preLoaderRoute: typeof AppProfilerLiderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app/rs/': {
       id: '/app/rs/'
       path: '/app/rs'
@@ -513,7 +493,6 @@ const rootRouteChildren: RootRouteChildren = {
   RsIndexRoute: RsIndexRoute,
   ApiPublicNewsletterImageRoute: ApiPublicNewsletterImageRoute,
   ApiPublicNewsletterImageUploadRoute: ApiPublicNewsletterImageUploadRoute,
-  AppProfilerLiderRoute: AppProfilerLiderRoute,
   AppRsIdRoute: AppRsIdRoute,
   ProfilerAvaliacaoEmployeeIdRoute: ProfilerAvaliacaoEmployeeIdRoute,
   ProfilerRelatorioEmployeeIdRoute: ProfilerRelatorioEmployeeIdRoute,
