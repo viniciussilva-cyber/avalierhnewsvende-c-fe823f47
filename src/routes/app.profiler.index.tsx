@@ -62,7 +62,7 @@ function ProfilerPanel() {
 
   useEffect(() => {
     if (!loading && !roleLoading && user && role === "gestor") {
-      navigate({ to: "/app/profiler/lider", replace: true });
+      navigate({ to: "/profiler", replace: true });
     }
   }, [loading, roleLoading, user, role, navigate]);
 
@@ -163,7 +163,7 @@ function ProfilerPanel() {
           </div>
           <div className="flex gap-2">
             <Link
-              to="/app/profiler/lider"
+              to="/profiler"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
             >
               <IdCard className="h-4 w-4" /> Visão do líder
