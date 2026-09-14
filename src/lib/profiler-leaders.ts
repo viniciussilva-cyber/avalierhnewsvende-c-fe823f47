@@ -6,6 +6,7 @@
  * lideranças compartilham a mesma lista através de `teamEmails`.
  */
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "./auth";
 
 export interface ProfilerLeader {
   name: string;
