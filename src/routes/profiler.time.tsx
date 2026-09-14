@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, LogOut, Sparkles } from "lucide-react";
+import { Home, Loader2, LogOut, Sparkles } from "lucide-react";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { PROFILES, PROFILE_KEYS, toPercentages } from "@/lib/profiler";
 import { listProfilerAssessments, listProfilerEmployees } from "@/lib/profiler.functions";
