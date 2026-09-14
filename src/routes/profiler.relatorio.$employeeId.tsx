@@ -64,13 +64,21 @@ function LeaderReport() {
   return (
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-30 border-b border-border bg-header/90 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center px-6 py-3">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3">
           <Link
             to="/profiler/time"
             className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Meu time
           </Link>
+          {leader?.isEscape && (
+            <Link
+              to="/app"
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              <Home className="h-3.5 w-3.5" /> Início
+            </Link>
+          )}
         </div>
       </div>
 
