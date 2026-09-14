@@ -15,6 +15,8 @@ export interface ProfilerLeader {
   teamEmails: string[];
   /** Quando verdadeiro, enxerga todos os colaboradores. */
   allTeams?: boolean;
+  /** Conta de escape do RH: pode voltar para o início da plataforma. */
+  isEscape?: boolean;
 }
 
 function leader(
@@ -23,8 +25,9 @@ function leader(
   team: string,
   teamEmails?: string[],
   allTeams?: boolean,
+  isEscape?: boolean,
 ): ProfilerLeader {
-  return { name, email, team, teamEmails: teamEmails ?? [email], allTeams };
+  return { name, email, team, teamEmails: teamEmails ?? [email], allTeams, isEscape };
 }
 
 export const PROFILER_LEADERS: ProfilerLeader[] = [
