@@ -106,11 +106,33 @@ export function leaderSignOut(): void {
 export function useLeaderSession(): { leader: ProfilerLeader | null; loading: boolean } {
   const [leaderSession, setLeaderSession] = useState<ProfilerLeader | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
 
   const refresh = useCallback(() => {
-    setLeaderSession(read());
+    if (authLoading) return;
+
+    const stored = read();
+    const signedInEmail = user?.email?.trim().toLowerCase() ?? null;
+
+    // Quando alguém está logado na plataforma, a sessão do Profiler sempre
+    // segue esse e-mail — nunca uma sessão de líder antiga guardada no
+    // navegador (ex.: rh@vende-c.com).
+    if (signedInEmail && stored?.email !== signedInEmail) {
+      const own = findProfilerLeader(signedInEmail);
+      if (own) {
+        window.localStorage.setItem(EMAIL_KEY, own.email);
+        setLeaderSession(own);
+      } else {
+        leaderSignOut();
+        setLeaderSession(null);
+      }
+      setLoading(false);
+      return;
+    }
+
+    setLeaderSession(stored);
     setLoading(false);
-  }, []);
+  }, [authLoading, user]);
 
   useEffect(() => {
     refresh();
