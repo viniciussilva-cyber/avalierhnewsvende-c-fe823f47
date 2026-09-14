@@ -67,6 +67,7 @@ export const PROFILER_LEADERS: ProfilerLeader[] = [
   ),
   leader("Luis Felipe Rossi", "felipe.rossi@vende-c.com", "Time Treinamentos - ROSSI"),
   leader("Lucas Quissak Bartelega Peixoto", "lucas@vende-c.com", "CEO · Todos os times", [], true),
+  leader("RH VENDE-C", "rh@vende-c.com", "RH · Acesso geral", [], true, true),
 ];
 
 export function findProfilerLeader(email: string | null | undefined): ProfilerLeader | null {
