@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, LogOut, Sparkles } from "lucide-react";
+import { Home, Loader2, LogOut, Sparkles } from "lucide-react";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { PROFILES, PROFILE_KEYS, toPercentages } from "@/lib/profiler";
 import { listProfilerAssessments, listProfilerEmployees } from "@/lib/profiler.functions";
@@ -78,6 +78,14 @@ function LeaderTeam() {
             <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground sm:inline">
               {leader!.email}
             </span>
+            {leader!.isEscape && (
+              <Link
+                to="/app"
+                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <Home className="h-3.5 w-3.5" /> Início
+              </Link>
+            )}
             <button
               onClick={() => {
                 leaderSignOut();
