@@ -137,6 +137,17 @@ function ProfilerPanel() {
     }
   };
 
+  const copyLeaderLink = async () => {
+    const url = `${window.location.origin}/profiler`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied("leader");
+      setTimeout(() => setCopied(null), 2000);
+    } catch {
+      window.prompt("Copie o link do acesso do líder:", url);
+    }
+  };
+
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -161,7 +172,21 @@ function ProfilerPanel() {
               Copie o link da avaliação e envie para quem vai responder.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={copyLeaderLink}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
+            >
+              {copied === "leader" ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-400" /> Link copiado
+                </>
+              ) : (
+                <>
+                  <Link2 className="h-4 w-4" /> Copiar link do acesso do líder
+                </>
+              )}
+            </button>
             <Link
               to="/profiler"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/40"
