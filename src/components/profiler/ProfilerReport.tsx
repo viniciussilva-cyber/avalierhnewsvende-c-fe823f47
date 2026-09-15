@@ -22,7 +22,6 @@ interface ProfilerReportProps {
 
 export function ProfilerReport({ name, position, sector, scores, celebrate }: ProfilerReportProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
 
   const pct = toPercentages(scores);
   const dominant = dominantProfile(scores);
@@ -33,88 +32,36 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
   const inds = indicators(dominant);
   const topZones = zones.slice(0, 5);
 
-  // Função Robusta para exportar PDF
-  const exportPDF = async () => {
-    setIsExporting(true);
-    try {
-      // Pequena pausa para o React atualizar a tela para "Gerando..."
-      await new Promise((resolve) => setTimeout(resolve, 150));
-
-      const element = document.getElementById("relatorio-vende-c");
-      if (!element) return;
-
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `Perfil_${name.replace(/\s+/g, "_")}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
-
-      // Carrega a biblioteca de forma segura
-      if (!(window as any).html2pdf) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
-          script.onload = resolve;
-          script.onerror = () => reject(new Error("Bloqueado pelo navegador"));
-          document.body.appendChild(script);
-        });
-      }
-
-      await (window as any).html2pdf().set(opt).from(element).save();
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      alert("O navegador bloqueou a geração direta. Tente usar a opção Imprimir (Ctrl+P).");
-    } finally {
-      setIsExporting(false); // Destrava o botão aconteça o que acontecer
-    }
-  };
-
-  // Função Robusta para exportar PNG
-  const exportPNG = async () => {
-    setIsExporting(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-      
-      const element = document.getElementById("relatorio-vende-c");
-      if (!element) return;
-
-      if (!(window as any).html2canvas) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-          script.onload = resolve;
-          script.onerror = () => reject(new Error("Bloqueado pelo navegador"));
-          document.body.appendChild(script);
-        });
-      }
-
-      const canvas = await (window as any).html2canvas(element, { scale: 2, useCORS: true, allowTaint: true });
-      const link = document.createElement("a");
-      link.download = `Perfil_${name.replace(/\s+/g, "_")}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-      
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Erro ao gerar Imagem:", error);
-      alert("Erro ao gerar a imagem. O servidor de imagens pode estar bloqueando o acesso.");
-    } finally {
-      setIsExporting(false); // Destrava o botão
-    }
+  // Aciona a impressão nativa limpa
+  const exportPDF = () => {
+    setIsModalOpen(false);
+    // Um pequeno atraso pro modal fechar antes de gerar o PDF
+    setTimeout(() => {
+      window.print();
+    }, 200);
   };
 
   return (
     <>
-      {/* Estilos Globais para limpar o Ctrl+P padrão, caso precisem usar */}
+      {/* 
+        A MÁGICA ACONTECE AQUI:
+        Esse CSS limpa a página inteira na hora de gerar o PDF, 
+        removendo links, datas, e o selo do Lovable.
+      */}
       <style>
         {`
           @media print {
-            @page { margin: 0; } /* Remove o link HTTPS e data do cabeçalho */
-            body { padding: 1cm; }
-            /* Esconde a logo flutuante do Lovable */
+            @page { margin: 0; }
+            body { 
+              padding: 1cm; 
+              background-color: #0a0a0a !important; 
+              color: white !important;
+            }
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            /* Oculta selos do Lovable e botões */
             div[id^="lovable"], .lovable-badge { display: none !important; }
             .print\\:hidden { display: none !important; }
           }
@@ -146,51 +93,26 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           >
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-semibold">Exportar Relatório Visual</h3>
-              <button onClick={() => !isExporting && setIsModalOpen(false)} className="text-zinc-400 hover:text-white disabled:opacity-50">
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-400 hover:text-white transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>
             </div>
             
             <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-              Exporta o resultado da avaliação — {name} — exatamente como está na tela.
+              Gere um documento com o resultado da avaliação de {name}.
             </p>
 
             <div className="space-y-3">
-              {/* Botão PDF */}
               <button 
                 onClick={exportPDF}
-                disabled={isExporting}
-                className="flex w-full items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-left transition hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-left transition hover:bg-zinc-800"
               >
                 <div className="rounded-lg bg-red-500/10 p-2 text-red-500">
-                  {isExporting ? (
-                    <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-                  )}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
                 </div>
                 <div>
-                  <h4 className="font-medium text-zinc-100">{isExporting ? "Processando..." : "Exportar como PDF"}</h4>
-                  <p className="text-xs text-zinc-400">O relatório em tela, em formato A4</p>
-                </div>
-              </button>
-
-              {/* Botão PNG */}
-              <button 
-                onClick={exportPNG}
-                disabled={isExporting}
-                className="flex w-full items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 text-left transition hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <div className="rounded-lg bg-blue-500/10 p-2 text-blue-500">
-                  {isExporting ? (
-                    <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                  )}
-                </div>
-                <div>
-                  <h4 className="font-medium text-zinc-100">{isExporting ? "Processando..." : "Exportar como Imagem (PNG)"}</h4>
-                  <p className="text-xs text-zinc-400">O relatório em tela, em alta resolução</p>
+                  <h4 className="font-medium text-zinc-100">Exportar como PDF</h4>
+                  <p className="text-xs text-zinc-400">Gera o relatório visual em formato de documento</p>
                 </div>
               </button>
             </div>
@@ -198,9 +120,8 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* CONTEÚDO DO RELATÓRIO - Envolvido pela div relatorio-vende-c */}
-      <div id="relatorio-vende-c" className="space-y-8 bg-background p-2 rounded-xl" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
-        {/* Cabeçalho + personagem predominante */}
+      {/* CONTEÚDO DO RELATÓRIO */}
+      <div id="relatorio-vende-c" className="space-y-8 bg-background p-2 rounded-xl">
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -242,12 +163,10 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
               src={info.mascot}
               alt={`Personagem ${info.label} da VENDE-C`}
               className="mx-auto h-64 w-auto object-contain drop-shadow-2xl sm:h-80"
-              crossOrigin="anonymous" 
             />
           </div>
         </motion.section>
 
-        {/* Distribuição dos quatro perfis */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Distribuição do seu perfil</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -279,7 +198,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </div>
         </section>
 
-        {/* Pontos fortes / atenção */}
         <div className="grid gap-6 md:grid-cols-2">
           <section className="rounded-3xl border border-border bg-card p-6">
             <h2 className="text-lg font-bold text-foreground">Pontos fortes</h2>
@@ -305,7 +223,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </section>
         </div>
 
-        {/* Competências */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Competências</h2>
           <div className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
@@ -323,7 +240,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </div>
         </section>
 
-        {/* Como a pessoa se comporta */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Como esse perfil se comporta</h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -336,7 +252,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </div>
         </section>
 
-        {/* Zonas de talento */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Onde esse perfil rende mais</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -357,7 +272,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </div>
         </section>
 
-        {/* Ambiente e liderança */}
         <div className="grid gap-6 md:grid-cols-2">
           <section className="rounded-3xl border border-border bg-card p-6">
             <h2 className="text-lg font-bold text-foreground">Ambiente ideal</h2>
@@ -369,7 +283,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </section>
         </div>
 
-        {/* Os quatro personagens */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Os quatro perfis VENDE-C</h2>
           <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -388,7 +301,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                     src={p.mascot}
                     alt={`Personagem ${p.label}`}
                     className={`mx-auto w-auto object-contain ${isMain ? "h-40" : "h-28"}`}
-                    crossOrigin="anonymous"
                   />
                   <p className="mt-3 text-sm font-bold" style={{ color: p.color }}>
                     {p.label}
