@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Loader2, LogOut, Sparkles } from "lucide-react";
+import { Home, Loader2, LogOut, Search, Sparkles } from "lucide-react";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { PROFILES, PROFILE_KEYS, toPercentages } from "@/lib/profiler";
 import { listProfilerAssessments, listProfilerEmployees } from "@/lib/profiler.functions";
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/profiler/time")({
 function LeaderTeam() {
   const navigate = useNavigate();
   const { leader, loading } = useLeaderSession();
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!loading && !leader) navigate({ to: "/profiler", replace: true });
@@ -42,16 +43,27 @@ function LeaderTeam() {
     queryFn: () => listProfilerEmployees(),
     enabled: ready,
   });
+  
   const assessmentsQuery = useQuery({
     queryKey: ["profiler-assessments"],
     queryFn: () => listProfilerAssessments(),
     enabled: ready,
   });
 
+  // Filtra primeiro quem é do time do líder
   const team = useMemo(() => {
     if (!leader) return [];
     return (employeesQuery.data ?? []).filter((e) => leadsEmployee(leader, e.leaderEmail));
   }, [employeesQuery.data, leader]);
+
+  // Filtra novamente baseado na barra de pesquisa (Nome, E-mail ou Cargo)
+  const filteredTeam = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return team;
+    return team.filter((e) =>
+      `${e.fullName} ${e.email} ${e.position} ${e.sector}`.toLowerCase().includes(q),
+    );
+  }, [team, searchQuery]);
 
   const assessmentByEmployee = useMemo(() => {
     const map = new Map<string, NonNullable<typeof assessmentsQuery.data>[number]>();
@@ -108,6 +120,21 @@ function LeaderTeam() {
           {team.length} {team.length === 1 ? "pessoa" : "pessoas"} sob sua liderança.
         </p>
 
+        {/* BARRA DE PESQUISA DO LÍDER */}
+        {team.length > 0 && (
+          <div className="mt-8 rounded-2xl border border-border bg-card p-4">
+            <label className="relative flex items-center">
+              <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar colaborador por nome, e-mail, cargo ou setor..."
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 pl-9 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
+              />
+            </label>
+          </div>
+        )}
+
         {team.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
             <p className="text-sm text-muted-foreground">
@@ -115,9 +142,15 @@ function LeaderTeam() {
               direto no cadastro.
             </p>
           </div>
+        ) : filteredTeam.length === 0 ? (
+          <div className="mt-8 rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
+            <p className="text-sm text-muted-foreground">
+              Nenhum colaborador encontrado com essa pesquisa.
+            </p>
+          </div>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {team.map((e, i) => {
+            {filteredTeam.map((e, i) => {
               const assessment = assessmentByEmployee.get(e.id);
               const pct = assessment ? toPercentages(assessment.scores) : null;
               const profile = assessment ? PROFILES[assessment.dominant] : null;
@@ -133,6 +166,10 @@ function LeaderTeam() {
                         <p className="truncate text-lg font-bold text-foreground">{e.fullName}</p>
                         <p className="mt-1 truncate text-xs text-muted-foreground">
                           {e.position || e.sector || "Cargo não informado"}
+                        </p>
+                        {/* Mostrando o E-mail debaixo do nome para o Líder saber que achou a pessoa certa */}
+                        <p className="mt-0.5 truncate text-[11px] text-muted-foreground/60">
+                          {e.email}
                         </p>
                       </div>
                       {profile ? (
