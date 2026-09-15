@@ -31,7 +31,24 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
   const topZones = zones.slice(0, 5);
 
   return (
-    <div className="space-y-8">
+    // Adicionado estilo para forçar a impressão das cores de fundo no PDF
+    <div className="space-y-8" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
+      
+      {/* Botão de Baixar PDF que some na hora da impressão */}
+      <div className="flex justify-end print:hidden mb-2">
+        <button
+          onClick={() => window.print()}
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" x2="12" y1="15" y2="3"/>
+          </svg>
+          Baixar Relatório em PDF
+        </button>
+      </div>
+
       {/* Cabeçalho + personagem predominante */}
       <motion.section
         initial={{ opacity: 0, y: 16 }}
