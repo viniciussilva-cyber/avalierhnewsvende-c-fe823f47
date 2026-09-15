@@ -67,7 +67,7 @@
 :root {
   --radius: 0.75rem;
 
-  --background: rgba(10, 10, 10, 0.82);
+  --background: rgba(10, 10, 10, 0.62);
   --foreground: #ffffff;
   --card: #111111;
   --card-foreground: #e5e5e5;
@@ -130,7 +130,7 @@
 
   body {
     min-height: 100vh;
-    background-color: var(--color-background);
+    background-color: transparent;
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
