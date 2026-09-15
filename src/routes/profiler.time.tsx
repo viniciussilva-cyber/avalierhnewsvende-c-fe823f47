@@ -13,12 +13,12 @@ export const Route = createFileRoute("/profiler/time")({
       { title: "Meu time — Profiler · VENDE-C" },
       {
         name: "description",
-        content: "Perfil comportamental de cada pessoa liderada por você na VENDE-C.",
+        content: "Perfil comportamental de cada pessoa liderada por você no VENDE-C.",
       },
       { property: "og:title", content: "Meu time — Profiler · VENDE-C" },
       {
         property: "og:description",
-        content: "Perfil comportamental de cada pessoa liderada por você na VENDE-C.",
+        content: "Perfil comportamental de cada pessoa liderada por você no VENDE-C.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
