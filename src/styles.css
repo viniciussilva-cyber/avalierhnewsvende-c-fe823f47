@@ -67,7 +67,7 @@
 :root {
   --radius: 0.75rem;
 
-  --background: #0a0a0a;
+  --background: rgba(10, 10, 10, 0.62);
   --foreground: #ffffff;
   --card: #111111;
   --card-foreground: #e5e5e5;
@@ -117,10 +117,20 @@
 
   html {
     color-scheme: dark;
+    min-height: 100%;
+    background-color: var(--header);
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.36), rgba(0, 0, 0, 0.36)),
+      url("/__l5e/assets-v1/80d68f58-39d8-44fd-af21-78266d9a4322/plataforma-fundo.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
   }
 
   body {
-    background-color: var(--color-background);
+    min-height: 100vh;
+    background-color: transparent;
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
