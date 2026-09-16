@@ -14,7 +14,6 @@ export const exportNodeAsPNG = async (node: HTMLElement, fileName: string): Prom
       quality: 1.0,
       pixelRatio: 2,
       filter: filterElements,
-      // FORÇA A CAPTURA DO TAMANHO TOTAL DO ELEMENTO (MESMO COM ROLAGEM)
       width: node.scrollWidth,
       height: node.scrollHeight,
       style: {
@@ -39,7 +38,6 @@ export const exportNodeAsPDF = async (node: HTMLElement, fileName: string): Prom
       quality: 1.0,
       pixelRatio: 2,
       filter: filterElements,
-      // FORÇA A CAPTURA DO TAMANHO TOTAL DO ELEMENTO (MESMO COM ROLAGEM)
       width: node.scrollWidth,
       height: node.scrollHeight,
       style: {
@@ -48,15 +46,35 @@ export const exportNodeAsPDF = async (node: HTMLElement, fileName: string): Prom
       },
     });
 
-    // Cria um PDF com o tamanho DINÂMICO (exatamente do tamanho do relatório)
-    // Assim não corta e nem espreme o conteúdo.
+    // Cria o PDF no formato A4 padrão
     const pdf = new jsPDF({
       orientation: "portrait",
-      unit: "px",
-      format: [node.scrollWidth, node.scrollHeight],
+      unit: "mm",
+      format: "a4",
     });
 
-    pdf.addImage(dataUrl, "PNG", 0, 0, node.scrollWidth, node.scrollHeight);
+    const imgProps = pdf.getImageProperties(dataUrl);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+    // Calcula a altura total da imagem baseada na largura do A4
+    const totalImgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    let heightLeft = totalImgHeight;
+    let position = 0; // Posição Y da imagem
+
+    // Cola a imagem na primeira página
+    pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, totalImgHeight);
+    heightLeft -= pdfHeight;
+
+    // Enquanto ainda sobrar conteúdo, cria uma nova página e continua colando
+    while (heightLeft > 0) {
+      position -= pdfHeight; // Move a imagem para cima para mostrar a próxima parte
+      pdf.addPage();
+      pdf.addImage(dataUrl, "PNG", 0, position, pdfWidth, totalImgHeight);
+      heightLeft -= pdfHeight;
+    }
+
     pdf.save(`${fileName}.pdf`);
   } catch (error) {
     console.error("Erro ao gerar PDF:", error);
