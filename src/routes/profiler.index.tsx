@@ -29,11 +29,10 @@ function LeaderLogin() {
   const { leader, loading } = useLeaderSession();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  // Adicionamos um estado para forçar a tela a não recarregar no momento do click
-  const [isAttemptingLogin, setIsAttemptingLogin] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Redireciona automaticamente se já houver uma sessão válida carregada
   useEffect(() => {
-    // Se não está carregando, E a pessoa está logada, ELA É encaminhada
     if (!loading && leader) {
       navigate({ to: "/profiler/time", replace: true });
     }
@@ -42,22 +41,16 @@ function LeaderLogin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    try {
-      setIsAttemptingLogin(true); // Bloqueia clicks duplos
-      leaderSignIn(email);
-      // Removemos o 'navigate' daqui! A navegação agora é inteiramente controlada 
-      // de forma reativa e segura pelo useEffect logo ali em cima.
-      
-      // Um pequeno "truque" para forçar a re-leitura se for necessário.
-      // Em projetos com estado forte, o SignIn aciona a mudança do leader,
-      // que por sua vez aciona o useEffect. Se demorar, a página aguarda.
-      setTimeout(() => {
-        setIsAttemptingLogin(false);
-      }, 500); 
+    setIsSubmitting(true);
 
+    try {
+      // 1. Grava no localStorage e valida o e-mail do líder
+      leaderSignIn(email);
+
+      // 2. Navega imediatamente para a tela do time sem esperar ciclo do React
+      navigate({ to: "/profiler/time", replace: true });
     } catch (err) {
-      setIsAttemptingLogin(false);
+      setIsSubmitting(false);
       setError(err instanceof Error ? err.message : "Não foi possível entrar.");
     }
   };
@@ -89,7 +82,7 @@ function LeaderLogin() {
                 autoComplete="username"
                 placeholder="nome@vende-c.com"
                 className="w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground outline-none ring-primary/40 placeholder:text-muted-foreground focus:ring-2"
-                disabled={isAttemptingLogin || (loading && leader !== null)}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -97,10 +90,10 @@ function LeaderLogin() {
 
             <button
               type="submit"
-              disabled={isAttemptingLogin || (loading && leader !== null)}
+              disabled={isSubmitting}
               className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.01] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <LogIn className="h-4 w-4" /> {isAttemptingLogin ? "Entrando..." : "Entrar"}
+              <LogIn className="h-4 w-4" /> {isSubmitting ? "Entrando..." : "Entrar"}
             </button>
           </form>
         </div>
