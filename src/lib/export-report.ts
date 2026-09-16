@@ -3,7 +3,6 @@ import { jsPDF } from "jspdf";
 
 /**
  * Filtra elementos que não devem aparecer na exportação
- * (como botões e modais com a tag data-export-ignore="true")
  */
 const filterElements = (node: HTMLElement) => {
   return node.getAttribute?.("data-export-ignore") !== "true";
@@ -13,8 +12,15 @@ export const exportNodeAsPNG = async (node: HTMLElement, fileName: string): Prom
   try {
     const dataUrl = await toPng(node, {
       quality: 1.0,
-      pixelRatio: 2, // Garante alta resolução na imagem
+      pixelRatio: 2,
       filter: filterElements,
+      // FORÇA A CAPTURA DO TAMANHO TOTAL DO ELEMENTO (MESMO COM ROLAGEM)
+      width: node.scrollWidth,
+      height: node.scrollHeight,
+      style: {
+        transform: "none",
+        margin: "0",
+      },
     });
 
     const link = document.createElement("a");
@@ -33,21 +39,24 @@ export const exportNodeAsPDF = async (node: HTMLElement, fileName: string): Prom
       quality: 1.0,
       pixelRatio: 2,
       filter: filterElements,
+      // FORÇA A CAPTURA DO TAMANHO TOTAL DO ELEMENTO (MESMO COM ROLAGEM)
+      width: node.scrollWidth,
+      height: node.scrollHeight,
+      style: {
+        transform: "none",
+        margin: "0",
+      },
     });
 
-    // Cria o PDF no formato A4 (Retrato)
+    // Cria um PDF com o tamanho DINÂMICO (exatamente do tamanho do relatório)
+    // Assim não corta e nem espreme o conteúdo.
     const pdf = new jsPDF({
       orientation: "portrait",
-      unit: "mm",
-      format: "a4",
+      unit: "px",
+      format: [node.scrollWidth, node.scrollHeight],
     });
 
-    const imgProps = pdf.getImageProperties(dataUrl);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    // Calcula a altura proporcional da imagem em relação à largura do A4
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-    pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.addImage(dataUrl, "PNG", 0, 0, node.scrollWidth, node.scrollHeight);
     pdf.save(`${fileName}.pdf`);
   } catch (error) {
     console.error("Erro ao gerar PDF:", error);
