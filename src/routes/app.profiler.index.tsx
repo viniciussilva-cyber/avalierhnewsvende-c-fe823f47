@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Search, Link2, Check, Trash2, IdCard, X } from "lucide-react";
 import { AppTopBar } from "@/components/AppTopBar";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
+import { ImageUpload } from "@/components/ImageUpload";
 import { useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { PROFILES } from "@/lib/profiler";
@@ -261,11 +262,12 @@ function ProfilerPanel() {
                   className={inputClass}
                 />
               </Field>
-              <Field label="Foto (URL)">
-                <input
+              
+              {/* BOTÃO DE UPLOAD DE FOTO INTEGRADO COM O SUPABASE */}
+              <Field label="Foto do colaborador">
+                <ImageUpload
                   value={form.photoUrl}
-                  onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
-                  className={inputClass}
+                  onChange={(url) => setForm({ ...form, photoUrl: url })}
                 />
               </Field>
             </div>
