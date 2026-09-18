@@ -8,7 +8,7 @@ import { ProfilerReport } from "@/components/profiler/ProfilerReport";
 import { useAuth } from "@/lib/auth";
 import { getProfilerAssessment, getProfilerEmployee } from "@/lib/profiler.functions";
 
-export const Route = createFileRoute("/app/profiler/colaborador/$employeeId")({
+export const Route = createFileRoute("/profiler/relatorio/$employeeId")({
   head: () => ({
     meta: [
       { title: "Relatório do colaborador · Profiler VENDE-C" },
