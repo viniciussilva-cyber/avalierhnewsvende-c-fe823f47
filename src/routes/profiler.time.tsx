@@ -43,7 +43,7 @@ function LeaderTeam() {
     queryFn: () => listProfilerEmployees(),
     enabled: ready,
   });
-  
+
   const assessmentsQuery = useQuery({
     queryKey: ["profiler-assessments"],
     queryFn: () => listProfilerAssessments(),
@@ -56,13 +56,25 @@ function LeaderTeam() {
     return (employeesQuery.data ?? []).filter((e) => leadsEmployee(leader, e.leaderEmail));
   }, [employeesQuery.data, leader]);
 
-  // Filtra novamente baseado na barra de pesquisa (Nome, E-mail ou Cargo)
+  // Filtra novamente baseado na barra de pesquisa (Nome, E-mail, Cargo ou Setor)
+  // Tratamento blindado contra campos null ou undefined
   const filteredTeam = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return team;
-    return team.filter((e) =>
-      `${e.fullName} ${e.email} ${e.position} ${e.sector}`.toLowerCase().includes(q),
-    );
+    
+    return team.filter((e) => {
+      const name = (e.fullName ?? "").toLowerCase();
+      const email = (e.email ?? "").toLowerCase();
+      const position = (e.position ?? "").toLowerCase();
+      const sector = (e.sector ?? "").toLowerCase();
+
+      return (
+        name.includes(q) ||
+        email.includes(q) ||
+        position.includes(q) ||
+        sector.includes(q)
+      );
+    });
   }, [team, searchQuery]);
 
   const assessmentByEmployee = useMemo(() => {
@@ -167,10 +179,12 @@ function LeaderTeam() {
                         <p className="mt-1 truncate text-xs text-muted-foreground">
                           {e.position || e.sector || "Cargo não informado"}
                         </p>
-                        {/* Mostrando o E-mail debaixo do nome para o Líder saber que achou a pessoa certa */}
-                        <p className="mt-0.5 truncate text-[11px] text-muted-foreground/60">
-                          {e.email}
-                        </p>
+                        {/* E-mail do colaborador em destaque */}
+                        {e.email && (
+                          <p className="mt-0.5 truncate text-[11px] font-medium text-primary/80">
+                            {e.email}
+                          </p>
+                        )}
                       </div>
                       {profile ? (
                         <span
