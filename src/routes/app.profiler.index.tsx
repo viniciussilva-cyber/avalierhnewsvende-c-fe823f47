@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Search, Link2, Check, Trash2, IdCard, X } from "lucide-react";
+import { Loader2, Plus, Search, Link2, Check, Trash2, IdCard, X, User } from "lucide-react";
 import { AppTopBar } from "@/components/AppTopBar";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -263,7 +263,6 @@ function ProfilerPanel() {
                 />
               </Field>
               
-              {/* BOTÃO DE UPLOAD DE FOTO INTEGRADO COM O SUPABASE */}
               <Field label="Foto do colaborador">
                 <ImageUpload
                   value={form.photoUrl}
@@ -325,31 +324,55 @@ function ProfilerPanel() {
             {filtered.map((e, i) => {
               const dominant = dominantByEmployee.get(e.id);
               const profile = dominant ? PROFILES[dominant as keyof typeof PROFILES] : null;
+              
+              // Define a cor da borda com base na cor do perfil dinâmico ou tom padrão para PENDENTE
+              const profileColor = profile ? profile.color : "#52525b";
+
               return (
                 <StaggerItem key={e.id} delay={Math.min(i * 0.04, 0.4)}>
-                  <div className="h-full rounded-2xl border border-border bg-card p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-lg font-bold text-foreground">{e.fullName}</p>
-                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                  <div className="flex h-full flex-col justify-between rounded-2xl border border-border bg-card p-5">
+                    <div className="flex items-start gap-3">
+                      {/* Avatar circular com a borda dinâmica da cor do perfil */}
+                      <div
+                        className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-secondary/50"
+                        style={{ borderColor: profileColor }}
+                      >
+                        {e.photoUrl ? (
+                          <img
+                            src={e.photoUrl}
+                            alt={e.fullName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-bold uppercase text-muted-foreground">
+                            {e.fullName.substring(0, 2)}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-1">
+                          <p className="truncate text-base font-bold text-foreground">{e.fullName}</p>
+                          {profile ? (
+                            <span
+                              className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                              style={{ backgroundColor: `${profile.color}22`, color: profile.color }}
+                            >
+                              {profile.label}
+                            </span>
+                          ) : (
+                            <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Pendente
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
                           {e.position || "Cargo não informado"} · {e.sector || "Sem setor"}
                         </p>
                       </div>
-                      {profile ? (
-                        <span
-                          className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider"
-                          style={{ backgroundColor: `${profile.color}22`, color: profile.color }}
-                        >
-                          {profile.label}
-                        </span>
-                      ) : (
-                        <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Pendente
-                        </span>
-                      )}
                     </div>
 
-                    <div className="mt-5 flex flex-wrap items-center gap-2">
+                    <div className="mt-5 flex flex-wrap items-center gap-2 pt-2 border-t border-border/40">
                       <Link
                         to="/app/profiler/colaborador/$employeeId"
                         params={{ employeeId: e.id }}
