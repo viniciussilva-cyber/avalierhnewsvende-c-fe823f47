@@ -21,25 +21,32 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
 
       const file = event.target.files[0];
       const fileExt = file.name.split(".").pop();
-      const filePath = `${Math.random()}.${fileExt}`;
+      // Nome limpo para evitar problemas de caracteres especiais
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+      const filePath = fileName;
 
-      // Envia a imagem PNG para o Bucket 'avatars' público do Supabase
-      const { error: uploadError } = await supabase.storage
+      // 1. Tenta fazer o upload para o bucket avatars
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
 
       if (uploadError) {
+        console.error("Erro detalhado do Supabase Storage:", uploadError);
         throw uploadError;
       }
 
-      // Pega a URL pública gerada automaticamente
+      // 2. Obtém a URL pública da imagem enviada
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
       setPreview(data.publicUrl);
-      onChange(data.publicUrl); // Repassa a URL para o formulário
-    } catch (error) {
-      alert("Erro ao enviar a imagem. Confirme se o bucket 'avatars' no Supabase é público.");
-      console.error(error);
+      onChange(data.publicUrl);
+    } catch (error: any) {
+      console.error("Catch Error:", error);
+      const message = error?.message || error?.error_description || "Erro desconhecido";
+      alert(`Falha no upload: ${message}`);
     } finally {
       setUploading(false);
     }
