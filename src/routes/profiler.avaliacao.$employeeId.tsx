@@ -4,9 +4,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QUESTIONS, scoreAnswers, type ProfileKey } from "@/lib/profiler";
+import { QUESTIONS, scoreAnswers, PROFILES, type ProfileKey } from "@/lib/profiler";
 import { getProfilerEmployee, submitProfilerAssessment } from "@/lib/profiler.functions";
 import { ProfilerReport } from "@/components/profiler/ProfilerReport";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profiler/avaliacao/$employeeId")({
   head: () => ({
@@ -41,15 +42,47 @@ function AssessmentPage() {
     queryFn: () => getProfilerEmployee({ data: { id: employeeId } }),
   });
 
-  const mutation = useMutation({
-    mutationFn: () => submit({ data: { employeeId, answers } }),
-    onSuccess: () => setDone(true),
-  });
-
   const total = QUESTIONS.length;
   const question = QUESTIONS[step]!;
   const progress = Math.round((Object.keys(answers).length / total) * 100);
   const scores = useMemo(() => scoreAnswers(answers), [answers]);
+
+  // Identifica o perfil com maior pontuação para incluir no e-mail
+  const dominantProfileKey = useMemo(() => {
+    let topKey: ProfileKey = "EXECUTOR";
+    let maxScore = -1;
+    for (const [key, val] of Object.entries(scores)) {
+      if (val > maxScore) {
+        maxScore = val;
+        topKey = key as ProfileKey;
+      }
+    }
+    return topKey;
+  }, [scores]);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      // 1. Salva a avaliação no banco
+      const res = await submit({ data: { employeeId, answers } });
+
+      // 2. Dispara o e-mail automático para o líder se o e-mail estiver cadastrado
+      const emp = employeeQuery.data;
+      if (emp && emp.leaderEmail) {
+        const profileInfo = PROFILES[dominantProfileKey];
+        await supabase.functions.invoke("send-profiler-report", {
+          body: {
+            leaderEmail: emp.leaderEmail,
+            employeeName: emp.fullName,
+            profileLabel: profileInfo?.label || dominantProfileKey,
+            reportUrl: `${window.location.origin}/app/profiler/colaborador/${emp.id}`,
+          },
+        });
+      }
+
+      return res;
+    },
+    onSuccess: () => setDone(true),
+  });
 
   const choose = (profile: ProfileKey) => {
     setAnswers((prev) => ({ ...prev, [String(question.id)]: profile }));
@@ -89,7 +122,7 @@ function AssessmentPage() {
             celebrate
           />
           <p className="mt-10 text-center text-xs text-muted-foreground">
-            Seu resultado foi enviado ao RH da VENDE-C.
+            Seu resultado foi enviado ao RH e ao seu líder direto.
           </p>
         </div>
       </div>
