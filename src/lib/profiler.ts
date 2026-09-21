@@ -4,10 +4,6 @@
  * Os quatro perfis usam a linguagem visual da VENDE-C:
  *   Executor (D) · Comunicador (I) · Planejador (S) · Analista (C)
  */
-import analistaAsset from "@/assets/mascots/analista.png.asset.json";
-import planejadorAsset from "@/assets/mascots/planejador.png.asset.json";
-import executorAsset from "@/assets/mascots/executor.png.asset.json";
-import comunicadorAsset from "@/assets/mascots/comunicador.png.asset.json";
 
 export type ProfileKey = "executor" | "comunicador" | "planejador" | "analista";
 
@@ -33,7 +29,7 @@ export const PROFILES: Record<ProfileKey, ProfileInfo> = {
     label: "Analista",
     phrase: "Observa, analisa e encontra o que outros não veem.",
     color: "#7c3aed",
-    mascot: analistaAsset.url,
+    mascot: "",
     summary:
       "Perfil orientado a dados, critério e precisão. Prefere decidir com informação na mão e entrega trabalho consistente e bem fundamentado.",
     strengths: [
@@ -57,7 +53,7 @@ export const PROFILES: Record<ProfileKey, ProfileInfo> = {
     label: "Planejador",
     phrase: "Pensa no hoje, projeta o amanhã.",
     color: "#2563eb",
-    mascot: planejadorAsset.url,
+    mascot: "",
     summary:
       "Perfil estável, colaborativo e previsível. Sustenta a rotina do time, cuida das pessoas e mantém o combinado de pé.",
     strengths: [
@@ -80,7 +76,7 @@ export const PROFILES: Record<ProfileKey, ProfileInfo> = {
     label: "Executor",
     phrase: "Tira do papel e faz acontecer.",
     color: "#16a34a",
-    mascot: executorAsset.url,
+    mascot: "",
     summary:
       "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
     strengths: [
@@ -102,7 +98,7 @@ export const PROFILES: Record<ProfileKey, ProfileInfo> = {
     label: "Comunicador",
     phrase: "Conecta pessoas, compartilha ideias e gera movimento.",
     color: "#ea580c",
-    mascot: comunicadorAsset.url,
+    mascot: "",
     summary:
       "Perfil sociável, entusiasta e persuasivo. Abre portas, engaja o time e transforma ideia em movimento.",
     strengths: [
