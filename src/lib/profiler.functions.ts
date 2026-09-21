@@ -1,5 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { ProfileKey, Scores } from "./profiler";
+import {
+  QUESTIONS,
+  scoreAnswers,
+  dominantProfile,
+  toPercentages,
+  competencies,
+  indicators,
+  talentZones,
+  type ProfileKey,
+  type Scores,
+} from "./profiler";
 
 export interface ProfilerEmployee {
   id: string;
@@ -218,9 +228,6 @@ export const getProfilerAssessment = createServerFn({ method: "GET" })
 export const submitProfilerAssessment = createServerFn({ method: "POST" })
   .inputValidator((d: { employeeId: string; answers: Record<string, ProfileKey> }) => d)
   .handler(async ({ data }): Promise<ProfilerAssessment> => {
-    const { QUESTIONS, scoreAnswers, dominantProfile, toPercentages, competencies, indicators, talentZones } =
-      await import("./profiler");
-
     const answered = Object.keys(data.answers ?? {}).length;
     if (answered < QUESTIONS.length) {
       throw new Error("Responda todas as perguntas antes de enviar.");
