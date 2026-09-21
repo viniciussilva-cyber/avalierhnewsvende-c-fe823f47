@@ -69,15 +69,15 @@ function AssessmentPage() {
       const emp = employeeQuery.data;
       if (emp && emp.leaderEmail) {
         const profileInfo = PROFILES[dominantProfileKey];
-        await supabase.functions.invoke("send-profiler-report", {
-          body: {
-            leaderEmail: emp.leaderEmail,
-            employeeName: emp.fullName,
-            profileLabel: profileInfo?.label || dominantProfileKey,
-            reportUrl: `${window.location.origin}/app/profiler/colaborador/${emp.id}`,
-          },
-        });
-      }
+       // Altere de "send-profiler-report" para "rapid-task"
+await supabase.functions.invoke("rapid-task", {
+  body: {
+    leaderEmail: emp.leaderEmail,
+    employeeName: emp.fullName,
+    profileLabel: profileInfo?.label || dominantProfileKey,
+    reportUrl: `${window.location.origin}/app/profiler/colaborador/${emp.id}`,
+  },
+});
 
       return res;
     },
