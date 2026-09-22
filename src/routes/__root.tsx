@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -73,7 +73,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{ queryClient?: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -88,8 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
       { name: "twitter:description", content: "RH News Hub is a web application for reading and rating internal newsletters." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/314ff4c0-d5cd-4e06-a62a-879dae43f816/id-preview-c0af36d8--9f65e3a8-eb94-48e3-a4b1-24d90a8acad2.lovable.app-1781892941445.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/314ff4c0-d5cd-4e06-a62a-879dae43f816/id-preview-c0af36d8--9f65e3a8-eb94-48e3-a4b1-24d90a8acad2.lovable.app-1781892941445.png" },
     ],
     links: [
       {
@@ -119,11 +117,12 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const context = Route.useRouteContext();
+  const [fallbackClient] = useState(() => new QueryClient());
+  const activeQueryClient = context?.queryClient ?? fallbackClient;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+    <QueryClientProvider client={activeQueryClient}>
       <Outlet />
       <Toaster position="top-center" richColors />
     </QueryClientProvider>
