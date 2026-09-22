@@ -49,7 +49,7 @@ function AssessmentPage() {
 
   // Identifica o perfil com maior pontuação para incluir no e-mail
   const dominantProfileKey = useMemo(() => {
-    let topKey: ProfileKey = "EXECUTOR";
+    let topKey: ProfileKey = "executor";
     let maxScore = -1;
     for (const [key, val] of Object.entries(scores)) {
       if (val > maxScore) {
@@ -69,15 +69,15 @@ function AssessmentPage() {
       const emp = employeeQuery.data;
       if (emp && emp.leaderEmail) {
         const profileInfo = PROFILES[dominantProfileKey];
-       // Altere de "send-profiler-report" para "rapid-task"
-await supabase.functions.invoke("rapid-task", {
-  body: {
-    leaderEmail: emp.leaderEmail,
-    employeeName: emp.fullName,
-    profileLabel: profileInfo?.label || dominantProfileKey,
-    reportUrl: `${window.location.origin}/app/profiler/colaborador/${emp.id}`,
-  },
-});
+        await supabase.functions.invoke("rapid-task", {
+          body: {
+            leaderEmail: emp.leaderEmail,
+            employeeName: emp.fullName,
+            profileLabel: profileInfo?.label || dominantProfileKey,
+            reportUrl: `${window.location.origin}/app/profiler/colaborador/${emp.id}`,
+          },
+        });
+      }
 
       return res;
     },
