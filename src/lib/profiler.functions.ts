@@ -10,6 +10,7 @@ import {
   PROFILES,
   type ProfileKey,
   type Scores,
+  type BlockAnswer,
 } from "./profiler";
 
 export interface ProfilerEmployee {
@@ -30,7 +31,7 @@ export interface ProfilerAssessment {
   employeeId: string;
   scores: Scores;
   dominant: ProfileKey;
-  answers: Record<string, ProfileKey>;
+  answers: Record<string, any>;
   notes: string;
   updatedAt: number;
 }
@@ -107,7 +108,7 @@ function mapAssessment(r: AssessmentRow): ProfilerAssessment {
       analista: r.score_analista ?? 0,
     },
     dominant: (r.dominant as ProfileKey) ?? "executor",
-    answers: (r.answers as Record<string, ProfileKey>) ?? {},
+    answers: (r.answers as Record<string, any>) ?? {},
     notes: r.notes ?? "",
     updatedAt: new Date(r.updated_at).getTime(),
   };
@@ -244,12 +245,12 @@ export const getProfilerAssessment = createServerFn({ method: "GET" })
 
 export const submitProfilerAssessment = createServerFn({ method: "POST" })
   .validator(
-    (d: { employeeId: string; answers: Record<string, ProfileKey>; origin?: string }) => d,
+    (d: { employeeId: string; answers: Record<string, any>; origin?: string }) => d,
   )
   .handler(async ({ data }): Promise<ProfilerAssessment> => {
-    const answered = Object.keys(data.answers ?? {}).length;
-    if (answered < QUESTIONS.length) {
-      throw new Error("Responda todas as perguntas antes de enviar.");
+    const answeredCount = Object.keys(data.answers ?? {}).length;
+    if (answeredCount < QUESTIONS.length) {
+      throw new Error("Responda todos os blocos antes de enviar.");
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
