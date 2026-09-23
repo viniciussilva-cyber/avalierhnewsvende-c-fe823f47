@@ -140,6 +140,65 @@ export const getProfilerEmployee = createServerFn({ method: "GET" })
     return row ? mapEmployee(row as EmployeeRow) : null;
   });
 
+export const saveProfilerEmployee = createServerFn({ method: "POST" })
+  .validator(
+    (d: {
+      actorEmail: string;
+      id?: string;
+      fullName: string;
+      email: string;
+      position: string;
+      sector: string;
+      leaderEmail: string;
+      active: boolean;
+      photoUrl: string;
+    }) => d,
+  )
+  .handler(async ({ data }): Promise<{ id: string }> => {
+    assertInternalEmail(data.actorEmail);
+    if (!data.fullName?.trim()) throw new Error("Informe o nome do colaborador.");
+
+    const payload = {
+      full_name: data.fullName.trim().slice(0, 200),
+      email: norm(data.email).slice(0, 200),
+      position: (data.position ?? "").trim().slice(0, 200),
+      sector: (data.sector ?? "").trim().slice(0, 200),
+      leader_email: norm(data.leaderEmail).slice(0, 200),
+      active: data.active,
+      photo_url: (data.photoUrl ?? "").slice(0, 2000),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    if (data.id) {
+      const { error } = await supabaseAdmin
+        .from("profiler_employees")
+        .update(payload)
+        .eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { id: data.id };
+    }
+
+    const { data: row, error } = await supabaseAdmin
+      .from("profiler_employees")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: (row as { id: string }).id };
+  });
+
+export const deleteProfilerEmployee = createServerFn({ method: "POST" })
+  .validator((d: { actorEmail: string; id: string }) => d)
+  .handler(async ({ data }) => {
+    assertInternalEmail(data.actorEmail);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("profiler_employees").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const toggleReassessmentPermission = createServerFn({ method: "POST" })
   .validator((d: { actorEmail: string; employeeId: string; canReassess: boolean }) => d)
   .handler(async ({ data }) => {
@@ -195,7 +254,6 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Busca o colaborador
     const { data: employeeRow, error: empError } = await supabaseAdmin
       .from("profiler_employees")
       .select(EMPLOYEE_COLS)
@@ -206,7 +264,6 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
 
     const employee = mapEmployee(employeeRow as EmployeeRow);
 
-    // Checa se o colaborador já fez uma avaliação anterior
     const { data: existingAssessments } = await supabaseAdmin
       .from("profiler_assessments")
       .select("id")
@@ -215,7 +272,6 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
 
     const hasPreviousAssessment = (existingAssessments ?? []).length > 0;
 
-    // Se já fez e não está liberado para refazer, bloqueia
     if (hasPreviousAssessment && !employee.canReassess) {
       throw new Error("Você já realizou esta avaliação. Para refazer, solicite liberação ao RH.");
     }
@@ -238,7 +294,6 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
     };
 
-    // Insere SEMPRE como uma nova avaliação no histórico
     const { data: inserted, error: insertError } = await supabaseAdmin
       .from("profiler_assessments")
       .insert(payload)
@@ -247,13 +302,11 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
 
     if (insertError) throw new Error(insertError.message);
 
-    // Reseta a permissão de refazer para false
     await supabaseAdmin
       .from("profiler_employees")
       .update({ can_reassess: false, updated_at: new Date().toISOString() })
       .eq("id", data.employeeId);
 
-    // Dispara e-mail para o líder
     if (employee.leaderEmail) {
       const profileInfo = PROFILES[dominant];
       const baseUrl = data.origin || "https://avalierhnewsvende-c.vercel.app";
@@ -276,4 +329,17 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
       notes: "",
       updatedAt: Date.now(),
     };
+  });
+
+export const saveProfilerNotes = createServerFn({ method: "POST" })
+  .validator((d: { actorEmail: string; employeeId: string; notes: string }) => d)
+  .handler(async ({ data }) => {
+    assertInternalEmail(data.actorEmail);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("profiler_assessments")
+      .update({ notes: (data.notes ?? "").slice(0, 20000), updated_at: new Date().toISOString() })
+      .eq("employee_id", data.employeeId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
