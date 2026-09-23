@@ -22,7 +22,7 @@ serve(async (req) => {
       });
     }
 
-    // Cores específicas para cada perfil comportamental
+    // Cores oficiais dos perfis comportamentais
     const profileColors: Record<string, string> = {
       EXECUTOR: "#16a34a",     // Verde
       COMUNICADOR: "#ea580c",  // Laranja
@@ -48,27 +48,31 @@ serve(async (req) => {
             <head>
               <meta charset="utf-8">
               <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 40px 20px; }
-                .container { max-width: 580px; margin: 0 auto; background-color: #000000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); border: 1px solid #222222; }
-                .header { background-color: #ff0068; padding: 32px 40px; text-align: center; }
-                .header-title { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-                .header-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 6px; }
-                .content { padding: 40px; }
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px; }
+                .container { max-width: 580px; margin: 0 auto; background-color: #141414; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid #262626; }
+                .header { padding: 40px 40px 20px 40px; text-align: left; }
+                .logo-text { color: #ffffff; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0; }
+                .logo-pink { color: #ff0068; }
+                .header-subtitle { color: #ffffff; font-size: 14px; font-weight: 600; margin-top: 6px; }
+                .header-subtitle span { color: #ff0068; }
+                .content { padding: 30px 40px 40px 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
                 .text { font-size: 15px; color: #a1a1aa; line-height: 1.6; margin-bottom: 28px; }
-                .profile-card { background-color: #888888; border-radius: 16px; padding: 24px; border: 1px solid #999999; text-align: center; margin-bottom: 32px; }
-                .profile-tag { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #ffffff; margin-bottom: 8px; }
-                .profile-name { font-size: 28px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+                .profile-card { background-color: #1f1f1f; border-radius: 16px; padding: 24px; border: 1px solid #2e2e2e; text-align: center; margin-bottom: 32px; }
+                .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #71717a; margin-bottom: 8px; }
+                .profile-name { font-size: 28px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; }
                 .button-container { text-align: center; margin-bottom: 12px; }
                 .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 0, 104, 0.4); }
-                .footer { background-color: #050505; padding: 24px 40px; text-align: center; border-top: 1px solid #18181b; font-size: 12px; color: #71717a; }
+                .footer { background-color: #0f0f0f; padding: 32px 40px; border-top: 1px solid #262626; font-size: 12px; color: #71717a; }
+                .social-links { margin-top: 16px; margin-bottom: 16px; }
+                .social-btn { display: inline-block; background-color: #ff0068; color: #ffffff; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 8px; font-size: 14px; }
               </style>
             </head>
             <body>
               <div class="container">
                 <div class="header">
-                  <div class="header-subtitle">PLATAFORMA DE RECURSOS HUMANOS</div>
-                  <h1 class="header-title">VENDE-C Profiler</h1>
+                  <h1 class="logo-text">VENDE<span class="logo-pink">-C</span></h1>
+                  <p class="header-subtitle">A maior escola de vendas <span>do Brasil</span></p>
                 </div>
 
                 <div class="content">
@@ -88,7 +92,12 @@ serve(async (req) => {
                 </div>
 
                 <div class="footer">
-                  <p style="margin: 0; font-weight: 600; color: #a1a1aa;">VENDE-C — A maior escola de vendas do Brasil</p>
+                  <div class="social-links">
+                    <a href="https://youtube.com" class="social-btn" target="_blank">▶</a>
+                    <a href="https://instagram.com" class="social-btn" target="_blank">📷</a>
+                    <a href="https://linkedin.com" class="social-btn" target="_blank">in</a>
+                  </div>
+                  <p style="margin: 0; color: #a1a1aa; font-weight: 500;">VENDE-C — Plataforma de Recursos Humanos</p>
                   <p style="margin: 4px 0 0 0; font-size: 11px;">Este é um e-mail automático disparado pelo sistema.</p>
                 </div>
               </div>
