@@ -56,9 +56,9 @@ serve(async (req) => {
                 .content { padding: 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
                 .text { font-size: 15px; color: #a1a1aa; line-height: 1.6; margin-bottom: 28px; }
-                .profile-card { background-color: #111111; border-radius: 16px; padding: 24px; border: 1px solid #27272a; text-align: center; margin-bottom: 32px; }
-                .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a1a1aa; margin-bottom: 8px; }
-                .profile-name { font-size: 26px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; }
+                .profile-card { background-color: #888888; border-radius: 16px; padding: 24px; border: 1px solid #999999; text-align: center; margin-bottom: 32px; }
+                .profile-tag { display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #ffffff; margin-bottom: 8px; }
+                .profile-name { font-size: 28px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
                 .button-container { text-align: center; margin-bottom: 12px; }
                 .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 0, 104, 0.4); }
                 .footer { background-color: #050505; padding: 24px 40px; text-align: center; border-top: 1px solid #18181b; font-size: 12px; color: #71717a; }
@@ -78,7 +78,7 @@ serve(async (req) => {
                   </p>
 
                   <div class="profile-card">
-                    <span class="profile-tag">Perfil Predominante Mapeado</span>
+                    <span class="profile-tag">PERFIL PREDOMINANTE MAPEADO</span>
                     <h3 class="profile-name">${profileLabel}</h3>
                   </div>
 
