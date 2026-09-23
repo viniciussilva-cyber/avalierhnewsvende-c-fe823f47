@@ -50,18 +50,24 @@ serve(async (req) => {
               <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px; }
                 .container { max-width: 580px; margin: 0 auto; background-color: #141414; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid #262626; }
-                .header { padding: 40px 40px 10px 40px; text-align: left; }
-                .logo-text { color: #ffffff; font-size: 32px; font-weight: 900; letter-spacing: -1px; margin: 0; }
+                
+                /* Cabeçalho na mesma cor da caixa cinza (#1f1f1f) */
+                .header { background-color: #1f1f1f; padding: 32px 40px; text-align: left; border-bottom: 1px solid #2e2e2e; }
+                .logo-text { color: #ffffff; font-size: 30px; font-weight: 900; letter-spacing: -1px; margin: 0; }
                 .logo-pink-dash { color: #ff0068; font-weight: 900; }
-                .header-subtitle { color: #ffffff; font-size: 16px; font-weight: 600; margin-top: 8px; margin-bottom: 0; }
-                .content { padding: 30px 40px 40px 40px; }
+                .header-subtitle { color: #ffffff; font-size: 15px; font-weight: 600; margin-top: 6px; margin-bottom: 0; }
+                
+                .content { padding: 36px 40px 40px 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
                 .text { font-size: 15px; color: #ffffff; line-height: 1.6; margin-bottom: 28px; }
+                
+                /* Caixa cinza do perfil (#1f1f1f) */
                 .profile-card { background-color: #1f1f1f; border-radius: 16px; padding: 24px; border: 1px solid #2e2e2e; text-align: center; margin-bottom: 32px; }
                 .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a1a1aa; margin-bottom: 8px; }
                 .profile-name { font-size: 28px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; }
+                
                 .button-container { text-align: center; margin-bottom: 12px; }
-                .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 0, 104, 0.4); }
+                .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 0, 104, 0.35); }
                 .footer { background-color: #0f0f0f; padding: 24px 40px; border-top: 1px solid #262626; font-size: 12px; color: #71717a; text-align: left; }
               </style>
             </head>
