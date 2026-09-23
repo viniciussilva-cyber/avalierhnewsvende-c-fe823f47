@@ -7,6 +7,7 @@ import {
   competencies,
   indicators,
   talentZones,
+  PROFILES,
   type ProfileKey,
   type Scores,
 } from "./profiler";
@@ -19,6 +20,7 @@ export interface ProfilerEmployee {
   sector: string;
   leaderEmail: string;
   active: boolean;
+  canReassess: boolean;
   photoUrl: string;
   createdAt: number;
 }
@@ -33,7 +35,6 @@ export interface ProfilerAssessment {
   updatedAt: number;
 }
 
-/** Serializa valores para colunas jsonb sem brigar com os tipos gerados. */
 function toJson(value: unknown) {
   return JSON.parse(JSON.stringify(value)) as never;
 }
@@ -56,12 +57,13 @@ type EmployeeRow = {
   sector: string | null;
   leader_email: string | null;
   active: boolean | null;
+  can_reassess: boolean | null;
   photo_url: string | null;
   created_at: string;
 };
 
 const EMPLOYEE_COLS =
-  "id, full_name, email, position, sector, leader_email, active, photo_url, created_at";
+  "id, full_name, email, position, sector, leader_email, active, can_reassess, photo_url, created_at";
 
 function mapEmployee(r: EmployeeRow): ProfilerEmployee {
   return {
@@ -72,6 +74,7 @@ function mapEmployee(r: EmployeeRow): ProfilerEmployee {
     sector: r.sector ?? "",
     leaderEmail: r.leader_email ?? "",
     active: r.active ?? true,
+    canReassess: r.can_reassess ?? false,
     photoUrl: r.photo_url ?? "",
     createdAt: new Date(r.created_at).getTime(),
   };
@@ -125,7 +128,7 @@ export const listProfilerEmployees = createServerFn({ method: "GET" }).handler(
 );
 
 export const getProfilerEmployee = createServerFn({ method: "GET" })
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ data }): Promise<ProfilerEmployee | null> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
@@ -137,81 +140,36 @@ export const getProfilerEmployee = createServerFn({ method: "GET" })
     return row ? mapEmployee(row as EmployeeRow) : null;
   });
 
-export const saveProfilerEmployee = createServerFn({ method: "POST" })
-  .inputValidator(
-    (d: {
-      actorEmail: string;
-      id?: string;
-      fullName: string;
-      email: string;
-      position: string;
-      sector: string;
-      leaderEmail: string;
-      active: boolean;
-      photoUrl: string;
-    }) => d,
-  )
-  .handler(async ({ data }): Promise<{ id: string }> => {
-    assertInternalEmail(data.actorEmail);
-    if (!data.fullName?.trim()) throw new Error("Informe o nome do colaborador.");
-
-    const payload = {
-      full_name: data.fullName.trim().slice(0, 200),
-      email: norm(data.email).slice(0, 200),
-      position: (data.position ?? "").trim().slice(0, 200),
-      sector: (data.sector ?? "").trim().slice(0, 200),
-      leader_email: norm(data.leaderEmail).slice(0, 200),
-      active: data.active,
-      photo_url: (data.photoUrl ?? "").slice(0, 2000),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    if (data.id) {
-      const { error } = await supabaseAdmin
-        .from("profiler_employees")
-        .update(payload)
-        .eq("id", data.id);
-      if (error) throw new Error(error.message);
-      return { id: data.id };
-    }
-
-    const { data: row, error } = await supabaseAdmin
-      .from("profiler_employees")
-      .insert(payload)
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { id: (row as { id: string }).id };
-  });
-
-export const deleteProfilerEmployee = createServerFn({ method: "POST" })
-  .inputValidator((d: { actorEmail: string; id: string }) => d)
+export const toggleReassessmentPermission = createServerFn({ method: "POST" })
+  .validator((d: { actorEmail: string; employeeId: string; canReassess: boolean }) => d)
   .handler(async ({ data }) => {
     assertInternalEmail(data.actorEmail);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("profiler_employees").delete().eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("profiler_employees")
+      .update({ can_reassess: data.canReassess, updated_at: new Date().toISOString() })
+      .eq("id", data.employeeId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
 /** ---------------- Avaliações ---------------- */
 
-export const listProfilerAssessments = createServerFn({ method: "GET" }).handler(
-  async (): Promise<ProfilerAssessment[]> => {
+export const listProfilerAssessments = createServerFn({ method: "GET" })
+  .validator((d?: { employeeId?: string }) => d)
+  .handler(async ({ data }): Promise<ProfilerAssessment[]> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("profiler_assessments")
-      .select(ASSESSMENT_COLS)
-      .order("updated_at", { ascending: false });
+    let query = supabaseAdmin.from("profiler_assessments").select(ASSESSMENT_COLS);
+    if (data?.employeeId) {
+      query = query.eq("employee_id", data.employeeId);
+    }
+    const { data: rows, error } = await query.order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return ((data ?? []) as AssessmentRow[]).map(mapAssessment);
-  },
-);
+    return ((rows ?? []) as AssessmentRow[]).map(mapAssessment);
+  });
 
 export const getProfilerAssessment = createServerFn({ method: "GET" })
-  .inputValidator((d: { employeeId: string }) => d)
+  .validator((d: { employeeId: string }) => d)
   .handler(async ({ data }): Promise<ProfilerAssessment | null> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
@@ -226,7 +184,9 @@ export const getProfilerAssessment = createServerFn({ method: "GET" })
   });
 
 export const submitProfilerAssessment = createServerFn({ method: "POST" })
-  .inputValidator((d: { employeeId: string; answers: Record<string, ProfileKey> }) => d)
+  .validator(
+    (d: { employeeId: string; answers: Record<string, ProfileKey>; origin?: string }) => d,
+  )
   .handler(async ({ data }): Promise<ProfilerAssessment> => {
     const answered = Object.keys(data.answers ?? {}).length;
     if (answered < QUESTIONS.length) {
@@ -235,24 +195,34 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: employee, error: empError } = await supabaseAdmin
+    // Busca o colaborador
+    const { data: employeeRow, error: empError } = await supabaseAdmin
       .from("profiler_employees")
-      .select("id")
+      .select(EMPLOYEE_COLS)
       .eq("id", data.employeeId)
       .maybeSingle();
     if (empError) throw new Error(empError.message);
-    if (!employee) throw new Error("Colaborador não encontrado.");
+    if (!employeeRow) throw new Error("Colaborador não encontrado.");
+
+    const employee = mapEmployee(employeeRow as EmployeeRow);
+
+    // Checa se o colaborador já fez uma avaliação anterior
+    const { data: existingAssessments } = await supabaseAdmin
+      .from("profiler_assessments")
+      .select("id")
+      .eq("employee_id", data.employeeId)
+      .limit(1);
+
+    const hasPreviousAssessment = (existingAssessments ?? []).length > 0;
+
+    // Se já fez e não está liberado para refazer, bloqueia
+    if (hasPreviousAssessment && !employee.canReassess) {
+      throw new Error("Você já realizou esta avaliação. Para refazer, solicite liberação ao RH.");
+    }
 
     const scores = scoreAnswers(data.answers);
     const dominant = dominantProfile(scores);
     const pct = toPercentages(scores);
-
-    const { data: existing } = await supabaseAdmin
-      .from("profiler_assessments")
-      .select("id")
-      .eq("employee_id", data.employeeId)
-      .limit(1)
-      .maybeSingle();
 
     const payload = {
       employee_id: data.employeeId,
@@ -268,19 +238,37 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
       updated_at: new Date().toISOString(),
     };
 
-    if (existing) {
-      const { error } = await supabaseAdmin
-        .from("profiler_assessments")
-        .update(payload)
-        .eq("id", (existing as { id: string }).id);
-      if (error) throw new Error(error.message);
-    } else {
-      const { error } = await supabaseAdmin.from("profiler_assessments").insert(payload);
-      if (error) throw new Error(error.message);
+    // Insere SEMPRE como uma nova avaliação no histórico
+    const { data: inserted, error: insertError } = await supabaseAdmin
+      .from("profiler_assessments")
+      .insert(payload)
+      .select("id")
+      .single();
+
+    if (insertError) throw new Error(insertError.message);
+
+    // Reseta a permissão de refazer para false
+    await supabaseAdmin
+      .from("profiler_employees")
+      .update({ can_reassess: false, updated_at: new Date().toISOString() })
+      .eq("id", data.employeeId);
+
+    // Dispara e-mail para o líder
+    if (employee.leaderEmail) {
+      const profileInfo = PROFILES[dominant];
+      const baseUrl = data.origin || "https://avalierhnewsvende-c.vercel.app";
+      await supabaseAdmin.functions.invoke("rapid-task", {
+        body: {
+          leaderEmail: employee.leaderEmail,
+          employeeName: employee.fullName,
+          profileLabel: profileInfo?.label || dominant,
+          reportUrl: `${baseUrl}/app/profiler/colaborador/${employee.id}`,
+        },
+      });
     }
 
     return {
-      id: (existing as { id: string } | null)?.id ?? "",
+      id: (inserted as { id: string }).id,
       employeeId: data.employeeId,
       scores,
       dominant,
@@ -288,17 +276,4 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
       notes: "",
       updatedAt: Date.now(),
     };
-  });
-
-export const saveProfilerNotes = createServerFn({ method: "POST" })
-  .inputValidator((d: { actorEmail: string; employeeId: string; notes: string }) => d)
-  .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("profiler_assessments")
-      .update({ notes: (data.notes ?? "").slice(0, 20000), updated_at: new Date().toISOString() })
-      .eq("employee_id", data.employeeId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
   });
