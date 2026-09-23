@@ -49,19 +49,19 @@ serve(async (req) => {
               <meta charset="utf-8">
               <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 40px 20px; }
-                .container { max-width: 580px; margin: 0 auto; background-color: #0f172a; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); border: 1px solid #1e293b; }
+                .container { max-width: 580px; margin: 0 auto; background-color: #000000; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); border: 1px solid #222222; }
                 .header { background-color: #ff0068; padding: 32px 40px; text-align: center; }
                 .header-title { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
                 .header-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 6px; }
                 .content { padding: 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
-                .text { font-size: 15px; color: #94a3b8; line-height: 1.6; margin-bottom: 28px; }
-                .profile-card { background-color: #1e293b; border-radius: 16px; padding: 24px; border: 1px solid #334155; text-align: center; margin-bottom: 32px; }
-                .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #94a3b8; margin-bottom: 8px; }
+                .text { font-size: 15px; color: #a1a1aa; line-height: 1.6; margin-bottom: 28px; }
+                .profile-card { background-color: #111111; border-radius: 16px; padding: 24px; border: 1px solid #27272a; text-align: center; margin-bottom: 32px; }
+                .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a1a1aa; margin-bottom: 8px; }
                 .profile-name { font-size: 26px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; }
                 .button-container { text-align: center; margin-bottom: 12px; }
                 .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 0, 104, 0.4); }
-                .footer { background-color: #020617; padding: 24px 40px; text-align: center; border-top: 1px solid #1e293b; font-size: 12px; color: #64748b; }
+                .footer { background-color: #050505; padding: 24px 40px; text-align: center; border-top: 1px solid #18181b; font-size: 12px; color: #71717a; }
               </style>
             </head>
             <body>
@@ -88,7 +88,7 @@ serve(async (req) => {
                 </div>
 
                 <div class="footer">
-                  <p style="margin: 0; font-weight: 600; color: #94a3b8;">VENDE-C — A maior escola de vendas do Brasil</p>
+                  <p style="margin: 0; font-weight: 600; color: #a1a1aa;">VENDE-C — A maior escola de vendas do Brasil</p>
                   <p style="margin: 4px 0 0 0; font-size: 11px;">Este é um e-mail automático disparado pelo sistema.</p>
                 </div>
               </div>
