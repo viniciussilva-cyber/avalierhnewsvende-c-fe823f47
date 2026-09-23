@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles, ArrowRight, ArrowLeft, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QUESTIONS, scoreAnswers, type ProfileKey, type BlockAnswer } from "@/lib/profiler";
+import { QUESTIONS, scoreAnswers, type ProfileKey, type BlockAnswer, type Scores } from "@/lib/profiler";
 import {
   getProfilerEmployee,
   getProfilerAssessment,
@@ -24,9 +24,9 @@ function AssessmentPage() {
   const submit = useServerFn(submitProfilerAssessment);
 
   const [step, setStep] = useState(0);
-  // Estado para armazenar { "1": { most: "executor", least: "analista" } }
   const [answers, setAnswers] = useState<Record<string, BlockAnswer>>({});
   const [done, setDone] = useState(false);
+  const [assessmentResult, setAssessmentResult] = useState<{ scores: Scores; dominant: ProfileKey } | null>(null);
 
   const employeeQuery = useQuery({
     queryKey: ["profiler-employee", employeeId],
@@ -41,32 +41,37 @@ function AssessmentPage() {
   const total = QUESTIONS.length;
   const question = QUESTIONS[step]!;
   
-  // Progresso baseado em quantos blocos foram TOTALMENTE respondidos (com mais e menos)
   const completedBlocksCount = Object.values(answers).filter(
     (a) => a?.most && a?.least
   ).length;
   const progress = Math.round((completedBlocksCount / total) * 100);
 
-  const scores = useMemo(() => scoreAnswers(answers), [answers]);
+  const currentScores = useMemo(() => scoreAnswers(answers), [answers]);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      return await submit({
+      const res = await submit({
         data: {
           employeeId,
           answers,
           origin: window.location.origin,
         },
       });
+      return res;
     },
-    onSuccess: () => setDone(true),
+    onSuccess: (res) => {
+      setAssessmentResult({
+        scores: res.scores,
+        dominant: res.dominant,
+      });
+      setDone(true);
+    },
   });
 
   const chooseOption = (profile: ProfileKey, type: "most" | "least") => {
     const qId = String(question.id);
     const current = answers[qId] || { most: undefined as any, least: undefined as any };
 
-    // Se selecionar "mais" para uma opção que era "menos", limpa o "menos" (e vice-versa)
     let newMost = type === "most" ? profile : current.most;
     let newLeast = type === "least" ? profile : current.least;
 
@@ -100,7 +105,6 @@ function AssessmentPage() {
     );
   }
 
-  // Se já possui avaliação e o RH não autorizou uma nova liberação
   if (existingAssessment && !employee.canReassess && !done) {
     return (
       <div className="min-h-screen bg-background">
@@ -121,8 +125,10 @@ function AssessmentPage() {
     );
   }
 
-  // EXIBE O RELATÓRIO QUANDO O TESTE É CONCLUÍDO
-  if (done) {
+  // EXIBE O RELATÓRIO QUANDO CONCLUÍDO (OU SE JÁ EXISTIA)
+  if (done || existingAssessment) {
+    const finalScores = assessmentResult?.scores || existingAssessment?.scores || currentScores;
+
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -131,7 +137,7 @@ function AssessmentPage() {
             name={employee.fullName}
             position={employee.position}
             sector={employee.sector}
-            scores={scores}
+            scores={finalScores}
             celebrate
           />
         </div>
@@ -158,7 +164,6 @@ function AssessmentPage() {
           Em cada bloco, selecione <strong className="text-foreground">1 opção que MAIS se parece com você</strong> e <strong className="text-foreground">1 opção que MENOS se parece com você</strong>.
         </p>
 
-        {/* Barra de Progresso */}
         <div className="mt-8 flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
             <motion.div
@@ -172,7 +177,6 @@ function AssessmentPage() {
           </span>
         </div>
 
-        {/* Bloco Atual */}
         <AnimatePresence mode="wait">
           <motion.div
             key={question.id}
@@ -232,7 +236,6 @@ function AssessmentPage() {
           </motion.div>
         </AnimatePresence>
 
-        {/* Botões de Navegação */}
         <div className="mt-8 flex items-center justify-between">
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
