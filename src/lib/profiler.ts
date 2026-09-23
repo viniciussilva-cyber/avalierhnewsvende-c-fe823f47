@@ -14,6 +14,12 @@ export interface DiscQuestionBlock {
   options: DiscOption[];
 }
 
+// Estrutura de resposta por bloco: qual foi escolhido como Mais (most) e Menos (least)
+export type BlockAnswer = {
+  most: ProfileKey;
+  least?: ProfileKey;
+};
+
 export const QUESTIONS: DiscQuestionBlock[] = [
   {
     id: 1,
@@ -151,13 +157,20 @@ export const PROFILES: Record<ProfileKey, { label: string; description: string }
   analista: { label: "Analista", description: "Preciso, analítico e focado em qualidade." },
 };
 
-export function scoreAnswers(answers: Record<string, ProfileKey>): Scores {
+export function scoreAnswers(answers: Record<string, ProfileKey | BlockAnswer>): Scores {
   const scores: Scores = { executor: 0, comunicador: 0, planejador: 0, analista: 0 };
-  Object.values(answers).forEach((profile) => {
-    if (scores[profile] !== undefined) {
-      scores[profile] += 1;
+  
+  Object.values(answers).forEach((value) => {
+    if (typeof value === 'string') {
+      if (scores[value] !== undefined) scores[value] += 1;
+    } else if (value && typeof value === 'object') {
+      const most = value.most;
+      if (most && scores[most] !== undefined) {
+        scores[most] += 1;
+      }
     }
   });
+
   return scores;
 }
 
