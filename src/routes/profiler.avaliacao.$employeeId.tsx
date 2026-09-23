@@ -2,29 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, Sparkles, ArrowRight, ArrowLeft, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QUESTIONS, scoreAnswers, PROFILES, type ProfileKey } from "@/lib/profiler";
-import { getProfilerEmployee, submitProfilerAssessment } from "@/lib/profiler.functions";
+import { QUESTIONS, scoreAnswers, type ProfileKey } from "@/lib/profiler";
+import {
+  getProfilerEmployee,
+  getProfilerAssessment,
+  submitProfilerAssessment,
+} from "@/lib/profiler.functions";
 import { ProfilerReport } from "@/components/profiler/ProfilerReport";
-import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profiler/avaliacao/$employeeId")({
   head: () => ({
-    meta: [
-      { title: "Perfil comportamental · VENDE-C Profiler" },
-      {
-        name: "description",
-        content: "Responda 20 blocos rápidos e descubra seu perfil comportamental na VENDE-C.",
-      },
-      { property: "og:title", content: "Perfil comportamental · VENDE-C Profiler" },
-      {
-        property: "og:description",
-        content: "Responda 20 blocos rápidos e descubra seu perfil comportamental na VENDE-C.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
+    meta: [{ title: "Perfil comportamental · VENDE-C Profiler" }],
   }),
   component: AssessmentPage,
 });
@@ -42,44 +32,25 @@ function AssessmentPage() {
     queryFn: () => getProfilerEmployee({ data: { id: employeeId } }),
   });
 
+  const previousAssessmentQuery = useQuery({
+    queryKey: ["profiler-assessment-existing", employeeId],
+    queryFn: () => getProfilerAssessment({ data: { employeeId } }),
+  });
+
   const total = QUESTIONS.length;
   const question = QUESTIONS[step]!;
   const progress = Math.round((Object.keys(answers).length / total) * 100);
   const scores = useMemo(() => scoreAnswers(answers), [answers]);
 
-  // Identifica o perfil com maior pontuação para incluir no e-mail
-  const dominantProfileKey = useMemo(() => {
-    let topKey: ProfileKey = "executor";
-    let maxScore = -1;
-    for (const [key, val] of Object.entries(scores)) {
-      if (val > maxScore) {
-        maxScore = val;
-        topKey = key as ProfileKey;
-      }
-    }
-    return topKey;
-  }, [scores]);
-
   const mutation = useMutation({
     mutationFn: async () => {
-      // 1. Salva a avaliação no banco
-      const res = await submit({ data: { employeeId, answers } });
-
-      // 2. Dispara o e-mail automático para o líder se o e-mail estiver cadastrado
-      const emp = employeeQuery.data;
-      if (emp && emp.leaderEmail) {
-        const profileInfo = PROFILES[dominantProfileKey];
-        await supabase.functions.invoke("rapid-task", {
-          body: {
-            leaderEmail: emp.leaderEmail,
-            employeeName: emp.fullName,
-            profileLabel: profileInfo?.label || dominantProfileKey,
-            reportUrl: `${window.location.origin}/app/profiler/colaborador/${emp.id}`,
-          },
-        });
-      }
-
-      return res;
+      return await submit({
+        data: {
+          employeeId,
+          answers,
+          origin: window.location.origin,
+        },
+      });
     },
     onSuccess: () => setDone(true),
   });
@@ -89,7 +60,7 @@ function AssessmentPage() {
     if (step < total - 1) setTimeout(() => setStep((s) => s + 1), 160);
   };
 
-  if (employeeQuery.isLoading) {
+  if (employeeQuery.isLoading || previousAssessmentQuery.isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -98,6 +69,7 @@ function AssessmentPage() {
   }
 
   const employee = employeeQuery.data;
+  const existingAssessment = previousAssessmentQuery.data;
 
   if (!employee) {
     return (
@@ -105,6 +77,27 @@ function AssessmentPage() {
         <p className="text-center text-sm text-muted-foreground">
           Este link de avaliação não é válido. Fale com o RH da VENDE-C.
         </p>
+      </div>
+    );
+  }
+
+  // Se já possui avaliação e o RH não autorizou uma nova liberação
+  if (existingAssessment && !employee.canReassess && !done) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="mx-auto flex max-w-lg flex-col items-center justify-center px-6 py-20 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <ShieldAlert className="h-8 w-8" />
+          </div>
+          <h2 className="mt-4 text-xl font-bold text-foreground">Avaliação já realizada</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Olá, <strong className="text-foreground">{employee.fullName}</strong>. Você já respondeu ao seu teste comportamental.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Caso precise refazer para um novo acompanhamento, solicite a liberação ao RH.
+          </p>
+        </div>
       </div>
     );
   }
@@ -121,9 +114,6 @@ function AssessmentPage() {
             scores={scores}
             celebrate
           />
-          <p className="mt-10 text-center text-xs text-muted-foreground">
-            Seu resultado foi enviado ao RH e ao seu líder direto.
-          </p>
         </div>
       </div>
     );
@@ -214,12 +204,6 @@ function AssessmentPage() {
             </button>
           )}
         </div>
-
-        {!allAnswered && step === total - 1 && (
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Ainda faltam {total - Object.keys(answers).length} blocos para responder.
-          </p>
-        )}
 
         {mutation.isError && (
           <p className="mt-4 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs text-destructive">
