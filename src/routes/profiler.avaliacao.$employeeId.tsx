@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles, ArrowRight, ArrowLeft, ShieldAlert } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QUESTIONS, scoreAnswers, type ProfileKey } from "@/lib/profiler";
+import { QUESTIONS, scoreAnswers, type ProfileKey, type BlockAnswer } from "@/lib/profiler";
 import {
   getProfilerEmployee,
   getProfilerAssessment,
@@ -24,7 +24,8 @@ function AssessmentPage() {
   const submit = useServerFn(submitProfilerAssessment);
 
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, ProfileKey>>({});
+  // Estado para armazenar { "1": { most: "executor", least: "analista" } }
+  const [answers, setAnswers] = useState<Record<string, BlockAnswer>>({});
   const [done, setDone] = useState(false);
 
   const employeeQuery = useQuery({
@@ -39,7 +40,13 @@ function AssessmentPage() {
 
   const total = QUESTIONS.length;
   const question = QUESTIONS[step]!;
-  const progress = Math.round((Object.keys(answers).length / total) * 100);
+  
+  // Progresso baseado em quantos blocos foram TOTALMENTE respondidos (com mais e menos)
+  const completedBlocksCount = Object.values(answers).filter(
+    (a) => a?.most && a?.least
+  ).length;
+  const progress = Math.round((completedBlocksCount / total) * 100);
+
   const scores = useMemo(() => scoreAnswers(answers), [answers]);
 
   const mutation = useMutation({
@@ -55,9 +62,21 @@ function AssessmentPage() {
     onSuccess: () => setDone(true),
   });
 
-  const choose = (profile: ProfileKey) => {
-    setAnswers((prev) => ({ ...prev, [String(question.id)]: profile }));
-    if (step < total - 1) setTimeout(() => setStep((s) => s + 1), 160);
+  const chooseOption = (profile: ProfileKey, type: "most" | "least") => {
+    const qId = String(question.id);
+    const current = answers[qId] || { most: undefined as any, least: undefined as any };
+
+    // Se selecionar "mais" para uma opção que era "menos", limpa o "menos" (e vice-versa)
+    let newMost = type === "most" ? profile : current.most;
+    let newLeast = type === "least" ? profile : current.least;
+
+    if (type === "most" && current.least === profile) newLeast = undefined;
+    if (type === "least" && current.most === profile) newMost = undefined;
+
+    setAnswers((prev) => ({
+      ...prev,
+      [qId]: { most: newMost, least: newLeast },
+    }));
   };
 
   if (employeeQuery.isLoading || previousAssessmentQuery.isLoading) {
@@ -102,6 +121,7 @@ function AssessmentPage() {
     );
   }
 
+  // EXIBE O RELATÓRIO QUANDO O TESTE É CONCLUÍDO
   if (done) {
     return (
       <div className="min-h-screen bg-background">
@@ -119,7 +139,9 @@ function AssessmentPage() {
     );
   }
 
-  const allAnswered = Object.keys(answers).length === total;
+  const currentAnswer = answers[String(question.id)] || {};
+  const currentBlockComplete = currentAnswer.most && currentAnswer.least;
+  const allAnswered = completedBlocksCount === total;
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,9 +155,10 @@ function AssessmentPage() {
           Descubra seu perfil comportamental
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Em cada bloco, escolha a frase que mais tem a ver com você. Não existe resposta certa ou errada.
+          Em cada bloco, selecione <strong className="text-foreground">1 opção que MAIS se parece com você</strong> e <strong className="text-foreground">1 opção que MENOS se parece com você</strong>.
         </p>
 
+        {/* Barra de Progresso */}
         <div className="mt-8 flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
             <motion.div
@@ -149,6 +172,7 @@ function AssessmentPage() {
           </span>
         </div>
 
+        {/* Bloco Atual */}
         <AnimatePresence mode="wait">
           <motion.div
             key={question.id}
@@ -156,27 +180,59 @@ function AssessmentPage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             transition={{ duration: 0.25 }}
-            className="mt-8 space-y-3"
+            className="mt-8 space-y-4"
           >
-            {question.options.map((o) => {
-              const selected = answers[String(question.id)] === o.profile;
-              return (
-                <button
-                  key={o.profile}
-                  onClick={() => choose(o.profile)}
-                  className={`w-full rounded-2xl border p-4 text-left text-sm transition-all ${
-                    selected
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                  }`}
-                >
-                  {o.text}
-                </button>
-              );
-            })}
+            <h3 className="text-base font-bold text-foreground">{question.title}</h3>
+
+            <div className="space-y-3">
+              {question.options.map((o) => {
+                const isMost = currentAnswer.most === o.profile;
+                const isLeast = currentAnswer.least === o.profile;
+
+                return (
+                  <div
+                    key={o.profile}
+                    className={`flex flex-col gap-3 rounded-2xl border p-4 text-left text-sm transition-all sm:flex-row sm:items-center sm:justify-between ${
+                      isMost || isLeast
+                        ? "border-primary/60 bg-primary/5"
+                        : "border-border bg-card"
+                    }`}
+                  >
+                    <p className="text-foreground/90 leading-relaxed">{o.text}</p>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => chooseOption(o.profile, "most")}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                          isMost
+                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                            : "border border-border bg-secondary/50 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        + Mais parecido
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => chooseOption(o.profile, "least")}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
+                          isLeast
+                            ? "bg-foreground text-background shadow-md"
+                            : "border border-border bg-secondary/50 text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
+                        - Menos parecido
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </motion.div>
         </AnimatePresence>
 
+        {/* Botões de Navegação */}
         <div className="mt-8 flex items-center justify-between">
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
@@ -189,7 +245,8 @@ function AssessmentPage() {
           {step < total - 1 ? (
             <button
               onClick={() => setStep((s) => Math.min(total - 1, s + 1))}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+              disabled={!currentBlockComplete}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 disabled:opacity-30"
             >
               Avançar <ArrowRight className="h-3.5 w-3.5" />
             </button>
