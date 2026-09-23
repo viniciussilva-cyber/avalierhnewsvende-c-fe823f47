@@ -1,317 +1,139 @@
-/**
- * VENDE-C Profiler — perfis comportamentais (estilo DISC).
- *
- * Os quatro perfis usam a linguagem visual da VENDE-C:
- *   Executor (D) · Comunicador (I) · Planejador (S) · Analista (C)
- */
+export type ProfileKey = 'executor' | 'comunicador' | 'planejador' | 'analista';
 
-export type ProfileKey = "executor" | "comunicador" | "planejador" | "analista";
-
-export const PROFILE_KEYS: ProfileKey[] = ["executor", "comunicador", "planejador", "analista"];
-
-export interface ProfileInfo {
-  key: ProfileKey;
-  label: string;
-  phrase: string;
-  color: string;
-  mascot: string;
-  summary: string;
-  strengths: string[];
-  watchouts: string[];
-  bestEnvironment: string;
-  howToLead: string;
-}
-
-export const PROFILES: Record<ProfileKey, ProfileInfo> = {
-  analista: {
-    key: "analista",
-    label: "Analista",
-    phrase: "Observa, analisa e encontra o que outros não veem.",
-    color: "#7c3aed",
-    mascot: "/mascots/analista.png",
-    summary:
-      "Perfil orientado a dados, critério e precisão. Prefere decidir com informação na mão e entrega trabalho consistente e bem fundamentado.",
-    strengths: [
-      "Rigor técnico e atenção a detalhes",
-      "Pensamento crítico e capacidade analítica",
-      "Organização de informações e processos",
-      "Entrega com alto padrão de qualidade",
-    ],
-    watchouts: [
-      "Pode travar decisões buscando informação demais",
-      "Tende ao perfeccionismo em entregas rápidas",
-      "Comunicação pode soar distante ou técnica",
-    ],
-    bestEnvironment:
-      "Ambientes com regras claras, tempo para análise e critérios objetivos de qualidade.",
-    howToLead:
-      "Traga contexto e dados, explique o porquê das decisões e evite mudanças de rota sem justificativa.",
-  },
-  planejador: {
-    key: "planejador",
-    label: "Planejador",
-    phrase: "Pensa no hoje, projeta o amanhã.",
-    color: "#2563eb",
-    mascot: "/mascots/planejador.png",
-    summary:
-      "Perfil estável, colaborativo e previsível. Sustenta a rotina do time, cuida das pessoas e mantém o combinado de pé.",
-    strengths: [
-      "Constância e confiabilidade na entrega",
-      "Escuta ativa e cuidado com o time",
-      "Planejamento e visão de médio prazo",
-      "Sustenta processos e rotinas",
-    ],
-    watchouts: [
-      "Resistência inicial a mudanças bruscas",
-      "Pode evitar conflitos necessários",
-      "Dificuldade em dizer não e priorizar",
-    ],
-    bestEnvironment: "Times estáveis, com prioridades claras e mudanças comunicadas com antecedência.",
-    howToLead:
-      "Avise mudanças com antecedência, reconheça a consistência e crie espaço seguro para discordar.",
-  },
-  executor: {
-    key: "executor",
-    label: "Executor",
-    phrase: "Tira do papel e faz acontecer.",
-    color: "#16a34a",
-    mascot: "/mascots/executor.png",
-    summary:
-      "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
-    strengths: [
-      "Velocidade de decisão e execução",
-      "Foco em meta e resultado",
-      "Coragem para assumir riscos",
-      "Destrava problemas parados",
-    ],
-    watchouts: [
-      "Pode atropelar processos e pessoas",
-      "Impaciência com detalhes e ritmos diferentes",
-      "Comunicação pode soar dura sob pressão",
-    ],
-    bestEnvironment: "Metas desafiadoras, autonomia real e pouco engessamento burocrático.",
-    howToLead: "Seja direto, combine o resultado esperado e dê autonomia sobre o caminho.",
-  },
-  comunicador: {
-    key: "comunicador",
-    label: "Comunicador",
-    phrase: "Conecta pessoas, compartilha ideias e gera movimento.",
-    color: "#ea580c",
-    mascot: "/mascots/comunicador.png",
-    summary:
-      "Perfil sociável, entusiasta e persuasivo. Abre portas, engaja o time e transforma ideia em movimento.",
-    strengths: [
-      "Comunicação e influência",
-      "Facilidade em criar rede de relacionamento",
-      "Energia e entusiasmo contagiantes",
-      "Adaptação rápida a novos contextos",
-    ],
-    watchouts: [
-      "Pode se dispersar entre muitas frentes",
-      "Menos apego a detalhe e acompanhamento",
-      "Otimismo pode subestimar riscos",
-    ],
-    bestEnvironment: "Contato com pessoas, variedade de desafios e reconhecimento visível.",
-    howToLead: "Dê palco, conecte a entrega a pessoas e ajude a fechar o que foi começado.",
-  },
-};
-
-/** ---------------- Questionário ---------------- */
-
-export interface QuestionOption {
-  profile: ProfileKey;
+export interface DiscOption {
+  id: string;
   text: string;
+  profile: ProfileKey;
 }
 
-export interface Question {
+export interface DiscQuestionBlock {
   id: number;
-  options: QuestionOption[];
+  title: string;
+  options: DiscOption[];
 }
 
-export const QUESTIONS: Question[] = [
+export const QUESTIONS: DiscQuestionBlock[] = [
   {
     id: 1,
+    title: "Ao encarar um prazo apertado",
     options: [
-      { profile: "executor", text: "Vou direto ao ponto e decido rápido." },
-      { profile: "comunicador", text: "Gosto de conversar e envolver as pessoas." },
-      { profile: "planejador", text: "Prefiro ouvir antes de me posicionar." },
-      { profile: "analista", text: "Analiso os dados antes de qualquer decisão." },
-    ],
+      { id: "1_d", profile: "executor", text: "Acelero o ritmo e cobro resultado imediato de mim e dos outros" },
+      { id: "1_i", profile: "comunicador", text: "Busco animar o time e mantenho o clima leve mesmo sob pressão" },
+      { id: "1_s", profile: "planejador", text: "Sigo o ritmo que já vinha seguindo, sem me alterar" },
+      { id: "1_c", profile: "analista", text: "Reviso o plano com calma antes de agir, mesmo com o relógio correndo" }
+    ]
   },
   {
     id: 2,
+    title: "Numa reunião de equipe",
     options: [
-      { profile: "executor", text: "Assumo o comando quando algo está parado." },
-      { profile: "comunicador", text: "Animo o time quando a energia cai." },
-      { profile: "planejador", text: "Mantenho a calma quando tudo aperta." },
-      { profile: "analista", text: "Reviso tudo antes de entregar." },
-    ],
+      { id: "2_d", profile: "executor", text: "Vou direto ao ponto e proponho a decisão" },
+      { id: "2_i", profile: "comunicador", text: "Falo bastante, envolvo todo mundo na conversa" },
+      { id: "2_s", profile: "planejador", text: "Escuto mais do que falo, espero minha vez" },
+      { id: "2_c", profile: "analista", text: "Anoto os detalhes e questiono pontos que não ficaram claros" }
+    ]
   },
   {
     id: 3,
+    title: "Diante de uma mudança repentina de planos",
     options: [
-      { profile: "executor", text: "Prefiro resultado a processo." },
-      { profile: "comunicador", text: "Prefiro pessoas a planilhas." },
-      { profile: "planejador", text: "Prefiro rotina previsível a improviso." },
-      { profile: "analista", text: "Prefiro critério claro a intuição." },
-    ],
+      { id: "3_d", profile: "executor", text: "Vejo como oportunidade de assumir o controle da situação" },
+      { id: "3_i", profile: "comunicador", text: "Me adapto rápido e tento contagiar os outros com otimismo" },
+      { id: "3_s", profile: "planejador", text: "Preciso de um tempo para me ajustar, prefiro previsibilidade" },
+      { id: "3_c", profile: "analista", text: "Quero entender o motivo da mudança antes de aceitar" }
+    ]
   },
   {
     id: 4,
+    title: "Ao tomar uma decisão importante",
     options: [
-      { profile: "executor", text: "Corro risco quando vejo oportunidade." },
-      { profile: "comunicador", text: "Confio na minha leitura das pessoas." },
-      { profile: "planejador", text: "Evito mudanças sem necessidade." },
-      { profile: "analista", text: "Só avanço quando o cenário está claro." },
-    ],
+      { id: "4_d", profile: "executor", text: "Decido rápido, com base no resultado que quero alcançar" },
+      { id: "4_i", profile: "comunicador", text: "Busco gerar entusiasmo no grupo em torno da escolha que defendo" },
+      { id: "4_s", profile: "planejador", text: "Prefiro buscar consenso com o grupo, mesmo que leve mais tempo" },
+      { id: "4_c", profile: "analista", text: "Levanto dados e analiso prós e contras com cuidado" }
+    ]
   },
   {
     id: 5,
+    title: "Recebendo uma crítica ou feedback",
     options: [
-      { profile: "executor", text: "Fico impaciente com reuniões longas." },
-      { profile: "comunicador", text: "Aproveito reuniões para conectar ideias." },
-      { profile: "planejador", text: "Uso reuniões para alinhar o time." },
-      { profile: "analista", text: "Levo dados preparados para a reunião." },
-    ],
+      { id: "5_d", profile: "executor", text: "Encaro de frente e já penso no que fazer diferente" },
+      { id: "5_i", profile: "comunicador", text: "Comento logo com alguém por perto e sigo animado(a)" },
+      { id: "5_s", profile: "planejador", text: "Levo a sério e prefiro processar em silêncio" },
+      { id: "5_c", profile: "analista", text: "Peço exemplos concretos para entender exatamente o que errei" }
+    ]
   },
   {
     id: 6,
+    title: "Em situação de conflito",
     options: [
-      { profile: "executor", text: "Cobro entrega quando o prazo aperta." },
-      { profile: "comunicador", text: "Motivo o time quando o prazo aperta." },
-      { profile: "planejador", text: "Reorganizo a rotina quando o prazo aperta." },
-      { profile: "analista", text: "Reviso o plano quando o prazo aperta." },
-    ],
+      { id: "6_d", profile: "executor", text: "Confronto diretamente, prefiro resolver logo" },
+      { id: "6_i", profile: "comunicador", text: "Tento amenizar com bom humor ou conversa" },
+      { id: "6_s", profile: "planejador", text: "Evito o confronto, busco manter a harmonia" },
+      { id: "6_c", profile: "analista", text: "Analiso os fatos antes de tomar partido" }
+    ]
   },
   {
     id: 7,
+    title: "No dia a dia de trabalho",
     options: [
-      { profile: "executor", text: "Falo o que penso, mesmo que incomode." },
-      { profile: "comunicador", text: "Escolho as palavras para engajar." },
-      { profile: "planejador", text: "Evito criar atrito desnecessário." },
-      { profile: "analista", text: "Prefiro argumentar com fatos." },
-    ],
+      { id: "7_d", profile: "executor", text: "Gosto de ambientes com desafio e meta clara pra bater" },
+      { id: "7_i", profile: "comunicador", text: "Prefiro dias com bastante troca e conversa com o time" },
+      { id: "7_s", profile: "planejador", text: "Gosto de manter o mesmo ritmo, sem sobressaltos" },
+      { id: "7_c", profile: "analista", text: "Prefiro caprichar nos detalhes a entregar rápido e com falhas" }
+    ]
   },
   {
     id: 8,
+    title: "Ao errar em alguma tarefa",
     options: [
-      { profile: "executor", text: "Gosto de metas difíceis." },
-      { profile: "comunicador", text: "Gosto de reconhecimento público." },
-      { profile: "planejador", text: "Gosto de estabilidade e segurança." },
-      { profile: "analista", text: "Gosto de trabalho bem-feito." },
-    ],
+      { id: "8_d", profile: "executor", text: "Sigo em frente rápido, não gosto de ficar remoendo" },
+      { id: "8_i", profile: "comunicador", text: "Comento abertamente, não escondo o erro" },
+      { id: "8_s", profile: "planejador", text: "Fico incomodado, mas evito criar alarde" },
+      { id: "8_c", profile: "analista", text: "Investigo a fundo o que causou o erro para não repetir" }
+    ]
   },
   {
     id: 9,
+    title: "Em relação a regras e processos",
     options: [
-      { profile: "executor", text: "Tomo a frente em situações de crise." },
-      { profile: "comunicador", text: "Busco aliados em situações de crise." },
-      { profile: "planejador", text: "Sustento o time em situações de crise." },
-      { profile: "analista", text: "Mapeio as causas em situações de crise." },
-    ],
+      { id: "9_d", profile: "executor", text: "Sigo as regras até onde elas não travam o resultado" },
+      { id: "9_i", profile: "comunicador", text: "Sigo as regras, mas não abro mão de manter um bom clima com todo mundo" },
+      { id: "9_s", profile: "planejador", text: "Sigo as regras como forma de manter a ordem" },
+      { id: "9_c", profile: "analista", text: "Sigo as regras à risca, questiono quando não fazem sentido" }
+    ]
   },
   {
     id: 10,
+    title: "Liderando ou influenciando outras pessoas",
     options: [
-      { profile: "executor", text: "Delego e cobro resultado." },
-      { profile: "comunicador", text: "Delego explicando o propósito." },
-      { profile: "planejador", text: "Delego acompanhando de perto." },
-      { profile: "analista", text: "Delego com instruções detalhadas." },
-    ],
+      { id: "10_d", profile: "executor", text: "Dou direção clara e cobro entrega" },
+      { id: "10_i", profile: "comunicador", text: "Inspiro e motivo pelo entusiasmo" },
+      { id: "10_s", profile: "planejador", text: "Apoio e dou suporte constante ao time" },
+      { id: "10_c", profile: "analista", text: "Oriento com base em dados e processos bem definidos" }
+    ]
   },
   {
     id: 11,
+    title: "Ao começar um projeto novo",
     options: [
-      { profile: "executor", text: "Mudança para mim é oportunidade." },
-      { profile: "comunicador", text: "Mudança para mim é novidade boa." },
-      { profile: "planejador", text: "Mudança para mim precisa de tempo." },
-      { profile: "analista", text: "Mudança para mim precisa de justificativa." },
-    ],
+      { id: "11_d", profile: "executor", text: "Já penso nas metas finais e no impacto" },
+      { id: "11_i", profile: "comunicador", text: "Já penso em quem vou envolver e como vender a ideia" },
+      { id: "11_s", profile: "planejador", text: "Prefiro ir no ritmo que já conheço, sem pressa pra mudar a forma de trabalhar" },
+      { id: "11_c", profile: "analista", text: "Levanto todas as informações antes de dar o primeiro passo" }
+    ]
   },
   {
     id: 12,
+    title: "Sob estresse prolongado",
     options: [
-      { profile: "executor", text: "Prefiro decidir sozinho e seguir." },
-      { profile: "comunicador", text: "Prefiro decidir conversando com gente." },
-      { profile: "planejador", text: "Prefiro decidir em consenso." },
-      { profile: "analista", text: "Prefiro decidir com evidência." },
-    ],
-  },
-  {
-    id: 13,
-    options: [
-      { profile: "executor", text: "Meu ritmo é acelerado." },
-      { profile: "comunicador", text: "Meu ritmo é variado e animado." },
-      { profile: "planejador", text: "Meu ritmo é constante." },
-      { profile: "analista", text: "Meu ritmo é cuidadoso." },
-    ],
-  },
-  {
-    id: 14,
-    options: [
-      { profile: "executor", text: "Erro faz parte, sigo em frente." },
-      { profile: "comunicador", text: "Erro eu compartilho e aprendo junto." },
-      { profile: "planejador", text: "Erro eu corrijo com calma." },
-      { profile: "analista", text: "Erro eu investigo a fundo." },
-    ],
-  },
-  {
-    id: 15,
-    options: [
-      { profile: "executor", text: "Gosto de autonomia total." },
-      { profile: "comunicador", text: "Gosto de trabalhar cercado de pessoas." },
-      { profile: "planejador", text: "Gosto de saber o que esperar do dia." },
-      { profile: "analista", text: "Gosto de regras e padrões definidos." },
-    ],
-  },
-  {
-    id: 16,
-    options: [
-      { profile: "executor", text: "Sou movido por desafio." },
-      { profile: "comunicador", text: "Sou movido por conexão." },
-      { profile: "planejador", text: "Sou movido por propósito e time." },
-      { profile: "analista", text: "Sou movido por excelência." },
-    ],
-  },
-  {
-    id: 17,
-    options: [
-      { profile: "executor", text: "Cobro de mim e dos outros." },
-      { profile: "comunicador", text: "Elogio bastante o time." },
-      { profile: "planejador", text: "Apoio quem está com dificuldade." },
-      { profile: "analista", text: "Aponto o que precisa ser corrigido." },
-    ],
-  },
-  {
-    id: 18,
-    options: [
-      { profile: "executor", text: "Prefiro começar e ajustar no caminho." },
-      { profile: "comunicador", text: "Prefiro alinhar com todos e começar." },
-      { profile: "planejador", text: "Prefiro combinar tudo antes de começar." },
-      { profile: "analista", text: "Prefiro planejar em detalhes antes de começar." },
-    ],
-  },
-  {
-    id: 19,
-    options: [
-      { profile: "executor", text: "Fico incomodado com lentidão." },
-      { profile: "comunicador", text: "Fico incomodado com ambiente frio." },
-      { profile: "planejador", text: "Fico incomodado com pressão e conflito." },
-      { profile: "analista", text: "Fico incomodado com desorganização." },
-    ],
-  },
-  {
-    id: 20,
-    options: [
-      { profile: "executor", text: "Quero ser lembrado pelos resultados." },
-      { profile: "comunicador", text: "Quero ser lembrado pelas pessoas que impactei." },
-      { profile: "planejador", text: "Quero ser lembrado pela confiança que passei." },
-      { profile: "analista", text: "Quero ser lembrado pela qualidade do que fiz." },
-    ],
-  },
+      { id: "12_d", profile: "executor", text: "Fico impaciente e mais direto do que de costume" },
+      { id: "12_i", profile: "comunicador", text: "Fico mais falante e busco apoio social" },
+      { id: "12_s", profile: "planejador", text: "Me fecho um pouco, evito mudanças adicionais" },
+      { id: "12_c", profile: "analista", text: "Fico mais crítico e exigente com detalhes" }
+    ]
+  }
 ];
-
-/** ---------------- Cálculo ---------------- */
 
 export interface Scores {
   executor: number;
@@ -320,210 +142,67 @@ export interface Scores {
   analista: number;
 }
 
-export const EMPTY_SCORES: Scores = {
-  executor: 0,
-  comunicador: 0,
-  planejador: 0,
-  analista: 0,
+export const PROFILES: Record<ProfileKey, { label: string; description: string }> = {
+  executor: { label: "Executor", description: "Focado em resultados, direto e decisivo." },
+  comunicador: { label: "Comunicador", description: "Persuasivo, entusiasmado e sociável." },
+  planejador: { label: "Planejador", description: "Estável, paciente e orientativo." },
+  analista: { label: "Analista", description: "Preciso, analítico e focado em qualidade." },
 };
 
 export function scoreAnswers(answers: Record<string, ProfileKey>): Scores {
-  const s: Scores = { ...EMPTY_SCORES };
-  for (const value of Object.values(answers)) {
-    if (value && value in s) s[value] += 1;
-  }
-  return s;
-}
-
-export function toPercentages(scores: Scores): Record<ProfileKey, number> {
-  const total = PROFILE_KEYS.reduce((acc, k) => acc + (scores[k] ?? 0), 0);
-  if (total <= 0) return { executor: 25, comunicador: 25, planejador: 25, analista: 25 };
-  const raw = PROFILE_KEYS.map((k) => ({ k, v: ((scores[k] ?? 0) / total) * 100 }));
-  const rounded = raw.map((r) => ({ k: r.k, v: Math.round(r.v) }));
-  const diff = 100 - rounded.reduce((a, r) => a + r.v, 0);
-  if (diff !== 0) {
-    const idx = rounded.reduce((best, r, i) => (r.v > rounded[best]!.v ? i : best), 0);
-    rounded[idx]!.v += diff;
-  }
-  return Object.fromEntries(rounded.map((r) => [r.k, r.v])) as Record<ProfileKey, number>;
+  const scores: Scores = { executor: 0, comunicador: 0, planejador: 0, analista: 0 };
+  Object.values(answers).forEach((profile) => {
+    if (scores[profile] !== undefined) {
+      scores[profile] += 1;
+    }
+  });
+  return scores;
 }
 
 export function dominantProfile(scores: Scores): ProfileKey {
-  return PROFILE_KEYS.reduce((best, k) => ((scores[k] ?? 0) > (scores[best] ?? 0) ? k : best), "executor");
+  let highestKey: ProfileKey = "executor";
+  let highestValue = -1;
+
+  (Object.keys(scores) as ProfileKey[]).forEach((key) => {
+    if (scores[key] > highestValue) {
+      highestValue = scores[key];
+      highestKey = key;
+    }
+  });
+
+  return highestKey;
 }
 
-export function rankProfiles(scores: Scores): ProfileKey[] {
-  return [...PROFILE_KEYS].sort((a, b) => (scores[b] ?? 0) - (scores[a] ?? 0));
+export function toPercentages(scores: Scores): Scores {
+  const total = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+  return {
+    executor: Math.round((scores.executor / total) * 100),
+    comunicador: Math.round((scores.comunicador / total) * 100),
+    planejador: Math.round((scores.planejador / total) * 100),
+    analista: Math.round((scores.analista / total) * 100),
+  };
 }
 
-type Weights = Partial<Record<ProfileKey, number>>;
-
-function weighted(pct: Record<ProfileKey, number>, w: Weights): number {
-  let sum = 0;
-  let total = 0;
-  for (const k of PROFILE_KEYS) {
-    const weight = w[k] ?? 0;
-    sum += (pct[k] ?? 0) * weight;
-    total += weight;
-  }
-  if (total === 0) return 0;
-  return Math.max(0, Math.min(100, Math.round((sum / total) * 2.2)));
+export function competencies(pct: Scores) {
+  return {
+    focoResultados: pct.executor,
+    comunicacao: pct.comunicador,
+    planejamento: pct.planejador,
+    qualidade: pct.analista,
+  };
 }
 
-/** ---------------- Competências ---------------- */
-
-const COMPETENCY_DEFS: { label: string; weights: Weights }[] = [
-  { label: "Foco em resultados", weights: { executor: 3, comunicador: 1 } },
-  { label: "Tomada de decisão", weights: { executor: 3, analista: 2 } },
-  { label: "Liderança", weights: { executor: 3, comunicador: 2 } },
-  { label: "Negociação", weights: { comunicador: 3, executor: 2 } },
-  { label: "Comunicação", weights: { comunicador: 4 } },
-  { label: "Relacionamento interpessoal", weights: { comunicador: 3, planejador: 2 } },
-  { label: "Influência e persuasão", weights: { comunicador: 4, executor: 1 } },
-  { label: "Trabalho em equipe", weights: { planejador: 3, comunicador: 2 } },
-  { label: "Empatia", weights: { planejador: 3, comunicador: 2 } },
-  { label: "Estabilidade emocional", weights: { planejador: 4 } },
-  { label: "Escuta ativa", weights: { planejador: 3, analista: 2 } },
-  { label: "Organização", weights: { analista: 3, planejador: 2 } },
-  { label: "Atenção a detalhes", weights: { analista: 4 } },
-  { label: "Análise crítica", weights: { analista: 4 } },
-  { label: "Qualidade e precisão", weights: { analista: 4, planejador: 1 } },
-  { label: "Planejamento", weights: { planejador: 3, analista: 3 } },
-  { label: "Adaptabilidade", weights: { comunicador: 3, executor: 2 } },
-  { label: "Iniciativa", weights: { executor: 3, comunicador: 2 } },
-  { label: "Resiliência", weights: { planejador: 3, executor: 2 } },
-  { label: "Aprendizado contínuo", weights: { analista: 3, comunicador: 2 } },
-];
-
-export interface Competency {
-  label: string;
-  value: number;
+export function indicators(dominant: ProfileKey) {
+  return {
+    perfilPredominante: PROFILES[dominant]?.label || dominant,
+  };
 }
 
-export function competencies(pct: Record<ProfileKey, number>): Competency[] {
-  return COMPETENCY_DEFS.map((c) => ({ label: c.label, value: weighted(pct, c.weights) }));
-}
-
-/** ---------------- Indicadores ---------------- */
-
-const INDICATOR_DEFS: { label: string; text: Record<ProfileKey, string> }[] = [
-  {
-    label: "Sob pressão",
-    text: {
-      executor: "Acelera, assume o controle e pode atropelar etapas.",
-      comunicador: "Fala mais, busca apoio e dispersa o foco.",
-      planejador: "Se fecha, absorve a tensão e evita expor o desconforto.",
-      analista: "Se retrai, revisa tudo e pode travar na análise.",
-    },
-  },
-  {
-    label: "Em conflitos",
-    text: {
-      executor: "Confronta direto e busca resolver rápido.",
-      comunicador: "Tenta contornar com conversa e bom humor.",
-      planejador: "Evita o embate e busca harmonizar.",
-      analista: "Argumenta com fatos e evita o lado emocional.",
-    },
-  },
-  {
-    label: "Ao decidir",
-    text: {
-      executor: "Decide rápido, com pouca informação, e ajusta depois.",
-      comunicador: "Decide pelo impacto nas pessoas e pela intuição.",
-      planejador: "Decide buscando consenso e evitando ruptura.",
-      analista: "Decide com dados, critério e cenário mapeado.",
-    },
-  },
-  {
-    label: "Ao comunicar",
-    text: {
-      executor: "Objetivo e direto; pode soar duro.",
-      comunicador: "Envolvente e expansivo; pode se alongar.",
-      planejador: "Calmo e acolhedor; pode faltar clareza no não.",
-      analista: "Preciso e técnico; pode soar distante.",
-    },
-  },
-  {
-    label: "Diante de mudanças",
-    text: {
-      executor: "Abraça a mudança se ela acelera o resultado.",
-      comunicador: "Vibra com a novidade e engaja os outros.",
-      planejador: "Precisa de tempo e previsibilidade para aderir.",
-      analista: "Precisa entender o porquê e ver o plano.",
-    },
-  },
-  {
-    label: "Ao delegar",
-    text: {
-      executor: "Delega o resultado e cobra o prazo.",
-      comunicador: "Delega inspirando; acompanha pouco o detalhe.",
-      planejador: "Delega e acompanha de perto, dando suporte.",
-      analista: "Delega com instrução detalhada e checa a execução.",
-    },
-  },
-  {
-    label: "Ao receber feedback",
-    text: {
-      executor: "Aceita se for direto e ligado a resultado.",
-      comunicador: "Reage ao tom; precisa de reconhecimento junto.",
-      planejador: "Absorve em silêncio; precisa de espaço seguro.",
-      analista: "Quer exemplos concretos e critérios claros.",
-    },
-  },
-  {
-    label: "Com prazos apertados",
-    text: {
-      executor: "Prioriza entrega e corta o que julgar acessório.",
-      comunicador: "Mobiliza gente para dar conta.",
-      planejador: "Reorganiza a rotina e sustenta o ritmo.",
-      analista: "Tenta manter o padrão de qualidade mesmo com o prazo.",
-    },
-  },
-  {
-    label: "No trabalho em equipe",
-    text: {
-      executor: "Puxa a frente e define o rumo.",
-      comunicador: "Conecta as pessoas e mantém o clima.",
-      planejador: "Sustenta o time e cuida de quem ficou para trás.",
-      analista: "Garante padrão, consistência e checagem.",
-    },
-  },
-];
-
-export interface Indicator {
-  label: string;
-  text: string;
-}
-
-export function indicators(dominant: ProfileKey): Indicator[] {
-  return INDICATOR_DEFS.map((i) => ({ label: i.label, text: i.text[dominant] }));
-}
-
-/** ---------------- Zonas de talento ---------------- */
-
-const TALENT_ZONE_DEFS: { label: string; weights: Weights }[] = [
-  { label: "Gestão e liderança de times", weights: { executor: 3, comunicador: 2 } },
-  { label: "Vendas e prospecção", weights: { comunicador: 3, executor: 3 } },
-  { label: "Atendimento e experiência do cliente", weights: { comunicador: 3, planejador: 3 } },
-  { label: "Marketing e conteúdo", weights: { comunicador: 3, analista: 2 } },
-  { label: "Treinamento e facilitação", weights: { comunicador: 3, planejador: 2 } },
-  { label: "Projetos e processos", weights: { planejador: 3, analista: 3 } },
-  { label: "Financeiro e controladoria", weights: { analista: 4, planejador: 2 } },
-  { label: "Dados e análise", weights: { analista: 4 } },
-  { label: "Tecnologia e produto", weights: { analista: 3, executor: 2 } },
-  { label: "Operações e logística", weights: { planejador: 3, executor: 2 } },
-  { label: "Recursos Humanos", weights: { planejador: 3, comunicador: 3 } },
-  { label: "Jurídico e compliance", weights: { analista: 4, planejador: 2 } },
-  { label: "Inovação e novos negócios", weights: { executor: 3, comunicador: 3 } },
-];
-
-export interface TalentZone {
-  label: string;
-  value: number;
-}
-
-export function talentZones(pct: Record<ProfileKey, number>): TalentZone[] {
-  return TALENT_ZONE_DEFS.map((z) => ({ label: z.label, value: weighted(pct, z.weights) })).sort(
-    (a, b) => b.value - a.value,
-  );
+export function talentZones(pct: Scores) {
+  return {
+    lideranca: pct.executor,
+    relacionamento: pct.comunicador,
+    estabilidade: pct.planejador,
+    organizacao: pct.analista,
+  };
 }
