@@ -50,9 +50,9 @@ serve(async (req) => {
               <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; margin: 0; padding: 40px 20px; }
                 .container { max-width: 580px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; }
-                .header { background-color: #0f172a; padding: 32px 40px; text-align: center; }
-                .header-title { color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-                .header-subtitle { color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-top: 6px; }
+                .header { background-color: #ff0068; padding: 32px 40px; text-align: center; }
+                .header-title { color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+                .header-subtitle { color: rgba(255, 255, 255, 0.85); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 6px; }
                 .content { padding: 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 12px; }
                 .text { font-size: 15px; color: #475569; line-height: 1.6; margin-bottom: 28px; }
@@ -67,7 +67,7 @@ serve(async (req) => {
             <body>
               <div class="container">
                 <div class="header">
-                  <div class="header-subtitle">Plataforma de Recursos Humanos</div>
+                  <div class="header-subtitle">PLATAFORMA DE RECURSOS HUMANOS</div>
                   <h1 class="header-title">VENDE-C Profiler</h1>
                 </div>
 
