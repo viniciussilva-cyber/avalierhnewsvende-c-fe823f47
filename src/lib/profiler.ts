@@ -1,5 +1,7 @@
 export type ProfileKey = 'executor' | 'comunicador' | 'planejador' | 'analista';
 
+export const PROFILE_KEYS: ProfileKey[] = ['executor', 'comunicador', 'planejador', 'analista'];
+
 export interface DiscOption {
   id: string;
   text: string;
@@ -171,6 +173,15 @@ export function dominantProfile(scores: Scores): ProfileKey {
   });
 
   return highestKey;
+}
+
+export function rankProfiles(scores: Scores): { key: ProfileKey; score: number; percentage: number }[] {
+  const pct = toPercentages(scores);
+  return PROFILE_KEYS.map((key) => ({
+    key,
+    score: scores[key] || 0,
+    percentage: pct[key] || 0,
+  })).sort((a, b) => b.score - a.score);
 }
 
 export function toPercentages(scores: Scores): Scores {
