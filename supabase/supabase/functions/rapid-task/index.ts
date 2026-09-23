@@ -30,7 +30,7 @@ serve(async (req) => {
       ANALISTA: "#7c3aed",
     };
 
-    const color = profileColors[profileLabel?.toUpperCase()] || "#7c3aed";
+    const color = profileColors[profileLabel?.toUpperCase()] || "#ff0068";
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -60,14 +60,14 @@ serve(async (req) => {
                 .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #64748b; margin-bottom: 8px; }
                 .profile-name { font-size: 26px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; }
                 .button-container { text-align: center; margin-bottom: 12px; }
-                .btn { display: inline-block; background-color: #7c3aed; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25); transition: all 0.2s ease; }
+                .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 12px rgba(255, 0, 104, 0.3); }
                 .footer { background-color: #f8fafc; padding: 24px 40px; text-align: center; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; }
               </style>
             </head>
             <body>
               <div class="container">
                 <div class="header">
-                  <div class="header-subtitle">Plataforma de Gestão de Pessoas</div>
+                  <div class="header-subtitle">Plataforma de Recursos Humanos</div>
                   <h1 class="header-title">VENDE-C Profiler</h1>
                 </div>
 
@@ -88,7 +88,7 @@ serve(async (req) => {
                 </div>
 
                 <div class="footer">
-                  <p style="margin: 0;">VENDE-C — Inteligência e Performance em Vendas</p>
+                  <p style="margin: 0; font-weight: 600;">VENDE-C — A maior escola de vendas do Brasil</p>
                   <p style="margin: 4px 0 0 0; font-size: 11px;">Este é um e-mail automático disparado pelo sistema.</p>
                 </div>
               </div>
