@@ -51,15 +51,9 @@ serve(async (req) => {
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px; }
                 .container { max-width: 580px; margin: 0 auto; background-color: #141414; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid #262626; }
                 .header { padding: 40px 40px 10px 40px; text-align: left; }
-                
-                /* Logo Estilizada VENDE-C */
-                .logo-container { display: flex; align-items: center; gap: 12px; }
-                .logo-icon { background-color: #ff0068; width: 42px; height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; margin-right: 12px; }
-                .logo-icon-arrow { color: #ffffff; font-size: 22px; font-weight: 900; line-height: 1; transform: rotate(45deg); display: inline-block; }
-                .logo-text { color: #ffffff; font-size: 32px; font-weight: 900; letter-spacing: -1px; margin: 0; display: inline-block; vertical-align: middle; }
+                .logo-text { color: #ffffff; font-size: 32px; font-weight: 900; letter-spacing: -1px; margin: 0; }
                 .logo-pink-dash { color: #ff0068; font-weight: 900; }
-                
-                .header-subtitle { color: #ffffff; font-size: 16px; font-weight: 600; margin-top: 12px; margin-bottom: 0; }
+                .header-subtitle { color: #ffffff; font-size: 16px; font-weight: 600; margin-top: 8px; margin-bottom: 0; }
                 .content { padding: 30px 40px 40px 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
                 .text { font-size: 15px; color: #ffffff; line-height: 1.6; margin-bottom: 28px; }
@@ -74,12 +68,7 @@ serve(async (req) => {
             <body>
               <div class="container">
                 <div class="header">
-                  <div class="logo-container">
-                    <div class="logo-icon">
-                      <span class="logo-icon-arrow">↑</span>
-                    </div>
-                    <h1 class="logo-text">VENDE<span class="logo-pink-dash">-</span>C</h1>
-                  </div>
+                  <h1 class="logo-text">VENDE<span class="logo-pink-dash">-</span>C</h1>
                   <p class="header-subtitle">A maior escola de vendas do Brasil</p>
                 </div>
 
