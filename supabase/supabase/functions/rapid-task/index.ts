@@ -22,7 +22,7 @@ serve(async (req) => {
       });
     }
 
-    // Cores oficiais dos perfis comportamentais
+    // Cores específicas para cada perfil comportamental
     const profileColors: Record<string, string> = {
       EXECUTOR: "#16a34a",     // Verde
       COMUNICADOR: "#ea580c",  // Laranja
@@ -50,29 +50,37 @@ serve(async (req) => {
               <style>
                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px; }
                 .container { max-width: 580px; margin: 0 auto; background-color: #141414; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid #262626; }
-                .header { padding: 40px 40px 20px 40px; text-align: left; }
-                .logo-text { color: #ffffff; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; margin: 0; }
-                .logo-pink { color: #ff0068; }
-                .header-subtitle { color: #ffffff; font-size: 14px; font-weight: 600; margin-top: 6px; }
-                .header-subtitle span { color: #ff0068; }
+                .header { padding: 40px 40px 10px 40px; text-align: left; }
+                
+                /* Logo Estilizada VENDE-C */
+                .logo-container { display: flex; align-items: center; gap: 12px; }
+                .logo-icon { background-color: #ff0068; width: 42px; height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; margin-right: 12px; }
+                .logo-icon-arrow { color: #ffffff; font-size: 22px; font-weight: 900; line-height: 1; transform: rotate(45deg); display: inline-block; }
+                .logo-text { color: #ffffff; font-size: 32px; font-weight: 900; letter-spacing: -1px; margin: 0; display: inline-block; vertical-align: middle; }
+                .logo-pink-dash { color: #ff0068; font-weight: 900; }
+                
+                .header-subtitle { color: #ffffff; font-size: 16px; font-weight: 600; margin-top: 12px; margin-bottom: 0; }
                 .content { padding: 30px 40px 40px 40px; }
                 .greeting { font-size: 18px; font-weight: 700; color: #ffffff; margin-top: 0; margin-bottom: 12px; }
-                .text { font-size: 15px; color: #a1a1aa; line-height: 1.6; margin-bottom: 28px; }
+                .text { font-size: 15px; color: #ffffff; line-height: 1.6; margin-bottom: 28px; }
                 .profile-card { background-color: #1f1f1f; border-radius: 16px; padding: 24px; border: 1px solid #2e2e2e; text-align: center; margin-bottom: 32px; }
-                .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #71717a; margin-bottom: 8px; }
+                .profile-tag { display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #a1a1aa; margin-bottom: 8px; }
                 .profile-name { font-size: 28px; font-weight: 900; color: ${color}; margin: 0; letter-spacing: -0.5px; }
                 .button-container { text-align: center; margin-bottom: 12px; }
                 .btn { display: inline-block; background-color: #ff0068; color: #ffffff !important; font-size: 15px; font-weight: 700; padding: 16px 36px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 0, 104, 0.4); }
-                .footer { background-color: #0f0f0f; padding: 32px 40px; border-top: 1px solid #262626; font-size: 12px; color: #71717a; }
-                .social-links { margin-top: 16px; margin-bottom: 16px; }
-                .social-btn { display: inline-block; background-color: #ff0068; color: #ffffff; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; text-decoration: none; font-weight: bold; margin-right: 8px; font-size: 14px; }
+                .footer { background-color: #0f0f0f; padding: 24px 40px; border-top: 1px solid #262626; font-size: 12px; color: #71717a; text-align: left; }
               </style>
             </head>
             <body>
               <div class="container">
                 <div class="header">
-                  <h1 class="logo-text">VENDE<span class="logo-pink">-C</span></h1>
-                  <p class="header-subtitle">A maior escola de vendas <span>do Brasil</span></p>
+                  <div class="logo-container">
+                    <div class="logo-icon">
+                      <span class="logo-icon-arrow">↑</span>
+                    </div>
+                    <h1 class="logo-text">VENDE<span class="logo-pink-dash">-</span>C</h1>
+                  </div>
+                  <p class="header-subtitle">A maior escola de vendas do Brasil</p>
                 </div>
 
                 <div class="content">
@@ -92,11 +100,6 @@ serve(async (req) => {
                 </div>
 
                 <div class="footer">
-                  <div class="social-links">
-                    <a href="https://youtube.com" class="social-btn" target="_blank">▶</a>
-                    <a href="https://instagram.com" class="social-btn" target="_blank">📷</a>
-                    <a href="https://linkedin.com" class="social-btn" target="_blank">in</a>
-                  </div>
                   <p style="margin: 0; color: #a1a1aa; font-weight: 500;">VENDE-C — Plataforma de Recursos Humanos</p>
                   <p style="margin: 4px 0 0 0; font-size: 11px;">Este é um e-mail automático disparado pelo sistema.</p>
                 </div>
