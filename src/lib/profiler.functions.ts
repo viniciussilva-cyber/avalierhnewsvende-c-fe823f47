@@ -1,345 +1,361 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useAuth } from "@/lib/auth";
+import { 
+  Plus, 
+  Search, 
+  UserCheck, 
+  Copy, 
+  Check, 
+  Trash2, 
+  ExternalLink, 
+  Loader2, 
+  RefreshCw 
+} from "lucide-react";
+import { toast } from "sonner";
 import {
-  QUESTIONS,
-  scoreAnswers,
-  dominantProfile,
-  toPercentages,
-  competencies,
-  indicators,
-  talentZones,
-  PROFILES,
-  type ProfileKey,
-  type Scores,
-} from "./profiler";
+  listProfilerEmployees,
+  listProfilerAssessments,
+  saveProfilerEmployee,
+  deleteProfilerEmployee,
+  toggleReassessmentPermission,
+  type ProfilerEmployee,
+} from "@/lib/profiler.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-export interface ProfilerEmployee {
-  id: string;
-  fullName: string;
-  email: string;
-  position: string;
-  sector: string;
-  leaderEmail: string;
-  active: boolean;
-  canReassess: boolean;
-  photoUrl: string;
-  createdAt: number;
-}
+export const Route = createFileRoute("/app/profiler/")({
+  head: () => ({
+    meta: [{ title: "Profiler · Gestão de Colaboradores" }],
+  }),
+  component: ProfilerDashboard,
+});
 
-export interface ProfilerAssessment {
-  id: string;
-  employeeId: string;
-  scores: Scores;
-  dominant: ProfileKey;
-  answers: Record<string, ProfileKey>;
-  notes: string;
-  updatedAt: number;
-}
+function ProfilerDashboard() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-function toJson(value: unknown) {
-  return JSON.parse(JSON.stringify(value)) as never;
-}
+  // Estados do Formulário
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [position, setPosition] = useState("");
+  const [sector, setSector] = useState("");
+  const [leaderEmail, setLeaderEmail] = useState("");
 
-function norm(v: string | null | undefined): string {
-  return (v ?? "").trim().toLowerCase();
-}
+  const fetchEmployees = useServerFn(listProfilerEmployees);
+  const fetchAssessments = useServerFn(listProfilerAssessments);
+  const saveEmployeeFn = useServerFn(saveProfilerEmployee);
+  const deleteEmployeeFn = useServerFn(deleteProfilerEmployee);
+  const toggleReassessFn = useServerFn(toggleReassessmentPermission);
 
-function assertInternalEmail(email: string) {
-  if (!norm(email).endsWith("@vende-c.com")) {
-    throw new Error("E-mail não autorizado.");
-  }
-}
-
-type EmployeeRow = {
-  id: string;
-  full_name: string | null;
-  email: string | null;
-  position: string | null;
-  sector: string | null;
-  leader_email: string | null;
-  active: boolean | null;
-  can_reassess: boolean | null;
-  photo_url: string | null;
-  created_at: string;
-};
-
-const EMPLOYEE_COLS =
-  "id, full_name, email, position, sector, leader_email, active, can_reassess, photo_url, created_at";
-
-function mapEmployee(r: EmployeeRow): ProfilerEmployee {
-  return {
-    id: r.id,
-    fullName: r.full_name ?? "",
-    email: r.email ?? "",
-    position: r.position ?? "",
-    sector: r.sector ?? "",
-    leaderEmail: r.leader_email ?? "",
-    active: r.active ?? true,
-    canReassess: r.can_reassess ?? false,
-    photoUrl: r.photo_url ?? "",
-    createdAt: new Date(r.created_at).getTime(),
-  };
-}
-
-type AssessmentRow = {
-  id: string;
-  employee_id: string;
-  score_executor: number | null;
-  score_comunicador: number | null;
-  score_planejador: number | null;
-  score_analista: number | null;
-  dominant: string | null;
-  answers: unknown;
-  notes: string | null;
-  updated_at: string;
-};
-
-const ASSESSMENT_COLS =
-  "id, employee_id, score_executor, score_comunicador, score_planejador, score_analista, dominant, answers, notes, updated_at";
-
-function mapAssessment(r: AssessmentRow): ProfilerAssessment {
-  return {
-    id: r.id,
-    employeeId: r.employee_id,
-    scores: {
-      executor: r.score_executor ?? 0,
-      comunicador: r.score_comunicador ?? 0,
-      planejador: r.score_planejador ?? 0,
-      analista: r.score_analista ?? 0,
-    },
-    dominant: (r.dominant as ProfileKey) ?? "executor",
-    answers: (r.answers as Record<string, ProfileKey>) ?? {},
-    notes: r.notes ?? "",
-    updatedAt: new Date(r.updated_at).getTime(),
-  };
-}
-
-/** ---------------- Colaboradores ---------------- */
-
-export const listProfilerEmployees = createServerFn({ method: "GET" }).handler(
-  async (): Promise<ProfilerEmployee[]> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("profiler_employees")
-      .select(EMPLOYEE_COLS)
-      .order("full_name", { ascending: true });
-    if (error) throw new Error(error.message);
-    return ((data ?? []) as EmployeeRow[]).map(mapEmployee);
-  },
-);
-
-export const getProfilerEmployee = createServerFn({ method: "GET" })
-  .validator((d: { id: string }) => d)
-  .handler(async ({ data }): Promise<ProfilerEmployee | null> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
-      .from("profiler_employees")
-      .select(EMPLOYEE_COLS)
-      .eq("id", data.id)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return row ? mapEmployee(row as EmployeeRow) : null;
+  const employeesQuery = useQuery({
+    queryKey: ["profiler-employees"],
+    queryFn: () => fetchEmployees(),
   });
 
-export const saveProfilerEmployee = createServerFn({ method: "POST" })
-  .validator(
-    (d: {
-      actorEmail: string;
-      id?: string;
-      fullName: string;
-      email: string;
-      position: string;
-      sector: string;
-      leaderEmail: string;
-      active: boolean;
-      photoUrl: string;
-    }) => d,
-  )
-  .handler(async ({ data }): Promise<{ id: string }> => {
-    assertInternalEmail(data.actorEmail);
-    if (!data.fullName?.trim()) throw new Error("Informe o nome do colaborador.");
-
-    const payload = {
-      full_name: data.fullName.trim().slice(0, 200),
-      email: norm(data.email).slice(0, 200),
-      position: (data.position ?? "").trim().slice(0, 200),
-      sector: (data.sector ?? "").trim().slice(0, 200),
-      leader_email: norm(data.leaderEmail).slice(0, 200),
-      active: data.active,
-      photo_url: (data.photoUrl ?? "").slice(0, 2000),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    if (data.id) {
-      const { error } = await supabaseAdmin
-        .from("profiler_employees")
-        .update(payload)
-        .eq("id", data.id);
-      if (error) throw new Error(error.message);
-      return { id: data.id };
-    }
-
-    const { data: row, error } = await supabaseAdmin
-      .from("profiler_employees")
-      .insert(payload)
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { id: (row as { id: string }).id };
+  const assessmentsQuery = useQuery({
+    queryKey: ["profiler-assessments"],
+    queryFn: () => fetchAssessments(),
   });
 
-export const deleteProfilerEmployee = createServerFn({ method: "POST" })
-  .validator((d: { actorEmail: string; id: string }) => d)
-  .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("profiler_employees").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
-export const toggleReassessmentPermission = createServerFn({ method: "POST" })
-  .validator((d: { actorEmail: string; employeeId: string; canReassess: boolean }) => d)
-  .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("profiler_employees")
-      .update({ can_reassess: data.canReassess, updated_at: new Date().toISOString() })
-      .eq("id", data.employeeId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
-  });
-
-/** ---------------- Avaliações ---------------- */
-
-export const listProfilerAssessments = createServerFn({ method: "GET" })
-  .validator((d?: { employeeId?: string }) => d)
-  .handler(async ({ data }): Promise<ProfilerAssessment[]> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let query = supabaseAdmin.from("profiler_assessments").select(ASSESSMENT_COLS);
-    if (data?.employeeId) {
-      query = query.eq("employee_id", data.employeeId);
-    }
-    const { data: rows, error } = await query.order("updated_at", { ascending: false });
-    if (error) throw new Error(error.message);
-    return ((rows ?? []) as AssessmentRow[]).map(mapAssessment);
-  });
-
-export const getProfilerAssessment = createServerFn({ method: "GET" })
-  .validator((d: { employeeId: string }) => d)
-  .handler(async ({ data }): Promise<ProfilerAssessment | null> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
-      .from("profiler_assessments")
-      .select(ASSESSMENT_COLS)
-      .eq("employee_id", data.employeeId)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (error) throw new Error(error.message);
-    return row ? mapAssessment(row as AssessmentRow) : null;
-  });
-
-export const submitProfilerAssessment = createServerFn({ method: "POST" })
-  .validator(
-    (d: { employeeId: string; answers: Record<string, ProfileKey>; origin?: string }) => d,
-  )
-  .handler(async ({ data }): Promise<ProfilerAssessment> => {
-    const answered = Object.keys(data.answers ?? {}).length;
-    if (answered < QUESTIONS.length) {
-      throw new Error("Responda todas as perguntas antes de enviar.");
-    }
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-    const { data: employeeRow, error: empError } = await supabaseAdmin
-      .from("profiler_employees")
-      .select(EMPLOYEE_COLS)
-      .eq("id", data.employeeId)
-      .maybeSingle();
-    if (empError) throw new Error(empError.message);
-    if (!employeeRow) throw new Error("Colaborador não encontrado.");
-
-    const employee = mapEmployee(employeeRow as EmployeeRow);
-
-    const { data: existingAssessments } = await supabaseAdmin
-      .from("profiler_assessments")
-      .select("id")
-      .eq("employee_id", data.employeeId)
-      .limit(1);
-
-    const hasPreviousAssessment = (existingAssessments ?? []).length > 0;
-
-    if (hasPreviousAssessment && !employee.canReassess) {
-      throw new Error("Você já realizou esta avaliação. Para refazer, solicite liberação ao RH.");
-    }
-
-    const scores = scoreAnswers(data.answers);
-    const dominant = dominantProfile(scores);
-    const pct = toPercentages(scores);
-
-    const payload = {
-      employee_id: data.employeeId,
-      score_executor: scores.executor,
-      score_comunicador: scores.comunicador,
-      score_planejador: scores.planejador,
-      score_analista: scores.analista,
-      dominant,
-      answers: toJson(data.answers),
-      competencies: toJson(competencies(pct)),
-      indicators: toJson(indicators(dominant)),
-      talent_zones: toJson(talentZones(pct)),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { data: inserted, error: insertError } = await supabaseAdmin
-      .from("profiler_assessments")
-      .insert(payload)
-      .select("id")
-      .single();
-
-    if (insertError) throw new Error(insertError.message);
-
-    await supabaseAdmin
-      .from("profiler_employees")
-      .update({ can_reassess: false, updated_at: new Date().toISOString() })
-      .eq("id", data.employeeId);
-
-    if (employee.leaderEmail) {
-      const profileInfo = PROFILES[dominant];
-      const baseUrl = data.origin || "https://avalierhnewsvende-c.vercel.app";
-      await supabaseAdmin.functions.invoke("rapid-task", {
-        body: {
-          leaderEmail: employee.leaderEmail,
-          employeeName: employee.fullName,
-          profileLabel: profileInfo?.label || dominant,
-          reportUrl: `${baseUrl}/app/profiler/colaborador/${employee.id}`,
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (!user?.email) throw new Error("Sessão inválida.");
+      return await saveEmployeeFn({
+        data: {
+          actorEmail: user.email,
+          fullName,
+          email,
+          position,
+          sector,
+          leaderEmail,
+          active: true,
+          photoUrl: "",
         },
       });
-    }
-
-    return {
-      id: (inserted as { id: string }).id,
-      employeeId: data.employeeId,
-      scores,
-      dominant,
-      answers: data.answers,
-      notes: "",
-      updatedAt: Date.now(),
-    };
+    },
+    onSuccess: () => {
+      toast.success("Colaborador cadastrado com sucesso!");
+      setIsModalOpen(false);
+      setFullName("");
+      setEmail("");
+      setPosition("");
+      setSector("");
+      setLeaderEmail("");
+      queryClient.invalidateQueries({ queryKey: ["profiler-employees"] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Erro ao salvar colaborador.");
+    },
   });
 
-export const saveProfilerNotes = createServerFn({ method: "POST" })
-  .validator((d: { actorEmail: string; employeeId: string; notes: string }) => d)
-  .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("profiler_assessments")
-      .update({ notes: (data.notes ?? "").slice(0, 20000), updated_at: new Date().toISOString() })
-      .eq("employee_id", data.employeeId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user?.email) throw new Error("Sessão inválida.");
+      return await deleteEmployeeFn({ data: { actorEmail: user.email, id } });
+    },
+    onSuccess: () => {
+      toast.success("Colaborador removido.");
+      queryClient.invalidateQueries({ queryKey: ["profiler-employees"] });
+    },
   });
+
+  const toggleReassessMutation = useMutation({
+    mutationFn: async ({ employeeId, canReassess }: { employeeId: string; canReassess: boolean }) => {
+      if (!user?.email) throw new Error("Sessão inválida.");
+      return await toggleReassessFn({
+        data: { actorEmail: user.email, employeeId, canReassess },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Permissão atualizada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["profiler-employees"] });
+    },
+  });
+
+  const handleCopyLink = (id: string) => {
+    const url = `${window.location.origin}/profiler/avaliacao/${id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    toast.success("Link de avaliação copiado!");
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const employees = employeesQuery.data ?? [];
+  const assessments = assessmentsQuery.data ?? [];
+
+  const filtered = employees.filter((e) =>
+    [e.fullName, e.position, e.sector].some((field) =>
+      field.toLowerCase().includes(search.toLowerCase())
+    )
+  );
+
+  return (
+    <div className="min-h-screen bg-background p-6 md:p-10">
+      <div className="mx-auto max-w-6xl space-y-8">
+        {/* Cabeçalho */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">
+              Perfil Comportamental
+            </p>
+            <h1 className="text-3xl font-extrabold text-foreground">Colaboradores</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {employees.length} colaboradores cadastrados. Copie o link da avaliação e envie para quem vai responder.
+            </p>
+          </div>
+
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <button className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:opacity-90 active:scale-95">
+                <Plus className="h-4 w-4" /> Novo colaborador
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Cadastrar Novo Colaborador</DialogTitle>
+              </DialogHeader>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  saveMutation.mutate();
+                }}
+                className="space-y-4 pt-4"
+              >
+                <div>
+                  <label className="text-xs font-semibold text-foreground">Nome completo *</label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Ex: João Silva"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-foreground">E-mail do colaborador</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="joao@vende-c.com"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-foreground">Cargo</label>
+                    <input
+                      type="text"
+                      value={position}
+                      onChange={(e) => setPosition(e.target.value)}
+                      placeholder="Ex: Executivo de Vendas"
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-foreground">Setor</label>
+                    <input
+                      type="text"
+                      value={sector}
+                      onChange={(e) => setSector(e.target.value)}
+                      placeholder="Ex: Comercial"
+                      className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-foreground">E-mail do Líder Direto</label>
+                  <input
+                    type="email"
+                    value={leaderEmail}
+                    onChange={(e) => setLeaderEmail(e.target.value)}
+                    placeholder="lider@vende-c.com"
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-secondary"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saveMutation.isPending}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+                  >
+                    {saveMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    Salvar Colaborador
+                  </button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Barra de Pesquisa */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome, cargo ou setor..."
+            className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+
+        {/* Tabela / Lista */}
+        {employeesQuery.isLoading ? (
+          <div className="flex py-20 justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-card/50 py-16 text-center">
+            <p className="text-sm text-muted-foreground">
+              Nenhum colaborador encontrado. Cadastre o primeiro para gerar o link da avaliação.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((emp) => {
+              const hasAssessment = assessments.some((a) => a.employeeId === emp.id);
+
+              return (
+                <div
+                  key={emp.id}
+                  className="flex flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all hover:border-primary/40"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-bold text-foreground">{emp.fullName}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {emp.position || "Sem cargo"} {emp.sector ? `· ${emp.sector}` : ""}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => deleteMutation.mutate(emp.id)}
+                        className="text-muted-foreground transition-colors hover:text-destructive"
+                        title="Excluir colaborador"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      <strong>Líder:</strong> {emp.leaderEmail || "Não informado"}
+                    </p>
+
+                    <div className="pt-2">
+                      {hasAssessment ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-500">
+                          <UserCheck className="h-3 w-3" /> Avaliação Concluída
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-500">
+                          Pendente de resposta
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-col gap-2 border-t border-border/60 pt-4">
+                    <button
+                      onClick={() => handleCopyLink(emp.id)}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary"
+                    >
+                      {copiedId === emp.id ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-500" /> Link Copiado!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" /> Copiar Link da Avaliação
+                        </>
+                      )}
+                    </button>
+
+                    {hasAssessment && (
+                      <button
+                        onClick={() =>
+                          toggleReassessMutation.mutate({
+                            employeeId: emp.id,
+                            canReassess: !emp.canReassess,
+                          })
+                        }
+                        className={`inline-flex items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors ${
+                          emp.canReassess
+                            ? "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                            : "border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        }`}
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        {emp.canReassess ? "Liberado para refazer" : "Liberar novo teste"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
