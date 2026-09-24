@@ -7,7 +7,6 @@ import {
   Plus, 
   Search, 
   Copy, 
-  Check, 
   Trash2, 
   Loader2, 
   RefreshCw,
@@ -168,7 +167,7 @@ function ProfilerDashboard() {
             </p>
             <h1 className="text-4xl font-extrabold text-white tracking-tight mt-1">Colaboradores</h1>
             <p className="mt-1 text-sm text-zinc-400">
-              {employees.length} colaborador cadastrados. Copie o link da avaliação e envie para quem vai responder.
+              {employees.length} colaboradores cadastrados. Copie o link da avaliação e envie para quem vai responder.
             </p>
           </div>
 
@@ -331,23 +330,23 @@ function ProfilerDashboard() {
                       </div>
 
                       {dominant && (
-                        <span className="text-[11px] font-black uppercase tracking-wider text-white">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-[#ff0068]">
                           {dominant}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-6 flex items-center gap-2 pt-4">
+                  <div className="mt-6 flex items-center gap-2 pt-4 border-t border-zinc-800/60">
                     {assessment ? (
-                      <a
-                        href={`/profiler/avaliacao/${emp.id}`}
+                      <Link
+                        to="/app/profiler/colaborador/$employeeId"
+                        params={{ employeeId: emp.id }}
                         target="_blank"
-                        rel="noreferrer"
                         className="rounded-lg border border-zinc-700/80 bg-zinc-800/80 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-zinc-700 transition-colors"
                       >
                         Ver relatório
-                      </a>
+                      </Link>
                     ) : null}
 
                     <button
