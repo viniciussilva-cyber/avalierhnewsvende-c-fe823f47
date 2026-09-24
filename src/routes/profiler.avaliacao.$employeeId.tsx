@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Sparkles, ArrowRight, ArrowLeft, ShieldAlert } from "lucide-react";
+import { Loader2, Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QUESTIONS, scoreAnswers, type ProfileKey, type BlockAnswer, type Scores } from "@/lib/profiler";
 import {
@@ -105,27 +105,8 @@ function AssessmentPage() {
     );
   }
 
-  if (existingAssessment && !employee.canReassess && !done) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="mx-auto flex max-w-lg flex-col items-center justify-center px-6 py-20 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <ShieldAlert className="h-8 w-8" />
-          </div>
-          <h2 className="mt-4 text-xl font-bold text-foreground">Avaliação já realizada</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Olá, <strong className="text-foreground">{employee.fullName}</strong>. Você já respondeu ao seu teste comportamental.
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Caso precise refazer para um novo acompanhamento, solicite a liberação ao RH.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // EXIBE O RELATÓRIO QUANDO CONCLUÍDO (OU SE JÁ EXISTIA)
+  // PRIMEIRO VERIFICA SE JÁ EXISTE RELATÓRIO OU SE FOI CONCLUÍDO AGORA.
+  // SE EXISTIR, EXIBE O RELATÓRIO IMEDIATAMENTE PARA QUEM RESPONDEU OU PARA QUEM ACESSOU O LINK.
   if (done || existingAssessment) {
     const finalScores = assessmentResult?.scores || existingAssessment?.scores || currentScores;
 
