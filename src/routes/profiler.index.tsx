@@ -44,7 +44,6 @@ function ProfilerDashboard() {
   const [copiedLeader, setCopiedLeader] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Estados do Formulário
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [position, setPosition] = useState("");
@@ -154,6 +153,14 @@ function ProfilerDashboard() {
       .join("")
       .substring(0, 2)
       .toUpperCase();
+  };
+
+  // Cores dinâmicas para o Perfil
+  const profileColorMap: Record<string, string> = {
+    EXECUTOR: "text-emerald-400",
+    COMUNICADOR: "text-orange-400",
+    PLANEJADOR: "text-sky-400",
+    ANALISTA: "text-purple-400",
   };
 
   return (
@@ -309,6 +316,7 @@ function ProfilerDashboard() {
             {filtered.map((emp) => {
               const assessment = assessments.find((a) => a.employeeId === emp.id);
               const dominant = assessment?.dominant?.toUpperCase();
+              const profileTextColor = dominant ? (profileColorMap[dominant] || "text-white") : "text-white";
 
               return (
                 <div
@@ -330,7 +338,7 @@ function ProfilerDashboard() {
                       </div>
 
                       {dominant && (
-                        <span className="text-[11px] font-black uppercase tracking-wider text-[#ff0068]">
+                        <span className={`text-[12px] font-black uppercase tracking-wider ${profileTextColor}`}>
                           {dominant}
                         </span>
                       )}
@@ -339,14 +347,14 @@ function ProfilerDashboard() {
 
                   <div className="mt-6 flex items-center gap-2 pt-4 border-t border-zinc-800/60">
                     {assessment ? (
-                      <Link
-                        to="/app/profiler/colaborador/$employeeId"
-                        params={{ employeeId: emp.id }}
+                      <a
+                        href={`/app/profiler/colaborador/${emp.id}`}
                         target="_blank"
+                        rel="noreferrer"
                         className="rounded-lg border border-zinc-700/80 bg-zinc-800/80 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-zinc-700 transition-colors"
                       >
                         Ver relatório
-                      </Link>
+                      </a>
                     ) : null}
 
                     <button
