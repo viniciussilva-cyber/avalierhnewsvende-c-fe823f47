@@ -10,7 +10,6 @@ import {
   PROFILES,
   type ProfileKey,
   type Scores,
-  type BlockAnswer,
 } from "./profiler";
 
 export interface ProfilerEmployee {
@@ -42,12 +41,6 @@ function toJson(value: unknown) {
 
 function norm(v: string | null | undefined): string {
   return (v ?? "").trim().toLowerCase();
-}
-
-function assertInternalEmail(email: string) {
-  if (!norm(email).endsWith("@vende-c.com")) {
-    throw new Error("E-mail não autorizado.");
-  }
 }
 
 type EmployeeRow = {
@@ -122,7 +115,7 @@ export const listProfilerEmployees = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabaseAdmin
       .from("profiler_employees")
       .select(EMPLOYEE_COLS)
-      .order("full_name", { ascending: true });
+      .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return ((data ?? []) as EmployeeRow[]).map(mapEmployee);
   },
@@ -144,7 +137,7 @@ export const getProfilerEmployee = createServerFn({ method: "GET" })
 export const saveProfilerEmployee = createServerFn({ method: "POST" })
   .validator(
     (d: {
-      actorEmail: string;
+      actorEmail?: string;
       id?: string;
       fullName: string;
       email: string;
@@ -156,7 +149,6 @@ export const saveProfilerEmployee = createServerFn({ method: "POST" })
     }) => d,
   )
   .handler(async ({ data }): Promise<{ id: string }> => {
-    assertInternalEmail(data.actorEmail);
     if (!data.fullName?.trim()) throw new Error("Informe o nome do colaborador.");
 
     const payload = {
@@ -191,9 +183,8 @@ export const saveProfilerEmployee = createServerFn({ method: "POST" })
   });
 
 export const deleteProfilerEmployee = createServerFn({ method: "POST" })
-  .validator((d: { actorEmail: string; id: string }) => d)
+  .validator((d: { actorEmail?: string; id: string }) => d)
   .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("profiler_employees").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -201,9 +192,8 @@ export const deleteProfilerEmployee = createServerFn({ method: "POST" })
   });
 
 export const toggleReassessmentPermission = createServerFn({ method: "POST" })
-  .validator((d: { actorEmail: string; employeeId: string; canReassess: boolean }) => d)
+  .validator((d: { actorEmail?: string; employeeId: string; canReassess: boolean }) => d)
   .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("profiler_employees")
@@ -330,17 +320,4 @@ export const submitProfilerAssessment = createServerFn({ method: "POST" })
       notes: "",
       updatedAt: Date.now(),
     };
-  });
-
-export const saveProfilerNotes = createServerFn({ method: "POST" })
-  .validator((d: { actorEmail: string; employeeId: string; notes: string }) => d)
-  .handler(async ({ data }) => {
-    assertInternalEmail(data.actorEmail);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("profiler_assessments")
-      .update({ notes: (data.notes ?? "").slice(0, 20000), updated_at: new Date().toISOString() })
-      .eq("employee_id", data.employeeId);
-    if (error) throw new Error(error.message);
-    return { ok: true };
   });
