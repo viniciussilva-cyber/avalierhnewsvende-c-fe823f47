@@ -1,6 +1,6 @@
 import React from "react";
 import { PROFILES, type ProfileKey, type Scores, toPercentages } from "@/lib/profiler";
-import { CheckCircle2, User, Target, Zap, AlertTriangle, Building2, Shield, HeartHandshake } from "lucide-react";
+import { CheckCircle2, Zap, AlertTriangle, Building2, HeartHandshake } from "lucide-react";
 
 interface ProfilerReportProps {
   name: string;
@@ -10,16 +10,25 @@ interface ProfilerReportProps {
   celebrate?: boolean;
 }
 
-// Detalhes aprofundados para cada perfil no relatório
+// URLs dos Mascotes 3D VENDE-C
+const MASCOTS_3D: Record<ProfileKey, string> = {
+  executor: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Running.png",
+  comunicador: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png",
+  planejador: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Office%20Worker.png",
+  analista: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Scientist.png",
+};
+
 const REPORT_DETAILS: Record<
   ProfileKey,
   {
     tagline: string;
     descriptionLong: string;
-    color: string;
-    badgeBg: string;
-    border: string;
-    barColor: string;
+    colorHex: string;
+    textClass: string;
+    borderClass: string;
+    bgClass: string;
+    barClass: string;
+    ringClass: string;
     pontosFortes: string[];
     pontosAtencao: string[];
     comportamento: Record<string, string>;
@@ -32,10 +41,12 @@ const REPORT_DETAILS: Record<
     tagline: "Tira do papel e faz acontecer.",
     descriptionLong:
       "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
-    color: "#16a34a",
-    badgeBg: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-    border: "border-emerald-500/30",
-    barColor: "bg-emerald-500",
+    colorHex: "#22c55e",
+    textClass: "text-emerald-400",
+    borderClass: "border-emerald-500/40",
+    bgClass: "bg-emerald-500/10",
+    barClass: "bg-emerald-500",
+    ringClass: "ring-emerald-500",
     pontosFortes: [
       "Velocidade de decisão e execução",
       "Foco em meta e resultado",
@@ -59,11 +70,11 @@ const REPORT_DETAILS: Record<
       "NO TRABALHO EM EQUIPE": "Puxa a frente e define o rumo.",
     },
     ondeRendeMais: [
-      { area: "Gestão e liderança de times", baseScore: 98 },
-      { area: "Vendas e prospecção", baseScore: 95 },
-      { area: "Inovação e novos negócios", baseScore: 92 },
-      { area: "Tecnologia e produto", baseScore: 85 },
-      { area: "Operações e logística", baseScore: 78 },
+      { area: "Gestão e liderança de times", baseScore: 100 },
+      { area: "Vendas e prospecção", baseScore: 99 },
+      { area: "Inovação e novos negócios", baseScore: 99 },
+      { area: "Tecnologia e produto", baseScore: 88 },
+      { area: "Operações e logística", baseScore: 75 },
     ],
     ambienteIdeal: "Metas desafiadoras, autonomia real e pouco engessamento burocrático.",
     comoLiderar: "Seja direto, combine o resultado esperado e dê autonomia sobre o caminho.",
@@ -72,10 +83,12 @@ const REPORT_DETAILS: Record<
     tagline: "Conecta pessoas, compartilha ideias e gera movimento.",
     descriptionLong:
       "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
-    color: "#ea580c",
-    badgeBg: "bg-orange-500/10 text-orange-400 border-orange-500/30",
-    border: "border-orange-500/30",
-    barColor: "bg-orange-500",
+    colorHex: "#f97316",
+    textClass: "text-orange-400",
+    borderClass: "border-orange-500/40",
+    bgClass: "bg-orange-500/10",
+    barClass: "bg-orange-500",
+    ringClass: "ring-orange-500",
     pontosFortes: [
       "Facilidade de comunicação e engajamento",
       "Poder de persuasão e otimismo",
@@ -99,11 +112,11 @@ const REPORT_DETAILS: Record<
       "NO TRABALHO EM EQUIPE": "Integra e anima o grupo constantemente.",
     },
     ondeRendeMais: [
-      { area: "Vendas e negociações de alto impacto", baseScore: 98 },
-      { area: "Marketing e comunicação institucional", baseScore: 95 },
-      { area: "Gestão de pessoas e cultura", baseScore: 90 },
-      { area: "Atendimento e experiência do cliente", baseScore: 88 },
-      { area: "Liderança motivacional", baseScore: 85 },
+      { area: "Vendas e negociações de alto impacto", baseScore: 100 },
+      { area: "Marketing e comunicação institucional", baseScore: 96 },
+      { area: "Gestão de pessoas e cultura", baseScore: 92 },
+      { area: "Atendimento e experiência do cliente", baseScore: 90 },
+      { area: "Liderança motivacional", baseScore: 86 },
     ],
     ambienteIdeal: "Ambiente dinâmico, colaborativo, leve e com interação constante.",
     comoLiderar: "Dê reconhecimento público, valorize as ideias e apoie no acompanhamento de detalhes.",
@@ -112,10 +125,12 @@ const REPORT_DETAILS: Record<
     tagline: "Pensa no hoje, projeta o amanhã.",
     descriptionLong:
       "Perfil estável, metodológico e confiável. Garante consistência, mantém o ambiente em harmonia e cumpre compromissos com lealdade.",
-    color: "#0284c7",
-    badgeBg: "bg-sky-500/10 text-sky-400 border-sky-500/30",
-    border: "border-sky-500/30",
-    barColor: "bg-sky-500",
+    colorHex: "#38bdf8",
+    textClass: "text-sky-400",
+    borderClass: "border-sky-500/40",
+    bgClass: "bg-sky-500/10",
+    barClass: "bg-sky-500",
+    ringClass: "ring-sky-500",
     pontosFortes: [
       "Constância e ritmo previsível",
       "Escuta ativa e empatia elevada",
@@ -139,11 +154,11 @@ const REPORT_DETAILS: Record<
       "NO TRABALHO EM EQUIPE": "Sustenta a rotina e dá apoio prático a todos.",
     },
     ondeRendeMais: [
-      { area: "Operações e processos continuados", baseScore: 98 },
-      { area: "Recursos Humanos e Acompanhamento", baseScore: 94 },
-      { area: "Sucesso do Cliente (Customer Success)", baseScore: 90 },
-      { area: "Gestão de Projetos e Planejamento", baseScore: 88 },
-      { area: "Suporte e Garantia de Qualidade", baseScore: 82 },
+      { area: "Operações e processos continuados", baseScore: 99 },
+      { area: "Recursos Humanos e Acompanhamento", baseScore: 95 },
+      { area: "Sucesso do Cliente (Customer Success)", baseScore: 92 },
+      { area: "Gestão de Projetos e Planejamento", baseScore: 89 },
+      { area: "Suporte e Garantia de Qualidade", baseScore: 84 },
     ],
     ambienteIdeal: "Ambiente calmo, com rotina estruturada, previsibilidade e cooperação.",
     comoLiderar: "Avise sobre mudanças com antecedência, ofereça suporte e evite pressões agressivas.",
@@ -152,10 +167,12 @@ const REPORT_DETAILS: Record<
     tagline: "Observa, analisa e encontra o que outros não veem.",
     descriptionLong:
       "Perfil preciso, criterioso e disciplinado. Focado em qualidade, dados e regras bem definidas para garantir padrão de excelência.",
-    color: "#7c3aed",
-    badgeBg: "bg-purple-500/10 text-purple-400 border-purple-500/30",
-    border: "border-purple-500/30",
-    barColor: "bg-purple-500",
+    colorHex: "#c084fc",
+    textClass: "text-purple-400",
+    borderClass: "border-purple-500/40",
+    bgClass: "bg-purple-500/10",
+    barClass: "bg-purple-500",
+    ringClass: "ring-purple-500",
     pontosFortes: [
       "Atenção minuciosa aos detalhes e dados",
       "Alto padrão de qualidade e precisão",
@@ -179,11 +196,11 @@ const REPORT_DETAILS: Record<
       "NO TRABALHO EM EQUIPE": "Garante a precisão e revisa as entregas do time.",
     },
     ondeRendeMais: [
-      { area: "Auditoria, Compliance e Qualidade", baseScore: 98 },
-      { area: "Análise de Dados e Finanças", baseScore: 95 },
-      { area: "Engenharia, TI e Arquitetura", baseScore: 92 },
-      { area: "Jurídico e Contratos", baseScore: 90 },
-      { area: "Pesquisa e Desenvolvimento", baseScore: 85 },
+      { area: "Auditoria, Compliance e Qualidade", baseScore: 99 },
+      { area: "Análise de Dados e Finanças", baseScore: 96 },
+      { area: "Engenharia, TI e Arquitetura", baseScore: 93 },
+      { area: "Jurídico e Contratos", baseScore: 91 },
+      { area: "Pesquisa e Desenvolvimento", baseScore: 86 },
     ],
     ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
@@ -193,7 +210,6 @@ const REPORT_DETAILS: Record<
 export function ProfilerReport({ name, position, sector, scores, celebrate }: ProfilerReportProps) {
   const pct = toPercentages(scores || { executor: 0, comunicador: 0, planejador: 0, analista: 0 });
 
-  // Descobre o perfil dominante
   let dominantKey: ProfileKey = "executor";
   let maxVal = -1;
   (Object.keys(pct) as ProfileKey[]).forEach((key) => {
@@ -205,7 +221,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const mainDetails = REPORT_DETAILS[dominantKey] || REPORT_DETAILS.executor;
 
-  // Cálculo das 20 Competências baseado nas porcentagens do DISC
   const calculateCompetencies = (p: Scores) => {
     const e = p.executor || 0;
     const c = p.comunicador || 0;
@@ -213,26 +228,26 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
     const a = p.analista || 0;
 
     return [
-      { label: "Foco em resultados", value: Math.round(e * 0.95 + c * 0.2 + a * 0.1) },
-      { label: "Liderança", value: Math.round(e * 0.9 + c * 0.4) },
-      { label: "Tomada de decisão", value: Math.round(e * 0.85 + a * 0.3) },
-      { label: "Negociação", value: Math.round(c * 0.7 + e * 0.5) },
-      { label: "Comunicação", value: Math.round(c * 0.95 + e * 0.2) },
-      { label: "Influência e persuasão", value: Math.round(c * 0.9 + e * 0.3) },
-      { label: "Empatia", value: Math.round(s * 0.8 + c * 0.5) },
-      { label: "Escuta ativa", value: Math.round(s * 0.85 + a * 0.4) },
-      { label: "Atenção a detalhes", value: Math.round(a * 0.95 + s * 0.3) },
-      { label: "Qualidade e precisão", value: Math.round(a * 0.98 + s * 0.2) },
-      { label: "Adaptabilidade", value: Math.round(c * 0.6 + e * 0.5) },
-      { label: "Resiliência", value: Math.round(e * 0.8 + s * 0.4) },
-      { label: "Relacionamento interpessoal", value: Math.round(c * 0.9 + s * 0.4) },
-      { label: "Trabalho em equipe", value: Math.round(s * 0.85 + c * 0.5) },
-      { label: "Estabilidade emocional", value: Math.round(s * 0.9 + a * 0.3) },
-      { label: "Organização", value: Math.round(a * 0.7 + s * 0.6) },
-      { label: "Análise crítica", value: Math.round(a * 0.9 + e * 0.3) },
-      { label: "Planejamento", value: Math.round(s * 0.7 + a * 0.6) },
-      { label: "Iniciativa", value: Math.round(e * 0.95 + c * 0.4) },
-      { label: "Aprendizado contínuo", value: Math.round(a * 0.7 + s * 0.4) },
+      { label: "Foco em resultados", value: Math.round(e * 0.98 + c * 0.1) },
+      { label: "Liderança", value: Math.round(e * 0.95 + c * 0.3) },
+      { label: "Tomada de decisão", value: Math.round(e * 0.9 + a * 0.2) },
+      { label: "Negociação", value: Math.round(c * 0.8 + e * 0.6) },
+      { label: "Comunicação", value: Math.round(c * 0.98 + e * 0.1) },
+      { label: "Influência e persuasão", value: Math.round(c * 0.92 + e * 0.3) },
+      { label: "Empatia", value: Math.round(s * 0.85 + c * 0.4) },
+      { label: "Escuta ativa", value: Math.round(s * 0.9 + a * 0.3) },
+      { label: "Atenção a detalhes", value: Math.round(a * 0.98 + s * 0.2) },
+      { label: "Qualidade e precisão", value: Math.round(a * 0.98 + s * 0.1) },
+      { label: "Adaptabilidade", value: Math.round(c * 0.7 + e * 0.5) },
+      { label: "Resiliência", value: Math.round(e * 0.85 + s * 0.3) },
+      { label: "Relacionamento interpessoal", value: Math.round(c * 0.95 + s * 0.3) },
+      { label: "Trabalho em equipe", value: Math.round(s * 0.9 + c * 0.4) },
+      { label: "Estabilidade emocional", value: Math.round(s * 0.92 + a * 0.2) },
+      { label: "Organização", value: Math.round(a * 0.8 + s * 0.5) },
+      { label: "Análise crítica", value: Math.round(a * 0.95 + e * 0.2) },
+      { label: "Planejamento", value: Math.round(s * 0.8 + a * 0.5) },
+      { label: "Iniciativa", value: Math.round(e * 0.98 + c * 0.3) },
+      { label: "Aprendizado contínuo", value: Math.round(a * 0.8 + s * 0.3) },
     ].map((comp) => ({ ...comp, value: Math.min(100, Math.max(0, comp.value)) }));
   };
 
@@ -240,33 +255,53 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   return (
     <div className="space-y-10 text-white font-sans">
+      {/* Import de Fonte de Destaque Big Shoulders */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&display=swap');
+        .font-big-shoulders {
+          font-family: 'Big Shoulders Display', sans-serif;
+          letter-spacing: 0.05em;
+        }
+      `}</style>
+
       {celebrate && (
         <div className="rounded-2xl border border-zinc-800 bg-[#141414] p-6 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-[#ff0068]" />
-          <h2 className="mt-3 text-2xl font-black">Avaliação Concluída com Sucesso!</h2>
+          <h2 className="mt-3 text-2xl font-black font-big-shoulders uppercase">Avaliação Concluída com Sucesso!</h2>
           <p className="mt-1 text-xs text-zinc-400">
             Obrigado, {name.split(" ")[0]}. Seu perfil foi mapeado e disponibilizado.
           </p>
         </div>
       )}
 
-      {/* Cartão de Topo - Identificação */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">{name}</h1>
-            <p className="text-sm font-semibold text-zinc-400 mt-1">
-              {position || "Colaborador"} {sector ? `· ${sector}` : ""}
-            </p>
-          </div>
-          <div className={`self-start sm:self-auto rounded-2xl border px-4 py-2 ${mainDetails.badgeBg}`}>
-            <span className="text-[10px] font-black uppercase tracking-wider block">PERFIL PREDOMINANTE</span>
-            <span className="text-lg font-black">{PROFILES[dominantKey]?.label}</span>
+      {/* Cartão de Topo - Com Mascote 3D */}
+      <div className={`rounded-3xl border ${mainDetails.borderClass} bg-[#141414] p-8 space-y-6 relative overflow-hidden shadow-2xl`}>
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-6">
+            <div className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner`}>
+              <img
+                src={MASCOTS_3D[dominantKey]}
+                alt={`Mascote 3D ${PROFILES[dominantKey].label}`}
+                className="h-24 w-24 object-contain drop-shadow-md"
+              />
+            </div>
+
+            <div>
+              <h1 className="text-4xl font-extrabold text-white tracking-tight">{name}</h1>
+              <p className="text-sm font-semibold text-zinc-400 mt-1">
+                {position || "Colaborador"} {sector ? `· ${sector}` : ""}
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2">
+                <span className={`text-xs font-black uppercase tracking-wider ${mainDetails.textClass}`}>
+                  Perfil predominantemente: {PROFILES[dominantKey].label}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-[#1a1a1a] p-6">
-          <h2 className="text-xl font-extrabold text-[#ff0068]">{mainDetails.tagline}</h2>
+        <div className="rounded-2xl border border-zinc-800/80 bg-[#1a1a1a] p-6">
+          <h2 className="text-2xl font-black text-[#ff0068] font-big-shoulders uppercase">{mainDetails.tagline}</h2>
           <p className="mt-2 text-sm text-zinc-300 leading-relaxed">{mainDetails.descriptionLong}</p>
         </div>
       </div>
@@ -274,7 +309,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       {/* Distribuição do Perfil */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
         <div>
-          <h3 className="text-lg font-extrabold text-white">Distribuição do seu perfil</h3>
+          <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Distribuição do seu perfil</h3>
           <p className="text-xs text-zinc-400 mt-1">
             Todo mundo tem um pouco dos quatro. O que muda é a intensidade de cada um.
           </p>
@@ -291,18 +326,18 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
               <div
                 key={key}
                 className={`rounded-2xl border p-5 transition-all ${
-                  isDominant ? `${pDet.border} bg-[#1a1a1a]` : "border-zinc-800/80 bg-zinc-900/40"
+                  isDominant ? `${pDet.borderClass} bg-[#1a1a1a]` : "border-zinc-800/80 bg-zinc-900/40"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-sm font-bold ${isDominant ? "text-white" : "text-zinc-400"}`}>
+                  <span className={`text-base font-black font-big-shoulders uppercase ${isDominant ? pDet.textClass : "text-zinc-400"}`}>
                     {pInfo.label}
                   </span>
-                  <span className="text-lg font-black text-white">{percentage}%</span>
+                  <span className="text-xl font-black text-white">{percentage}%</span>
                 </div>
-                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
                   <div
-                    className={`h-full ${pDet.barColor} transition-all duration-500`}
+                    className={`h-full ${pDet.barClass} transition-all duration-500`}
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
@@ -317,7 +352,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-4">
           <div className="flex items-center gap-2 text-emerald-400">
             <Zap className="h-5 w-5" />
-            <h3 className="text-base font-extrabold text-white">Pontos fortes</h3>
+            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Pontos fortes</h3>
           </div>
           <ul className="space-y-2.5 text-xs text-zinc-300">
             {mainDetails.pontosFortes.map((pf, idx) => (
@@ -332,7 +367,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-4">
           <div className="flex items-center gap-2 text-amber-400">
             <AlertTriangle className="h-5 w-5" />
-            <h3 className="text-base font-extrabold text-white">Pontos de atenção</h3>
+            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Pontos de atenção</h3>
           </div>
           <ul className="space-y-2.5 text-xs text-zinc-300">
             {mainDetails.pontosAtencao.map((pa, idx) => (
@@ -347,7 +382,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
       {/* Competências */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <h3 className="text-lg font-extrabold text-white">Competências mapeadas</h3>
+        <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Competências</h3>
 
         <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
           {competenciesList.map((comp, idx) => (
@@ -369,12 +404,12 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
       {/* Como esse perfil se comporta */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <h3 className="text-lg font-extrabold text-white">Como esse perfil se comporta</h3>
+        <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Como esse perfil se comporta</h3>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(mainDetails.comportamento).map(([title, desc], idx) => (
             <div key={idx} className="rounded-2xl border border-zinc-800 bg-[#1a1a1a] p-4 space-y-1.5">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#ff0068]">{title}</span>
+              <span className="text-xs font-black uppercase tracking-wider text-[#ff0068] font-big-shoulders">{title}</span>
               <p className="text-xs text-zinc-300 leading-relaxed">{desc}</p>
             </div>
           ))}
@@ -384,7 +419,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       {/* Onde esse perfil rende mais */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
         <div>
-          <h3 className="text-lg font-extrabold text-white">Onde esse perfil rende mais</h3>
+          <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Onde esse perfil rende mais</h3>
           <p className="text-xs text-zinc-400 mt-1">
             Áreas com maior afinidade natural - não são limites, são pontos de partida.
           </p>
@@ -413,7 +448,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-3">
           <div className="flex items-center gap-2 text-[#ff0068]">
             <Building2 className="h-5 w-5" />
-            <h3 className="text-base font-extrabold text-white">Ambiente ideal</h3>
+            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Ambiente ideal</h3>
           </div>
           <p className="text-xs text-zinc-300 leading-relaxed">{mainDetails.ambienteIdeal}</p>
         </div>
@@ -421,15 +456,15 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-3">
           <div className="flex items-center gap-2 text-sky-400">
             <HeartHandshake className="h-5 w-5" />
-            <h3 className="text-base font-extrabold text-white">Como liderar esse perfil</h3>
+            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Como liderar esse perfil</h3>
           </div>
           <p className="text-xs text-zinc-300 leading-relaxed">{mainDetails.comoLiderar}</p>
         </div>
       </div>
 
-      {/* Os Quatro Perfis VENDE-C no Rodapé */}
+      {/* Os Quatro Perfis VENDE-C no Rodapé com Mascotes 3D */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <h3 className="text-lg font-extrabold text-white">Os quatro perfis VENDE-C</h3>
+        <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Os quatro perfis VENDE-C</h3>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {(Object.keys(PROFILES) as ProfileKey[]).map((key) => {
@@ -441,12 +476,17 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
             return (
               <div
                 key={key}
-                className={`flex flex-col justify-between rounded-2xl border p-5 text-center ${
-                  isDominant ? `${pDet.border} bg-[#1a1a1a]` : "border-zinc-800/80 bg-zinc-900/30"
+                className={`flex flex-col items-center justify-between rounded-2xl border p-5 text-center transition-all ${
+                  isDominant ? `${pDet.borderClass}${pDet.bgClass}` : "border-zinc-800/80 bg-zinc-900/30"
                 }`}
               >
-                <div className="space-y-2">
-                  <h4 className={`text-base font-extrabold ${pDet.badgeBg.split(" ")[1]}`}>
+                <div className="flex flex-col items-center space-y-2">
+                  <img
+                    src={MASCOTS_3D[key]}
+                    alt={`Mascote ${pInfo.label}`}
+                    className="h-20 w-20 object-contain mb-2"
+                  />
+                  <h4 className={`text-lg font-black font-big-shoulders uppercase ${pDet.textClass}`}>
                     {pInfo.label}
                   </h4>
                   <p className="text-xs text-zinc-400 leading-snug">{pDet.tagline}</p>
