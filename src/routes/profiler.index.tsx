@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth";
 import { 
   Plus, 
   Search, 
-  Copy, 
   Trash2, 
   Loader2, 
   RefreshCw,
@@ -35,6 +34,47 @@ export const Route = createFileRoute("/app/profiler/")({
   }),
   component: ProfilerDashboard,
 });
+
+// Configuração completa de estilos e cores hexadecimais para garantia de renderização
+const PROFILE_CONFIG: Record<
+  string,
+  {
+    label: string;
+    textColor: string;
+    borderColor: string;
+    bgColor: string;
+    ringColor: string;
+  }
+> = {
+  EXECUTOR: {
+    label: "EXECUTOR",
+    textColor: "#4ade80",
+    borderColor: "rgba(34, 197, 94, 0.4)",
+    bgColor: "rgba(34, 197, 94, 0.08)",
+    ringColor: "#22c55e",
+  },
+  COMUNICADOR: {
+    label: "COMUNICADOR",
+    textColor: "#fb923c",
+    borderColor: "rgba(249, 115, 22, 0.4)",
+    bgColor: "rgba(249, 115, 22, 0.08)",
+    ringColor: "#f97316",
+  },
+  PLANEJADOR: {
+    label: "PLANEJADOR",
+    textColor: "#38bdf8",
+    borderColor: "rgba(56, 189, 248, 0.4)",
+    bgColor: "rgba(56, 189, 248, 0.08)",
+    ringColor: "#38bdf8",
+  },
+  ANALISTA: {
+    label: "ANALISTA",
+    textColor: "#c084fc",
+    borderColor: "rgba(168, 85, 247, 0.4)",
+    bgColor: "rgba(168, 85, 247, 0.08)",
+    ringColor: "#a855f7",
+  },
+};
 
 function ProfilerDashboard() {
   const { user } = useAuth();
@@ -155,17 +195,10 @@ function ProfilerDashboard() {
       .toUpperCase();
   };
 
-  // Mapeamento explícito de cores para a tag do perfil
-  const profileColorClasses: Record<string, string> = {
-    EXECUTOR: "text-emerald-400 font-black",
-    COMUNICADOR: "text-orange-400 font-black",
-    PLANEJADOR: "text-sky-400 font-black",
-    ANALISTA: "text-purple-400 font-black",
-  };
-
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 text-foreground">
       <div className="mx-auto max-w-6xl space-y-8">
+        {/* Cabeçalho */}
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#ff0068]">
@@ -180,15 +213,15 @@ function ProfilerDashboard() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleCopyLeaderLink}
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800 transition-all"
             >
               <LinkIcon className="h-3.5 w-3.5" />
               {copiedLeader ? "Link copiado!" : "Copiar link do acesso do líder"}
             </button>
 
             <Link
-              to="/app/profiler"
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800"
+              to="/app/profiler/lider"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800 transition-all"
             >
               <Eye className="h-3.5 w-3.5" /> Visão do líder
             </Link>
@@ -314,18 +347,28 @@ function ProfilerDashboard() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((emp) => {
               const assessment = assessments.find((a) => a.employeeId === emp.id);
-              const dominant = assessment?.dominant?.toUpperCase();
-              const tagColorClass = dominant ? (profileColorClasses[dominant] || "text-white") : "text-white";
+              const dominantKey = assessment?.dominant ? String(assessment.dominant).toUpperCase().trim() : null;
+              const config = dominantKey ? PROFILE_CONFIG[dominantKey] : null;
 
               return (
                 <div
                   key={emp.id}
-                  className="flex flex-col justify-between rounded-2xl border border-zinc-800/90 bg-[#141414] p-5 shadow-lg transition-all hover:border-zinc-700"
+                  className="flex flex-col justify-between rounded-2xl border p-5 shadow-lg transition-all"
+                  style={{
+                    backgroundColor: config ? config.bgColor : "#141414",
+                    borderColor: config ? config.borderColor : "rgba(39, 39, 42, 0.9)",
+                  }}
                 >
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800/80 text-xs font-extrabold text-zinc-300 border border-zinc-700/50">
+                        {/* Círculo da foto com anel na cor do perfil */}
+                        <div
+                          className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800 text-xs font-black text-white"
+                          style={{
+                            boxShadow: config ? `0 0 0 2px ${config.ringColor}` : "0 0 0 2px #3f3f46",
+                          }}
+                        >
                           {getInitials(emp.fullName)}
                         </div>
                         <div>
@@ -336,9 +379,12 @@ function ProfilerDashboard() {
                         </div>
                       </div>
 
-                      {dominant && (
-                        <span className={`text-[12px] uppercase tracking-wider ${tagColorClass}`}>
-                          {dominant}
+                      {config && (
+                        <span
+                          className="text-[12px] font-black uppercase tracking-wider"
+                          style={{ color: config.textColor }}
+                        >
+                          {config.label}
                         </span>
                       )}
                     </div>
