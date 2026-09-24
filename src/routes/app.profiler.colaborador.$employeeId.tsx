@@ -1,11 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
 import { AppTopBar } from "@/components/AppTopBar";
 import { PageTransition } from "@/components/PageTransition";
 import { ProfilerReport } from "@/components/profiler/ProfilerReport";
-import { useAuth } from "@/lib/auth";
 import { getProfilerAssessment, getProfilerEmployee } from "@/lib/profiler.functions";
 
 export const Route = createFileRoute("/app/profiler/colaborador/$employeeId")({
@@ -30,27 +29,22 @@ export const Route = createFileRoute("/app/profiler/colaborador/$employeeId")({
 
 function EmployeeReport() {
   const { employeeId } = Route.useParams();
-  const navigate = useNavigate();
-  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/admin", replace: true });
-  }, [loading, user, navigate]);
-
-  const ready = !loading && !!user;
+  // Wrappers do TanStack Start para execução do Server Function
+  const fetchEmployee = useServerFn(getProfilerEmployee);
+  const fetchAssessment = useServerFn(getProfilerAssessment);
 
   const employeeQuery = useQuery({
     queryKey: ["profiler-employee", employeeId],
-    queryFn: () => getProfilerEmployee({ data: { id: employeeId } }),
-    enabled: ready,
-  });
-  const assessmentQuery = useQuery({
-    queryKey: ["profiler-assessment", employeeId],
-    queryFn: () => getProfilerAssessment({ data: { employeeId } }),
-    enabled: ready,
+    queryFn: () => fetchEmployee({ data: { id: employeeId } }),
   });
 
-  if (!ready || employeeQuery.isLoading || assessmentQuery.isLoading) {
+  const assessmentQuery = useQuery({
+    queryKey: ["profiler-assessment", employeeId],
+    queryFn: () => fetchAssessment({ data: { employeeId } }),
+  });
+
+  if (employeeQuery.isLoading || assessmentQuery.isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
