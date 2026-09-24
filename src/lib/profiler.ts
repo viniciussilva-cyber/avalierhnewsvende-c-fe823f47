@@ -138,7 +138,7 @@ export const QUESTIONS: DiscQuestionBlock[] = [
       { id: "12_d", letter: "D", profile: "executor", text: "Fico impaciente e mais direto do que de costume" },
       { id: "12_i", letter: "I", profile: "comunicador", text: "Fico mais falante e busco apoio social" },
       { id: "12_s", letter: "S", profile: "planejador", text: "Me fecho um pouco, evito mudanças adicionais" },
-      { id: "12_c", profile: "analista", text: "Fico mais crítico e exigente com detalhes" }
+      { id: "12_c", letter: "C", profile: "analista", text: "Fico mais crítico e exigente com detalhes" }
     ]
   }
 ];
@@ -179,8 +179,9 @@ export function dominantProfile(scores: Scores): ProfileKey {
   let highestValue = -1;
 
   (Object.keys(scores) as ProfileKey[]).forEach((key) => {
-    if ((scores[key] || 0) > highestValue) {
-      highestValue = scores[key] || 0;
+    const val = scores[key] ?? 0;
+    if (val > highestValue) {
+      highestValue = val;
       highestKey = key;
     }
   });
@@ -198,7 +199,7 @@ export function rankProfiles(scores: Scores): { key: ProfileKey; score: number; 
 }
 
 export function toPercentages(scores: Scores): Scores {
-  const total = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+  const total = Object.values(scores).reduce((a, b) => a + (b || 0), 0) || 1;
   return {
     executor: Math.round(((scores.executor || 0) / total) * 100),
     comunicador: Math.round(((scores.comunicador || 0) / total) * 100),
