@@ -10,12 +10,12 @@ interface ProfilerReportProps {
   celebrate?: boolean;
 }
 
-// URLs dos Mascotes 3D VENDE-C
-const MASCOTS_3D: Record<ProfileKey, string> = {
-  executor: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Running.png",
-  comunicador: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Technologist.png",
-  planejador: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Office%20Worker.png",
-  analista: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Man%20Scientist.png",
+// Imagens Oficiais dos Mascotes VENDE-C
+const MASCOTS_OFFICIAL: Record<ProfileKey, string> = {
+  executor: "/mascots/executor.png",
+  comunicador: "/mascots/comunicador.png",
+  planejador: "/mascots/planejador.png",
+  analista: "/mascots/analista.png",
 };
 
 const REPORT_DETAILS: Record<
@@ -23,12 +23,10 @@ const REPORT_DETAILS: Record<
   {
     tagline: string;
     descriptionLong: string;
-    colorHex: string;
     textClass: string;
     borderClass: string;
     bgClass: string;
     barClass: string;
-    ringClass: string;
     pontosFortes: string[];
     pontosAtencao: string[];
     comportamento: Record<string, string>;
@@ -41,12 +39,10 @@ const REPORT_DETAILS: Record<
     tagline: "Tira do papel e faz acontecer.",
     descriptionLong:
       "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
-    colorHex: "#22c55e",
     textClass: "text-emerald-400",
     borderClass: "border-emerald-500/40",
     bgClass: "bg-emerald-500/10",
     barClass: "bg-emerald-500",
-    ringClass: "ring-emerald-500",
     pontosFortes: [
       "Velocidade de decisão e execução",
       "Foco em meta e resultado",
@@ -83,12 +79,10 @@ const REPORT_DETAILS: Record<
     tagline: "Conecta pessoas, compartilha ideias e gera movimento.",
     descriptionLong:
       "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
-    colorHex: "#f97316",
     textClass: "text-orange-400",
     borderClass: "border-orange-500/40",
     bgClass: "bg-orange-500/10",
     barClass: "bg-orange-500",
-    ringClass: "ring-orange-500",
     pontosFortes: [
       "Facilidade de comunicação e engajamento",
       "Poder de persuasão e otimismo",
@@ -125,12 +119,10 @@ const REPORT_DETAILS: Record<
     tagline: "Pensa no hoje, projeta o amanhã.",
     descriptionLong:
       "Perfil estável, metodológico e confiável. Garante consistência, mantém o ambiente em harmonia e cumpre compromissos com lealdade.",
-    colorHex: "#38bdf8",
     textClass: "text-sky-400",
     borderClass: "border-sky-500/40",
     bgClass: "bg-sky-500/10",
     barClass: "bg-sky-500",
-    ringClass: "ring-sky-500",
     pontosFortes: [
       "Constância e ritmo previsível",
       "Escuta ativa e empatia elevada",
@@ -167,12 +159,10 @@ const REPORT_DETAILS: Record<
     tagline: "Observa, analisa e encontra o que outros não veem.",
     descriptionLong:
       "Perfil preciso, criterioso e disciplinado. Focado em qualidade, dados e regras bem definidas para garantir padrão de excelência.",
-    colorHex: "#c084fc",
     textClass: "text-purple-400",
     borderClass: "border-purple-500/40",
     bgClass: "bg-purple-500/10",
     barClass: "bg-purple-500",
-    ringClass: "ring-purple-500",
     pontosFortes: [
       "Atenção minuciosa aos detalhes e dados",
       "Alto padrão de qualidade e precisão",
@@ -202,7 +192,7 @@ const REPORT_DETAILS: Record<
       { area: "Jurídico e Contratos", baseScore: 91 },
       { area: "Pesquisa e Desenvolvimento", baseScore: 86 },
     ],
-    ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
+    ambienteIdeal: "Ambiente organizedo, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
   },
 };
@@ -255,7 +245,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   return (
     <div className="space-y-10 text-white font-sans">
-      {/* Import de Fonte de Destaque Big Shoulders */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&display=swap');
         .font-big-shoulders {
@@ -274,15 +263,15 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* Cartão de Topo - Com Mascote 3D */}
+      {/* Cartão de Topo - Mascote 3D Oficial VENDE-C */}
       <div className={`rounded-3xl border ${mainDetails.borderClass} bg-[#141414] p-8 space-y-6 relative overflow-hidden shadow-2xl`}>
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-6">
-            <div className={`flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner`}>
+            <div className={`flex h-36 w-36 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner`}>
               <img
-                src={MASCOTS_3D[dominantKey]}
+                src={MASCOTS_OFFICIAL[dominantKey]}
                 alt={`Mascote 3D ${PROFILES[dominantKey].label}`}
-                className="h-24 w-24 object-contain drop-shadow-md"
+                className="h-32 w-32 object-contain drop-shadow-xl"
               />
             </div>
 
@@ -292,7 +281,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                 {position || "Colaborador"} {sector ? `· ${sector}` : ""}
               </p>
               <div className="mt-3 inline-flex items-center gap-2">
-                <span className={`text-xs font-black uppercase tracking-wider ${mainDetails.textClass}`}>
+                <span className={`text-sm font-black uppercase tracking-wider ${mainDetails.textClass}`}>
                   Perfil predominantemente: {PROFILES[dominantKey].label}
                 </span>
               </div>
@@ -462,7 +451,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       </div>
 
-      {/* Os Quatro Perfis VENDE-C no Rodapé com Mascotes 3D */}
+      {/* Os Quatro Perfis VENDE-C com as imagens oficiais */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
         <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Os quatro perfis VENDE-C</h3>
 
@@ -482,9 +471,9 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
               >
                 <div className="flex flex-col items-center space-y-2">
                   <img
-                    src={MASCOTS_3D[key]}
-                    alt={`Mascote ${pInfo.label}`}
-                    className="h-20 w-20 object-contain mb-2"
+                    src={MASCOTS_OFFICIAL[key]}
+                    alt={`Mascote Oficial ${pInfo.label}`}
+                    className="h-28 w-28 object-contain mb-2 drop-shadow-md"
                   />
                   <h4 className={`text-lg font-black font-big-shoulders uppercase ${pDet.textClass}`}>
                     {pInfo.label}
