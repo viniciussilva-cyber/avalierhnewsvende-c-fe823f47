@@ -155,18 +155,17 @@ function ProfilerDashboard() {
       .toUpperCase();
   };
 
-  // Cores dinâmicas para o Perfil
-  const profileColorMap: Record<string, string> = {
-    EXECUTOR: "text-emerald-400",
-    COMUNICADOR: "text-orange-400",
-    PLANEJADOR: "text-sky-400",
-    ANALISTA: "text-purple-400",
+  // Mapeamento explícito de cores para a tag do perfil
+  const profileColorClasses: Record<string, string> = {
+    EXECUTOR: "text-emerald-400 font-black",
+    COMUNICADOR: "text-orange-400 font-black",
+    PLANEJADOR: "text-sky-400 font-black",
+    ANALISTA: "text-purple-400 font-black",
   };
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 text-foreground">
       <div className="mx-auto max-w-6xl space-y-8">
-        {/* Cabeçalho */}
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#ff0068]">
@@ -181,7 +180,7 @@ function ProfilerDashboard() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleCopyLeaderLink}
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white transition-all hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800"
             >
               <LinkIcon className="h-3.5 w-3.5" />
               {copiedLeader ? "Link copiado!" : "Copiar link do acesso do líder"}
@@ -189,7 +188,7 @@ function ProfilerDashboard() {
 
             <Link
               to="/app/profiler"
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white transition-all hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800"
             >
               <Eye className="h-3.5 w-3.5" /> Visão do líder
             </Link>
@@ -316,7 +315,7 @@ function ProfilerDashboard() {
             {filtered.map((emp) => {
               const assessment = assessments.find((a) => a.employeeId === emp.id);
               const dominant = assessment?.dominant?.toUpperCase();
-              const profileTextColor = dominant ? (profileColorMap[dominant] || "text-white") : "text-white";
+              const tagColorClass = dominant ? (profileColorClasses[dominant] || "text-white") : "text-white";
 
               return (
                 <div
@@ -338,7 +337,7 @@ function ProfilerDashboard() {
                       </div>
 
                       {dominant && (
-                        <span className={`text-[12px] font-black uppercase tracking-wider ${profileTextColor}`}>
+                        <span className={`text-[12px] uppercase tracking-wider ${tagColorClass}`}>
                           {dominant}
                         </span>
                       )}
