@@ -4,7 +4,7 @@ export const PROFILE_KEYS: ProfileKey[] = ['executor', 'comunicador', 'planejado
 
 export interface DiscOption {
   id: string;
-  letter: 'D' | 'I' | 'S' | 'C';
+  letter?: 'D' | 'I' | 'S' | 'C';
   profile: ProfileKey;
   text: string;
 }
@@ -160,9 +160,11 @@ export const PROFILES: Record<ProfileKey, { label: string; description: string }
 export function scoreAnswers(answers: Record<string, ProfileKey | BlockAnswer>): Scores {
   const scores: Scores = { executor: 0, comunicador: 0, planejador: 0, analista: 0 };
   
+  if (!answers) return scores;
+
   Object.values(answers).forEach((value) => {
     if (typeof value === 'string') {
-      if (scores[value] !== undefined) scores[value] += 1;
+      if (scores[value as ProfileKey] !== undefined) scores[value as ProfileKey] += 1;
     } else if (value && typeof value === 'object') {
       const most = value.most;
       if (most && scores[most] !== undefined) {
@@ -177,6 +179,8 @@ export function scoreAnswers(answers: Record<string, ProfileKey | BlockAnswer>):
 export function dominantProfile(scores: Scores): ProfileKey {
   let highestKey: ProfileKey = "executor";
   let highestValue = -1;
+
+  if (!scores) return highestKey;
 
   (Object.keys(scores) as ProfileKey[]).forEach((key) => {
     const val = scores[key] ?? 0;
@@ -199,6 +203,7 @@ export function rankProfiles(scores: Scores): { key: ProfileKey; score: number; 
 }
 
 export function toPercentages(scores: Scores): Scores {
+  if (!scores) return { executor: 25, comunicador: 25, planejador: 25, analista: 25 };
   const total = Object.values(scores).reduce((a, b) => a + (b || 0), 0) || 1;
   return {
     executor: Math.round(((scores.executor || 0) / total) * 100),
@@ -210,10 +215,10 @@ export function toPercentages(scores: Scores): Scores {
 
 export function competencies(pct: Scores) {
   return {
-    focoResultados: pct.executor || 0,
-    comunicacao: pct.comunicador || 0,
-    planejamento: pct.planejador || 0,
-    qualidade: pct.analista || 0,
+    focoResultados: pct?.executor || 0,
+    comunicacao: pct?.comunicador || 0,
+    planejamento: pct?.planejador || 0,
+    qualidade: pct?.analista || 0,
   };
 }
 
@@ -225,9 +230,9 @@ export function indicators(dominant: ProfileKey) {
 
 export function talentZones(pct: Scores) {
   return {
-    lideranca: pct.executor || 0,
-    relacionamento: pct.comunicador || 0,
-    estabilidade: pct.planejador || 0,
-    organizacao: pct.analista || 0,
+    lideranca: pct?.executor || 0,
+    relacionamento: pct?.comunicador || 0,
+    estabilidade: pct?.planejador || 0,
+    organizacao: pct?.analista || 0,
   };
 }
