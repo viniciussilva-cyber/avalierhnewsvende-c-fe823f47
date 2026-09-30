@@ -192,7 +192,7 @@ const REPORT_DETAILS: Record<
       { area: "Jurídico e Contratos", baseScore: 91 },
       { area: "Pesquisa e Desenvolvimento", baseScore: 86 },
     ],
-    ambienteIdeal: "Ambiente organizedo, com diretrizes claras, poucas interrupções e foco na qualidade.",
+    ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
   },
 };
@@ -263,15 +263,16 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* Cartão de Topo - Mascote 3D Oficial VENDE-C */}
+      {/* Cartão de Topo - Mascote 3D Oficial VENDE-C em Tamanho Destaque */}
       <div className={`rounded-3xl border ${mainDetails.borderClass} bg-[#141414] p-8 space-y-6 relative overflow-hidden shadow-2xl`}>
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-6">
-            <div className={`flex h-36 w-36 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner`}>
+            {/* Moldura Ampliada do Mascote Principal */}
+            <div className={`flex h-60 w-44 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner relative overflow-hidden`}>
               <img
                 src={MASCOTS_OFFICIAL[dominantKey]}
                 alt={`Mascote 3D ${PROFILES[dominantKey].label}`}
-                className="h-32 w-32 object-contain drop-shadow-xl"
+                className="h-full w-full object-contain drop-shadow-2xl scale-110"
               />
             </div>
 
@@ -451,7 +452,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       </div>
 
-      {/* Os Quatro Perfis VENDE-C com as imagens oficiais */}
+      {/* Os Quatro Perfis VENDE-C no Rodapé com Mascotes Ampliados */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
         <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Os quatro perfis VENDE-C</h3>
 
@@ -469,12 +470,14 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                   isDominant ? `${pDet.borderClass}${pDet.bgClass}` : "border-zinc-800/80 bg-zinc-900/30"
                 }`}
               >
-                <div className="flex flex-col items-center space-y-2">
-                  <img
-                    src={MASCOTS_OFFICIAL[key]}
-                    alt={`Mascote Oficial ${pInfo.label}`}
-                    className="h-28 w-28 object-contain mb-2 drop-shadow-md"
-                  />
+                <div className="flex flex-col items-center space-y-2 w-full">
+                  <div className="flex h-36 w-full items-center justify-center my-1">
+                    <img
+                      src={MASCOTS_OFFICIAL[key]}
+                      alt={`Mascote Oficial ${pInfo.label}`}
+                      className="h-full w-full object-contain drop-shadow-md scale-105"
+                    />
+                  </div>
                   <h4 className={`text-lg font-black font-big-shoulders uppercase ${pDet.textClass}`}>
                     {pInfo.label}
                   </h4>
