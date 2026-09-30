@@ -64,7 +64,7 @@ const REPORT_DETAILS: Record<
   comunicador: {
     tagline: "Conecta pessoas, compartilha ideias e gera movimento.",
     descriptionLong:
-      "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
+      "Perfil carismático, persuasivo e highly sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
     hexColor: "#f97316",
     pontosFortes: [
       "Facilidade de comunicação e engajamento",
@@ -202,74 +202,116 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
-  // Carregador Dinâmico de Scripts CDN para Download Direto de Ficheiros
-  const loadScript = (src: string) => {
+  // Renderizador fallback nativo via Canvas SVG (sem abrir CTRL + P)
+  const renderElementToCanvas = (element: HTMLElement): Promise<HTMLCanvasElement> => {
     return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) {
-        resolve(true);
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = src;
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(new Error(`Erro ao carregar o script ${src}`));
-      document.head.appendChild(script);
+      const width = element.offsetWidth || 900;
+      const height = element.offsetHeight || 1400;
+      const clone = element.cloneNode(true) as HTMLElement;
+
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+          <foreignObject width="100%" height="100%">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="background-color: #0a0a0b; color: #ffffff;">
+              ${new XMLSerializer().serializeToString(clone)}
+            </div>
+          </foreignObject>
+        </svg>
+      `;
+
+      const img = new Image();
+      const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = width * 2;
+        canvas.height = height * 2;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.scale(2, 2);
+          ctx.fillStyle = "#0a0a0b";
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0);
+        }
+        URL.revokeObjectURL(url);
+        resolve(canvas);
+      };
+      img.onerror = (e) => {
+        URL.revokeObjectURL(url);
+        reject(e);
+      };
+      img.src = url;
     });
   };
 
-  // Exportação Direta para Ficheiro (PNG e PDF) sem Janela de Impressão
+  // Download 100% Direto no Navegador (Gera o arquivo e baixa pra máquina)
   const handleExport = async (type: "png" | "pdf") => {
     if (!reportRef.current) return;
     setIsExporting(type);
 
     try {
-      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-      const html2canvas = (window as any).html2canvas;
+      let canvas: HTMLCanvasElement;
 
-      if (!html2canvas) throw new Error("html2canvas não disponível.");
+      try {
+        const html2canvasModule = await import("html2canvas");
+        const html2canvas = html2canvasModule.default || html2canvasModule;
+        canvas = await html2canvas(reportRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#0a0a0b",
+          logging: false,
+        });
+      } catch (e) {
+        canvas = await renderElementToCanvas(reportRef.current);
+      }
 
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#0a0a0b",
-        logging: false,
-      });
-
-      const fileName = `Relatorio-DISC-${name.replace(/\s+/g, "-")}`;
+      const fileName = `Relatorio-DISC-${name.trim().replace(/\s+/g, "-")}`;
+      const imgData = canvas.toDataURL("image/png", 1.0);
 
       if (type === "png") {
         const link = document.createElement("a");
         link.download = `${fileName}.png`;
-        link.href = canvas.toDataURL("image/png");
+        link.href = imgData;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
       } else {
-        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
-        const { jsPDF } = (window as any).jspdf;
+        try {
+          const { jsPDF } = await import("jspdf");
+          const pdf = new jsPDF("p", "mm", "a4");
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = pdf.internal.pageSize.getHeight();
+          const imgWidth = pdfWidth;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        const imgData = canvas.toDataURL("image/png");
-        const imgWidth = 210; // A4 Largura em mm
-        const pageHeight = 297; // A4 Altura em mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
+          let position = 0;
 
-        const pdf = new jsPDF("p", "mm", "a4");
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
           pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
+          heightLeft -= pdfHeight;
 
-        pdf.save(`${fileName}.pdf`);
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+          }
+
+          pdf.save(`${fileName}.pdf`);
+        } catch (pdfErr) {
+          // Se a biblioteca de PDF falhar, entrega a imagem em alta resolução diretamente
+          const link = document.createElement("a");
+          link.download = `${fileName}.png`;
+          link.href = imgData;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
       }
     } catch (err) {
-      console.error("Erro no download direto do relatório:", err);
-      window.print();
+      console.error("Erro ao gerar arquivo:", err);
     } finally {
       setIsExporting(null);
     }
@@ -282,17 +324,14 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         .font-modern {
           font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        @media print {
-          .no-print { display: none !important; }
-        }
       `}</style>
 
       {/* Toolbar Executiva de Download Direto */}
-      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-[#121214] p-4 shadow-xl font-modern">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-[#121214] p-4 shadow-xl font-modern">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-zinc-400" />
           <span className="text-xs font-semibold text-zinc-300">
-            Descarregar Relatório do Colaborador
+            Baixar Relatório do Colaborador
           </span>
         </div>
 
