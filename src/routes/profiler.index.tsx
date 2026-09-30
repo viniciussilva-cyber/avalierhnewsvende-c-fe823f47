@@ -10,7 +10,11 @@ import {
   Loader2, 
   RefreshCw,
   Eye,
-  Link as LinkIcon
+  Link as LinkIcon,
+  ArrowLeft,
+  Pencil,
+  LogOut,
+  Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -30,59 +34,19 @@ import {
 
 export const Route = createFileRoute("/app/profiler/")({
   head: () => ({
-    meta: [{ title: "Profiler · Gestão de Colaboradores" }],
+    meta: [{ title: "Profiler · Perfis comportamentais" }],
   }),
   component: ProfilerDashboard,
 });
 
-// Configuração completa de estilos e cores hexadecimais para garantia de renderização
-const PROFILE_CONFIG: Record<
-  string,
-  {
-    label: string;
-    textColor: string;
-    borderColor: string;
-    bgColor: string;
-    ringColor: string;
-  }
-> = {
-  EXECUTOR: {
-    label: "EXECUTOR",
-    textColor: "#4ade80",
-    borderColor: "rgba(34, 197, 94, 0.4)",
-    bgColor: "rgba(34, 197, 94, 0.08)",
-    ringColor: "#22c55e",
-  },
-  COMUNICADOR: {
-    label: "COMUNICADOR",
-    textColor: "#fb923c",
-    borderColor: "rgba(249, 115, 22, 0.4)",
-    bgColor: "rgba(249, 115, 22, 0.08)",
-    ringColor: "#f97316",
-  },
-  PLANEJADOR: {
-    label: "PLANEJADOR",
-    textColor: "#38bdf8",
-    borderColor: "rgba(56, 189, 248, 0.4)",
-    bgColor: "rgba(56, 189, 248, 0.08)",
-    ringColor: "#38bdf8",
-  },
-  ANALISTA: {
-    label: "ANALISTA",
-    textColor: "#c084fc",
-    borderColor: "rgba(168, 85, 247, 0.4)",
-    bgColor: "rgba(168, 85, 247, 0.08)",
-    ringColor: "#a855f7",
-  },
-};
-
 function ProfilerDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedLeader, setCopiedLeader] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -111,6 +75,7 @@ function ProfilerDashboard() {
       if (!user?.email) throw new Error("Sessão inválida.");
       return await saveEmployeeFn({
         data: {
+          id: editingEmployee?.id,
           actorEmail: user.email,
           fullName,
           email,
@@ -118,18 +83,13 @@ function ProfilerDashboard() {
           sector,
           leaderEmail,
           active: true,
-          photoUrl: "",
+          photoUrl: editingEmployee?.photoUrl || "",
         },
       });
     },
     onSuccess: () => {
-      toast.success("Colaborador cadastrado com sucesso!");
-      setIsModalOpen(false);
-      setFullName("");
-      setEmail("");
-      setPosition("");
-      setSector("");
-      setLeaderEmail("");
+      toast.success(editingEmployee ? "Colaborador atualizado!" : "Colaborador cadastrado!");
+      closeModal();
       queryClient.invalidateQueries({ queryKey: ["profiler-employees"] });
     },
     onError: (err: Error) => {
@@ -156,16 +116,36 @@ function ProfilerDashboard() {
       });
     },
     onSuccess: () => {
-      toast.success("Permissão atualizada com sucesso!");
+      toast.success("Permissão atualizada!");
       queryClient.invalidateQueries({ queryKey: ["profiler-employees"] });
     },
   });
+
+  const openEditModal = (emp: any) => {
+    setEditingEmployee(emp);
+    setFullName(emp.fullName || "");
+    setEmail(emp.email || "");
+    setPosition(emp.position || "");
+    setSector(emp.sector || "");
+    setLeaderEmail(emp.leaderEmail || "");
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingEmployee(null);
+    setFullName("");
+    setEmail("");
+    setPosition("");
+    setSector("");
+    setLeaderEmail("");
+  };
 
   const handleCopyLink = (id: string) => {
     const url = `${window.location.origin}/profiler/avaliacao/${id}`;
     navigator.clipboard.writeText(url);
     setCopiedId(id);
-    toast.success("Link de avaliação copiado!");
+    toast.success("Link copiado!");
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -196,9 +176,36 @@ function ProfilerDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6 md:p-10 text-foreground">
-      <div className="mx-auto max-w-6xl space-y-8">
-        {/* Cabeçalho */}
+    <div className="min-h-screen bg-[#0a0a0b] text-white">
+      {/* Header Corporativo Elegante */}
+      <header className="border-b border-zinc-800/80 bg-[#121214] px-6 py-3.5 flex items-center justify-between text-xs">
+        <div className="flex items-center gap-3">
+          <Link to="/app" className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Módulos
+          </Link>
+          <span className="text-zinc-600">/</span>
+          <div className="flex items-center gap-2 text-white font-bold">
+            <Sparkles className="h-4 w-4 text-[#ff0068]" />
+            Profiler · Perfis comportamentais
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="rounded-full bg-zinc-800/80 border border-zinc-700/50 px-3 py-1 text-[11px] font-bold text-zinc-300">
+            RECRUTADOR (RH)
+          </span>
+          <span className="text-zinc-300 font-semibold">{user?.email || "vinicius.silva@vende-c.com"}</span>
+          <button 
+            onClick={() => logout && logout()} 
+            className="flex items-center gap-1 text-zinc-400 hover:text-white transition-colors ml-2"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Sair
+          </button>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-6xl p-6 md:p-10 space-y-8">
+        {/* Titulo e Ações */}
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#ff0068]">
@@ -213,7 +220,7 @@ function ProfilerDashboard() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleCopyLeaderLink}
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800 transition-all"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-2.5 text-xs font-bold text-white hover:bg-zinc-800 transition-all"
             >
               <LinkIcon className="h-3.5 w-3.5" />
               {copiedLeader ? "Link copiado!" : "Copiar link do acesso do líder"}
@@ -221,20 +228,23 @@ function ProfilerDashboard() {
 
             <Link
               to="/app/profiler/lider"
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-3 text-xs font-bold text-white hover:bg-zinc-800 transition-all"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-[#141414] px-4 py-2.5 text-xs font-bold text-white hover:bg-zinc-800 transition-all"
             >
               <Eye className="h-3.5 w-3.5" /> Visão do líder
             </Link>
 
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog open={isModalOpen} onOpenChange={(open) => !open && closeModal()}>
               <DialogTrigger asChild>
-                <button className="inline-flex items-center gap-2 rounded-xl bg-[#ff0068] px-5 py-3 text-xs font-bold text-white shadow-lg shadow-[#ff0068]/25 transition-all hover:opacity-90 active:scale-95">
-                  <Plus className="h-4 w-4" /> Novo colaborador
+                <button 
+                  onClick={() => closeModal()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#18181b] border border-zinc-700/80 px-4 py-2.5 text-xs font-bold text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-md cursor-pointer"
+                >
+                  <Plus className="h-4 w-4 text-[#ff0068]" /> Novo colaborador
                 </button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md bg-[#141414] border-zinc-800 text-white">
                 <DialogHeader>
-                  <DialogTitle>Cadastrar Novo Colaborador</DialogTitle>
+                  <DialogTitle>{editingEmployee ? "Editar Colaborador" : "Cadastrar Novo Colaborador"}</DialogTitle>
                 </DialogHeader>
                 <form
                   onSubmit={(e) => {
@@ -300,7 +310,7 @@ function ProfilerDashboard() {
                   <div className="flex justify-end gap-3 pt-4">
                     <button
                       type="button"
-                      onClick={() => setIsModalOpen(false)}
+                      onClick={closeModal}
                       className="rounded-lg border border-zinc-800 px-4 py-2 text-xs font-semibold text-zinc-400 hover:bg-zinc-800"
                     >
                       Cancelar
@@ -311,7 +321,7 @@ function ProfilerDashboard() {
                       className="inline-flex items-center gap-2 rounded-lg bg-[#ff0068] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"
                     >
                       {saveMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                      Salvar Colaborador
+                      {editingEmployee ? "Atualizar" : "Salvar Colaborador"}
                     </button>
                   </div>
                 </form>
@@ -320,7 +330,7 @@ function ProfilerDashboard() {
           </div>
         </div>
 
-        {/* Barra de Pesquisa */}
+        {/* Busca */}
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
           <input
@@ -328,17 +338,17 @@ function ProfilerDashboard() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nome, cargo ou setor..."
-            className="w-full rounded-xl border border-zinc-800/80 bg-[#141414] py-3.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#ff0068]"
+            className="w-full rounded-xl border border-zinc-800/80 bg-[#121214] py-3.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#ff0068]"
           />
         </div>
 
-        {/* Lista de Colaboradores */}
+        {/* Lista de Cards Executivos */}
         {employeesQuery.isLoading ? (
           <div className="flex py-20 justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-[#ff0068]" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-800 bg-[#141414]/50 py-16 text-center">
+          <div className="rounded-2xl border border-dashed border-zinc-800 bg-[#121214]/50 py-16 text-center">
             <p className="text-sm text-zinc-400">
               Nenhum colaborador encontrado. Cadastre o primeiro para gerar o link da avaliação.
             </p>
@@ -348,29 +358,26 @@ function ProfilerDashboard() {
             {filtered.map((emp) => {
               const assessment = assessments.find((a) => a.employeeId === emp.id);
               const dominantKey = assessment?.dominant ? String(assessment.dominant).toUpperCase().trim() : null;
-              const config = dominantKey ? PROFILE_CONFIG[dominantKey] : null;
 
               return (
                 <div
                   key={emp.id}
-                  className="flex flex-col justify-between rounded-2xl border p-5 shadow-lg transition-all"
-                  style={{
-                    backgroundColor: config ? config.bgColor : "#141414",
-                    borderColor: config ? config.borderColor : "rgba(39, 39, 42, 0.9)",
-                  }}
+                  className="flex flex-col justify-between rounded-2xl border border-zinc-800/80 bg-[#121214] p-5 shadow-lg hover:border-zinc-700/80 transition-all"
                 >
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        {/* Círculo da foto com anel na cor do perfil */}
-                        <div
-                          className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800 text-xs font-black text-white"
-                          style={{
-                            boxShadow: config ? `0 0 0 2px ${config.ringColor}` : "0 0 0 2px #3f3f46",
-                          }}
-                        >
-                          {getInitials(emp.fullName)}
-                        </div>
+                        {emp.photoUrl ? (
+                          <img
+                            src={emp.photoUrl}
+                            alt={emp.fullName}
+                            className="h-11 w-11 rounded-full object-cover border border-zinc-700"
+                          />
+                        ) : (
+                          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-zinc-800 text-xs font-bold text-zinc-300 border border-zinc-700/60">
+                            {getInitials(emp.fullName)}
+                          </div>
+                        )}
                         <div>
                           <h3 className="font-extrabold text-white text-base leading-tight">{emp.fullName}</h3>
                           <p className="text-xs text-zinc-400 mt-0.5">
@@ -379,12 +386,9 @@ function ProfilerDashboard() {
                         </div>
                       </div>
 
-                      {config && (
-                        <span
-                          className="text-[12px] font-black uppercase tracking-wider"
-                          style={{ color: config.textColor }}
-                        >
-                          {config.label}
+                      {dominantKey && (
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-white">
+                          {dominantKey}
                         </span>
                       )}
                     </div>
@@ -396,7 +400,7 @@ function ProfilerDashboard() {
                         href={`/app/profiler/colaborador/${emp.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-zinc-700/80 bg-zinc-800/80 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-zinc-700 transition-colors"
+                        className="rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 py-1.5 text-xs font-semibold text-zinc-200 hover:text-white hover:bg-zinc-800 transition-colors"
                       >
                         Ver relatório
                       </a>
@@ -404,9 +408,17 @@ function ProfilerDashboard() {
 
                     <button
                       onClick={() => handleCopyLink(emp.id)}
-                      className="rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
+                      className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
                     >
-                      {copiedId === emp.id ? "Copiado!" : "🔗 Link"}
+                      <LinkIcon className="h-3 w-3" />
+                      {copiedId === emp.id ? "Copiado!" : "Link"}
+                    </button>
+
+                    <button
+                      onClick={() => openEditModal(emp)}
+                      className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      <Pencil className="h-3 w-3" /> Editar
                     </button>
 
                     {emp.canReassess && (
@@ -426,7 +438,7 @@ function ProfilerDashboard() {
 
                     <button
                       onClick={() => deleteMutation.mutate(emp.id)}
-                      className="ml-auto text-zinc-600 hover:text-red-500 transition-colors"
+                      className="ml-auto text-zinc-600 hover:text-red-500 transition-colors p-1"
                       title="Excluir"
                     >
                       <Trash2 className="h-4 w-4" />
