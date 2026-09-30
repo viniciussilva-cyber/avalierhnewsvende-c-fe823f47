@@ -1,6 +1,6 @@
 import React from "react";
 import { PROFILES, type ProfileKey, type Scores, toPercentages } from "@/lib/profiler";
-import { CheckCircle2, Zap, AlertTriangle, Building2, HeartHandshake } from "lucide-react";
+import { CheckCircle2, Zap, AlertTriangle, Building2, HeartHandshake, Printer } from "lucide-react";
 
 interface ProfilerReportProps {
   name: string;
@@ -168,7 +168,7 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Foca no essencial sem abrir mão do padrão de qualidade.",
       "NO TRABALHO EM EQUIPE": "Garante a precisão e revisa as entregas do time.",
     },
-    ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
+    ambienteIdeal: "Ambiente organizedo, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
   },
 };
@@ -219,6 +219,10 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="space-y-10 text-white font-sans">
       <style>{`
@@ -226,12 +230,37 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         .font-modern {
           font-family: 'Plus Jakarta Sans', sans-serif;
         }
+        @media print {
+          body {
+            background-color: #0a0a0b !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
       `}</style>
 
+      {/* Barra Superior de Exportação (Oculta ao gerar o PDF) */}
+      <div className="no-print flex items-center justify-between rounded-2xl border border-zinc-800 bg-[#141414] p-4 shadow-md font-modern">
+        <span className="text-xs font-semibold text-zinc-400">
+          Relatório Mapeado · VENDE-C
+        </span>
+        <button
+          onClick={handlePrint}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#ff0068] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#ff0068]/25 hover:opacity-90 transition-all active:scale-95 cursor-pointer"
+        >
+          <Printer className="h-4 w-4" />
+          Baixar Relatório (PDF / Imprimir)
+        </button>
+      </div>
+
       {celebrate && (
-        <div className="rounded-2xl border border-zinc-800 bg-[#141414] p-6 text-center">
+        <div className="rounded-2xl border border-zinc-800 bg-[#141414] p-6 text-center font-modern">
           <CheckCircle2 className="mx-auto h-12 w-12 text-[#ff0068]" />
-          <h2 className="mt-3 text-2xl font-bold font-modern">Avaliação Concluída com Sucesso!</h2>
+          <h2 className="mt-3 text-2xl font-bold">Avaliação Concluída com Sucesso!</h2>
           <p className="mt-1 text-xs text-zinc-400">
             Obrigado, {name.split(" ")[0]}. Seu perfil foi mapeado e disponibilizado.
           </p>
