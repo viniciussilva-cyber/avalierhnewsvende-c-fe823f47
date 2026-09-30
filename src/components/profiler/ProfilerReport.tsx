@@ -202,13 +202,31 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
+  // Carregador Dinâmico de Scripts CDN para Download Direto de Ficheiros
+  const loadScript = (src: string) => {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error(`Erro ao carregar o script ${src}`));
+      document.head.appendChild(script);
+    });
+  };
+
+  // Exportação Direta para Ficheiro (PNG e PDF) sem Janela de Impressão
   const handleExport = async (type: "png" | "pdf") => {
     if (!reportRef.current) return;
     setIsExporting(type);
 
     try {
-      const html2canvasModule = await import("html2canvas");
-      const html2canvas = html2canvasModule.default || html2canvasModule;
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+      const html2canvas = (window as any).html2canvas;
+
+      if (!html2canvas) throw new Error("html2canvas não disponível.");
 
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
@@ -225,28 +243,32 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         link.href = canvas.toDataURL("image/png");
         link.click();
       } else {
+        await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+        const { jsPDF } = (window as any).jspdf;
+
         const imgData = canvas.toDataURL("image/png");
-        const printWindow = window.open("", "_blank");
-        if (printWindow) {
-          printWindow.document.write(`
-            <html>
-              <head>
-                <title>${fileName}</title>
-                <style>
-                  body { margin: 0; background-color: #0a0a0b; display: flex; justify-content: center; }
-                  img { width: 100%; max-width: 900px; height: auto; }
-                </style>
-              </head>
-              <body>
-                <img src="${imgData}" onload="window.print(); window.close();" />
-              </body>
-            </html>
-          `);
-          printWindow.document.close();
+        const imgWidth = 210; // A4 Largura em mm
+        const pageHeight = 297; // A4 Altura em mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        const pdf = new jsPDF("p", "mm", "a4");
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
         }
+
+        pdf.save(`${fileName}.pdf`);
       }
     } catch (err) {
-      console.error("Erro na exportação do relatório:", err);
+      console.error("Erro no download direto do relatório:", err);
       window.print();
     } finally {
       setIsExporting(null);
@@ -265,12 +287,12 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         }
       `}</style>
 
-      {/* Toolbar Executiva de Exportação */}
+      {/* Toolbar Executiva de Download Direto */}
       <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-[#121214] p-4 shadow-xl font-modern">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-zinc-400" />
           <span className="text-xs font-semibold text-zinc-300">
-            Exportar Relatório do Colaborador
+            Descarregar Relatório do Colaborador
           </span>
         </div>
 
@@ -313,7 +335,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* Conteúdo Impresso/Exportado do Relatório */}
+      {/* Conteúdo Exportado do Relatório */}
       <div ref={reportRef} className="space-y-8 bg-[#0a0a0b] p-2 md:p-4 rounded-3xl">
         {/* Cartão de Topo */}
         <div 
