@@ -10,6 +10,7 @@ interface ProfilerReportProps {
   celebrate?: boolean;
 }
 
+// Imagens Oficiais dos Mascotes VENDE-C
 const MASCOTS_OFFICIAL: Record<ProfileKey, string> = {
   executor: "/mascots/executor.png",
   comunicador: "/mascots/comunicador.png",
@@ -201,7 +202,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
-  // Motor de Exportação do Relatório (PNG e PDF)
   const handleExport = async (type: "png" | "pdf") => {
     if (!reportRef.current) return;
     setIsExporting(type);
@@ -266,7 +266,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       `}</style>
 
       {/* Toolbar Executiva de Exportação */}
-      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800/80 bg-[#121214] p-4 shadow-xl font-modern">
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-[#121214] p-4 shadow-xl font-modern">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-zinc-400" />
           <span className="text-xs font-semibold text-zinc-300">
