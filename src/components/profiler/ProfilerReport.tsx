@@ -10,7 +10,6 @@ interface ProfilerReportProps {
   celebrate?: boolean;
 }
 
-// Imagens Oficiais dos Mascotes VENDE-C
 const MASCOTS_OFFICIAL: Record<ProfileKey, string> = {
   executor: "/mascots/executor.png",
   comunicador: "/mascots/comunicador.png",
@@ -24,6 +23,10 @@ const REPORT_DETAILS: Record<
     tagline: string;
     descriptionLong: string;
     hexColor: string;
+    textClass: string;
+    borderClass: string;
+    bgClass: string;
+    barClass: string;
     pontosFortes: string[];
     pontosAtencao: string[];
     comportamento: Record<string, string>;
@@ -37,6 +40,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
     hexColor: "#22c55e",
+    textClass: "text-emerald-400",
+    borderClass: "border-emerald-500/40",
+    bgClass: "bg-emerald-500/10",
+    barClass: "bg-emerald-500",
     pontosFortes: [
       "Velocidade de decisão e execução",
       "Foco em meta e resultado",
@@ -74,6 +81,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
     hexColor: "#f97316",
+    textClass: "text-orange-400",
+    borderClass: "border-orange-500/40",
+    bgClass: "bg-orange-500/10",
+    barClass: "bg-orange-500",
     pontosFortes: [
       "Facilidade de comunicação e engajamento",
       "Poder de persuasão e otimismo",
@@ -111,6 +122,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil estável, metodológico e confiável. Garante consistência, mantém o ambiente em harmonia e cumpre compromissos com lealdade.",
     hexColor: "#38bdf8",
+    textClass: "text-sky-400",
+    borderClass: "border-sky-500/40",
+    bgClass: "bg-sky-500/10",
+    barClass: "bg-sky-500",
     pontosFortes: [
       "Constância e ritmo previsível",
       "Escuta ativa e empatia elevada",
@@ -148,6 +163,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil preciso, criterioso e disciplinado. Focado em qualidade, dados e regras bem definidas para garantir padrão de excelência.",
     hexColor: "#c084fc",
+    textClass: "text-purple-400",
+    borderClass: "border-purple-500/40",
+    bgClass: "bg-purple-500/10",
+    barClass: "bg-purple-500",
     pontosFortes: [
       "Atenção minuciosa aos detalhes e dados",
       "Alto padrão de qualidade e precisão",
@@ -177,14 +196,14 @@ const REPORT_DETAILS: Record<
       { area: "Jurídico e Contratos", baseScore: 91 },
       { area: "Pesquisa e Desenvolvimento", baseScore: 86 },
     ],
-    ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
+    ambienteIdeal: "Ambiente organizedo, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
   },
 };
 
 export function ProfilerReport({ name, position, sector, scores, celebrate }: ProfilerReportProps) {
   const reportRef = useRef<HTMLDivElement>(null);
-  const [isExporting, setIsExporting] = useState<"png" | "pdf" | null>(null);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   const pct = toPercentages(scores || { executor: 0, comunicador: 0, planejador: 0, analista: 0 });
 
@@ -231,65 +250,44 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
-  // Função de Exportação Direta via Pacotes Instalados no Projeto
-  const handleExport = async (format: "png" | "pdf") => {
+  // Exportação Segura para PNG usando captura direta
+  const handleExportPNG = async () => {
     if (!reportRef.current) return;
-    setIsExporting(format);
+    setIsExporting(true);
 
     try {
+      // Importa dinamicamente a partir das dependências compiladas do projeto
       const html2canvasModule = await import("html2canvas");
       const html2canvas = html2canvasModule.default || html2canvasModule;
 
       const canvas = await html2canvas(reportRef.current, {
         scale: 2,
         useCORS: true,
-        allowTaint: true,
         backgroundColor: "#0a0a0b",
         logging: false,
-        windowWidth: 1200,
       });
 
       const safeName = (name || "Colaborador").trim().replace(/\s+/g, "-");
-      const imgData = canvas.toDataURL("image/png", 1.0);
+      const imgData = canvas.toDataURL("image/png");
 
-      if (format === "png") {
-        const link = document.createElement("a");
-        link.download = `Relatorio-DISC-${safeName}.png`;
-        link.href = imgData;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        const jspdfModule = await import("jspdf");
-        const jsPDF = jspdfModule.jsPDF || jspdfModule.default;
-
-        const pdf = new jsPDF("p", "mm", "a4");
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pdfWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
-
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pdfHeight;
-        }
-
-        pdf.save(`Relatorio-DISC-${safeName}.pdf`);
-      }
+      const link = document.createElement("a");
+      link.download = `Relatorio-DISC-${safeName}.png`;
+      link.href = imgData;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
-      console.error("Erro na exportação do relatório:", err);
-      alert("Ocorreu um erro ao gerar o arquivo. Por favor, tente novamente.");
+      console.error("Erro ao gerar PNG:", err);
+      // Fallback para impressão se o canvas for bloqueado no browser
+      window.print();
     } finally {
-      setIsExporting(null);
+      setIsExporting(false);
     }
+  };
+
+  // Exportação nativa para PDF via impressão estilizada (Zero erro de CORS/script)
+  const handleExportPDF = () => {
+    window.print();
   };
 
   return (
@@ -299,10 +297,32 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         .font-modern {
           font-family: 'Plus Jakarta Sans', sans-serif;
         }
+
+        /* Regras de impressão para PDF escuro perfeito e sem cortes */
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 10mm;
+          }
+          body {
+            background-color: #0a0a0b !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .report-container {
+            background-color: #0a0a0b !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+          }
+        }
       `}</style>
 
       {/* Toolbar Executiva de Download Direto */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-[#121214] p-4 shadow-xl font-modern">
+      <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-zinc-800 bg-[#121214] p-4 shadow-xl font-modern">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-zinc-400" />
           <span className="text-xs font-semibold text-zinc-300">
@@ -312,11 +332,11 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
         <div className="flex items-center gap-2.5">
           <button
-            onClick={() => handleExport("png")}
-            disabled={isExporting !== null}
+            onClick={handleExportPNG}
+            disabled={isExporting}
             className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:text-white hover:bg-zinc-700 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
           >
-            {isExporting === "png" ? (
+            {isExporting ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <ImageIcon className="h-3.5 w-3.5 text-sky-400" />
@@ -325,22 +345,17 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </button>
 
           <button
-            onClick={() => handleExport("pdf")}
-            disabled={isExporting !== null}
-            className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:text-white hover:bg-zinc-700 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+            onClick={handleExportPDF}
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:text-white hover:bg-zinc-700 transition-all active:scale-95 cursor-pointer"
           >
-            {isExporting === "pdf" ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <FileText className="h-3.5 w-3.5 text-[#ff0068]" />
-            )}
+            <FileText className="h-3.5 w-3.5 text-[#ff0068]" />
             Baixar PDF
           </button>
         </div>
       </div>
 
       {celebrate && (
-        <div className="rounded-2xl border border-zinc-800 bg-[#121214] p-6 text-center font-modern">
+        <div className="no-print rounded-2xl border border-zinc-800 bg-[#121214] p-6 text-center font-modern">
           <CheckCircle2 className="mx-auto h-12 w-12 text-[#ff0068]" />
           <h2 className="mt-3 text-2xl font-bold">Avaliação Concluída com Sucesso!</h2>
           <p className="mt-1 text-xs text-zinc-400">
@@ -350,20 +365,20 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       )}
 
       {/* Conteúdo Exportado do Relatório - Estrutura Fiel ao PDF */}
-      <div ref={reportRef} className="space-y-8 bg-[#0a0a0b] p-2 md:p-4 rounded-3xl">
-        {/* Cartão de Topo */}
+      <div ref={reportRef} className="report-container space-y-8 bg-[#0a0a0b] p-2 md:p-4 rounded-3xl">
+        {/* Cartão de Topo - Mascote Destacado e Estrutura Elegante */}
         <div 
           className="rounded-3xl border bg-[#121214] p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl transition-all"
           style={{ borderColor: mainDetails.hexColor }}
         >
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col md:flex-row items-center gap-6 w-full">
-              {/* Mascote em Destaque Solto no Lado Esquerdo */}
-              <div className="flex h-72 md:h-80 w-full md:w-64 shrink-0 items-center justify-center p-2">
+              {/* Moldura do Mascote no Topo com fundo do perfil */}
+              <div className={`flex h-44 w-44 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-3 shadow-inner`}>
                 <img
                   src={MASCOTS_OFFICIAL[dominantKey]}
                   alt={`Mascote 3D ${PROFILES[dominantKey].label}`}
-                  className="h-full w-full object-contain drop-shadow-2xl"
+                  className="h-36 w-36 object-contain drop-shadow-xl"
                 />
               </div>
 
@@ -575,7 +590,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                   }}
                 >
                   <div className="flex flex-col items-center space-y-2 w-full">
-                    <div className="flex h-36 w-full items-center justify-center p-1">
+                    <div className="flex h-32 w-32 items-center justify-center p-1">
                       <img
                         src={MASCOTS_OFFICIAL[key]}
                         alt={`Mascote Oficial ${pInfo.label}`}
