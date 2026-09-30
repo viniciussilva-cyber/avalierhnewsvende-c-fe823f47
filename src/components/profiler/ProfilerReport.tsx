@@ -31,7 +31,6 @@ const REPORT_DETAILS: Record<
     pontosFortes: string[];
     pontosAtencao: string[];
     comportamento: Record<string, string>;
-    ondeRendeMais: { area: string; baseScore: number }[];
     ambienteIdeal: string;
     comoLiderar: string;
   }
@@ -67,13 +66,6 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Prioriza entrega e corta o que julgar acessório.",
       "NO TRABALHO EM EQUIPE": "Puxa a frente e define o rumo.",
     },
-    ondeRendeMais: [
-      { area: "Gestão e liderança de times", baseScore: 100 },
-      { area: "Vendas e prospecção", baseScore: 99 },
-      { area: "Inovação e novos negócios", baseScore: 99 },
-      { area: "Tecnologia e produto", baseScore: 88 },
-      { area: "Operações e logística", baseScore: 75 },
-    ],
     ambienteIdeal: "Metas desafiadoras, autonomia real e pouco engessamento burocrático.",
     comoLiderar: "Seja direto, combine o resultado esperado e dê autonomia sobre o caminho.",
   },
@@ -108,13 +100,6 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Mobiliza o time pra ajudar a entregar junto.",
       "NO TRABALHO EM EQUIPE": "Integra e anima o grupo constantemente.",
     },
-    ondeRendeMais: [
-      { area: "Vendas e negociações de alto impacto", baseScore: 100 },
-      { area: "Marketing e comunicação institucional", baseScore: 96 },
-      { area: "Gestão de pessoas e cultura", baseScore: 92 },
-      { area: "Atendimento e experiência do cliente", baseScore: 90 },
-      { area: "Liderança motivacional", baseScore: 86 },
-    ],
     ambienteIdeal: "Ambiente dinâmico, colaborativo, leve e com interação constante.",
     comoLiderar: "Dê reconhecimento público, valorize as ideias e apoie no acompanhamento de detalhes.",
   },
@@ -149,13 +134,6 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Mantém o ritmo firme, tentando não surtar.",
       "NO TRABALHO EM EQUIPE": "Sustenta a rotina e dá apoio prático a todos.",
     },
-    ondeRendeMais: [
-      { area: "Operações e processos continuados", baseScore: 99 },
-      { area: "Recursos Humanos e Acompanhamento", baseScore: 95 },
-      { area: "Sucesso do Cliente (Customer Success)", baseScore: 92 },
-      { area: "Gestão de Projetos e Planejamento", baseScore: 89 },
-      { area: "Suporte e Garantia de Qualidade", baseScore: 84 },
-    ],
     ambienteIdeal: "Ambiente calmo, com rotina estruturada, previsibilidade e cooperação.",
     comoLiderar: "Avise sobre mudanças com antecedência, ofereça suporte e evite pressões agressivas.",
   },
@@ -190,13 +168,6 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Foca no essencial sem abrir mão do padrão de qualidade.",
       "NO TRABALHO EM EQUIPE": "Garante a precisão e revisa as entregas do time.",
     },
-    ondeRendeMais: [
-      { area: "Auditoria, Compliance e Qualidade", baseScore: 99 },
-      { area: "Análise de Dados e Finanças", baseScore: 96 },
-      { area: "Engenharia, TI e Arquitetura", baseScore: 93 },
-      { area: "Jurídico e Contratos", baseScore: 91 },
-      { area: "Pesquisa e Desenvolvimento", baseScore: 86 },
-    ],
     ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
   },
@@ -250,7 +221,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   return (
     <div className="space-y-10 text-white font-sans">
-      {/* Import de Fonte Limpa e Moderna (Plus Jakarta Sans) */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
         .font-modern {
@@ -419,33 +389,6 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
             <div key={idx} className="rounded-2xl border border-zinc-800 bg-[#1a1a1a] p-4 space-y-1.5">
               <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff0068]">{title}</span>
               <p className="text-xs text-zinc-300 leading-relaxed">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Onde esse perfil rende mais */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6 font-modern">
-        <div>
-          <h3 className="text-xl font-bold text-white uppercase tracking-wider">Onde esse perfil rende mais</h3>
-          <p className="text-xs text-zinc-400 mt-1">
-            Áreas com maior afinidade natural - não são limites, são pontos de partida.
-          </p>
-        </div>
-
-        <div className="space-y-3">
-          {mainDetails.ondeRendeMais.map((item, idx) => (
-            <div key={idx} className="space-y-1.5">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-zinc-200">{item.area}</span>
-                <span className="text-zinc-400">{item.baseScore}%</span>
-              </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
-                <div
-                  className="h-full bg-emerald-500"
-                  style={{ width: `${item.baseScore}%` }}
-                />
-              </div>
             </div>
           ))}
         </div>
