@@ -23,6 +23,7 @@ const REPORT_DETAILS: Record<
   {
     tagline: string;
     descriptionLong: string;
+    hexColor: string;
     textClass: string;
     borderClass: string;
     bgClass: string;
@@ -39,8 +40,9 @@ const REPORT_DETAILS: Record<
     tagline: "Tira do papel e faz acontecer.",
     descriptionLong:
       "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
+    hexColor: "#22c55e",
     textClass: "text-emerald-400",
-    borderClass: "border-emerald-500/40",
+    borderClass: "border-emerald-500/50",
     bgClass: "bg-emerald-500/10",
     barClass: "bg-emerald-500",
     pontosFortes: [
@@ -79,8 +81,9 @@ const REPORT_DETAILS: Record<
     tagline: "Conecta pessoas, compartilha ideias e gera movimento.",
     descriptionLong:
       "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
+    hexColor: "#f97316",
     textClass: "text-orange-400",
-    borderClass: "border-orange-500/40",
+    borderClass: "border-orange-500/50",
     bgClass: "bg-orange-500/10",
     barClass: "bg-orange-500",
     pontosFortes: [
@@ -119,8 +122,9 @@ const REPORT_DETAILS: Record<
     tagline: "Pensa no hoje, projeta o amanhã.",
     descriptionLong:
       "Perfil estável, metodológico e confiável. Garante consistência, mantém o ambiente em harmonia e cumpre compromissos com lealdade.",
+    hexColor: "#38bdf8",
     textClass: "text-sky-400",
-    borderClass: "border-sky-500/40",
+    borderClass: "border-sky-500/50",
     bgClass: "bg-sky-500/10",
     barClass: "bg-sky-500",
     pontosFortes: [
@@ -159,8 +163,9 @@ const REPORT_DETAILS: Record<
     tagline: "Observa, analisa e encontra o que outros não veem.",
     descriptionLong:
       "Perfil preciso, criterioso e disciplinado. Focado em qualidade, dados e regras bem definidas para garantir padrão de excelência.",
+    hexColor: "#c084fc",
     textClass: "text-purple-400",
-    borderClass: "border-purple-500/40",
+    borderClass: "border-purple-500/50",
     bgClass: "bg-purple-500/10",
     barClass: "bg-purple-500",
     pontosFortes: [
@@ -263,27 +268,33 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* Cartão de Topo - Mascote 3D Oficial VENDE-C em Tamanho Destaque */}
-      <div className={`rounded-3xl border ${mainDetails.borderClass} bg-[#141414] p-8 space-y-6 relative overflow-hidden shadow-2xl`}>
+      {/* Cartão de Topo - Layout Fiel ao PDF (Mascote Destacado e Solto) */}
+      <div 
+        className="rounded-3xl border bg-[#141414] p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl transition-all"
+        style={{ borderColor: mainDetails.hexColor }}
+      >
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-6">
-            {/* Moldura Ampliada do Mascote Principal */}
-            <div className={`flex h-60 w-44 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner relative overflow-hidden`}>
+          <div className="flex flex-col md:flex-row items-center gap-6 w-full">
+            {/* Mascote em tamanho real, sem caixa escura ao redor */}
+            <div className="flex h-72 md:h-80 w-full md:w-64 shrink-0 items-center justify-center p-2">
               <img
                 src={MASCOTS_OFFICIAL[dominantKey]}
                 alt={`Mascote 3D ${PROFILES[dominantKey].label}`}
-                className="h-full w-full object-contain drop-shadow-2xl scale-110"
+                className="h-full w-full object-contain drop-shadow-2xl"
               />
             </div>
 
-            <div>
-              <h1 className="text-4xl font-extrabold text-white tracking-tight">{name}</h1>
-              <p className="text-sm font-semibold text-zinc-400 mt-1">
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">{name}</h1>
+              <p className="text-base font-semibold text-zinc-400 mt-1">
                 {position || "Colaborador"} {sector ? `· ${sector}` : ""}
               </p>
               <div className="mt-3 inline-flex items-center gap-2">
-                <span className={`text-sm font-black uppercase tracking-wider ${mainDetails.textClass}`}>
-                  Perfil predominantemente: {PROFILES[dominantKey].label}
+                <span 
+                  className="text-base font-black uppercase tracking-wider font-big-shoulders"
+                  style={{ color: mainDetails.hexColor }}
+                >
+                  PERFIL PREDOMINANTEMENTE: {PROFILES[dominantKey].label}
                 </span>
               </div>
             </div>
@@ -315,20 +326,28 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
             return (
               <div
                 key={key}
-                className={`rounded-2xl border p-5 transition-all ${
-                  isDominant ? `${pDet.borderClass} bg-[#1a1a1a]` : "border-zinc-800/80 bg-zinc-900/40"
-                }`}
+                className="rounded-2xl border p-5 transition-all"
+                style={{
+                  borderColor: isDominant ? pDet.hexColor : "rgba(39, 39, 42, 0.8)",
+                  backgroundColor: isDominant ? `${pDet.hexColor}15` : "rgba(24, 24, 27, 0.4)",
+                }}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-base font-black font-big-shoulders uppercase ${isDominant ? pDet.textClass : "text-zinc-400"}`}>
+                  <span 
+                    className="text-base font-black font-big-shoulders uppercase"
+                    style={{ color: isDominant ? pDet.hexColor : "#a1a1aa" }}
+                  >
                     {pInfo.label}
                   </span>
                   <span className="text-xl font-black text-white">{percentage}%</span>
                 </div>
                 <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
                   <div
-                    className={`h-full ${pDet.barClass} transition-all duration-500`}
-                    style={{ width: `${percentage}%` }}
+                    className="h-full transition-all duration-500"
+                    style={{ 
+                      width: `${percentage}%`,
+                      backgroundColor: pDet.hexColor 
+                    }}
                   />
                 </div>
               </div>
@@ -452,7 +471,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       </div>
 
-      {/* Os Quatro Perfis VENDE-C no Rodapé com Mascotes Ampliados */}
+      {/* Os Quatro Perfis VENDE-C no Rodapé */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
         <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Os quatro perfis VENDE-C</h3>
 
@@ -466,19 +485,24 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
             return (
               <div
                 key={key}
-                className={`flex flex-col items-center justify-between rounded-2xl border p-5 text-center transition-all ${
-                  isDominant ? `${pDet.borderClass}${pDet.bgClass}` : "border-zinc-800/80 bg-zinc-900/30"
-                }`}
+                className="flex flex-col items-center justify-between rounded-2xl border p-5 text-center transition-all"
+                style={{
+                  borderColor: isDominant ? pDet.hexColor : "rgba(39, 39, 42, 0.8)",
+                  backgroundColor: isDominant ? `${pDet.hexColor}15` : "rgba(24, 24, 27, 0.3)",
+                }}
               >
                 <div className="flex flex-col items-center space-y-2 w-full">
-                  <div className="flex h-36 w-full items-center justify-center my-1">
+                  <div className="flex h-44 w-full items-center justify-center p-1">
                     <img
                       src={MASCOTS_OFFICIAL[key]}
                       alt={`Mascote Oficial ${pInfo.label}`}
-                      className="h-full w-full object-contain drop-shadow-md scale-105"
+                      className="h-full w-full object-contain drop-shadow-md"
                     />
                   </div>
-                  <h4 className={`text-lg font-black font-big-shoulders uppercase ${pDet.textClass}`}>
+                  <h4 
+                    className="text-lg font-black font-big-shoulders uppercase"
+                    style={{ color: pDet.hexColor }}
+                  >
                     {pInfo.label}
                   </h4>
                   <p className="text-xs text-zinc-400 leading-snug">{pDet.tagline}</p>
