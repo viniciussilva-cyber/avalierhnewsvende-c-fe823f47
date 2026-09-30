@@ -10,6 +10,7 @@ interface ProfilerReportProps {
   celebrate?: boolean;
 }
 
+// Imagens Oficiais dos Mascotes VENDE-C
 const MASCOTS_OFFICIAL: Record<ProfileKey, string> = {
   executor: "/mascots/executor.png",
   comunicador: "/mascots/comunicador.png",
@@ -23,6 +24,10 @@ const REPORT_DETAILS: Record<
     tagline: string;
     descriptionLong: string;
     hexColor: string;
+    textClass: string;
+    borderClass: string;
+    bgClass: string;
+    barClass: string;
     pontosFortes: string[];
     pontosAtencao: string[];
     comportamento: Record<string, string>;
@@ -36,6 +41,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil direto, competitivo e orientado a resultado. Assume o volante, decide rápido e destrava o que está parado.",
     hexColor: "#22c55e",
+    textClass: "text-emerald-400",
+    borderClass: "border-emerald-500/40",
+    bgClass: "bg-emerald-500/10",
+    barClass: "bg-emerald-500",
     pontosFortes: [
       "Velocidade de decisão e execução",
       "Foco em meta e resultado",
@@ -73,6 +82,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
     hexColor: "#f97316",
+    textClass: "text-orange-400",
+    borderClass: "border-orange-500/40",
+    bgClass: "bg-orange-500/10",
+    barClass: "bg-orange-500",
     pontosFortes: [
       "Facilidade de comunicação e engajamento",
       "Poder de persuasão e otimismo",
@@ -110,6 +123,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil estável, metodológico e confiável. Garante consistência, mantém o ambiente em harmonia e cumpre compromissos com lealdade.",
     hexColor: "#38bdf8",
+    textClass: "text-sky-400",
+    borderClass: "border-sky-500/40",
+    bgClass: "bg-sky-500/10",
+    barClass: "bg-sky-500",
     pontosFortes: [
       "Constância e ritmo previsível",
       "Escuta ativa e empatia elevada",
@@ -147,6 +164,10 @@ const REPORT_DETAILS: Record<
     descriptionLong:
       "Perfil preciso, criterioso e disciplinado. Focado em qualidade, dados e regras bem definidas para garantir padrão de excelência.",
     hexColor: "#c084fc",
+    textClass: "text-purple-400",
+    borderClass: "border-purple-500/40",
+    bgClass: "bg-purple-500/10",
+    barClass: "bg-purple-500",
     pontosFortes: [
       "Atenção minuciosa aos detalhes e dados",
       "Alto padrão de qualidade e precisão",
@@ -230,121 +251,86 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
-  // Renderizador fallback com SVG Canvas
-  const renderSvgCanvas = (element: HTMLElement): Promise<HTMLCanvasElement> => {
+  // Função Auxiliar de Carregamento Seguro via CDN
+  const loadCDN = (url: string, globalVar: string): Promise<any> => {
     return new Promise((resolve, reject) => {
-      const width = element.offsetWidth || 850;
-      const height = element.offsetHeight || 1300;
-      const clone = element.cloneNode(true) as HTMLElement;
-
-      const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-          <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="background-color: #0a0a0b; color: #ffffff; font-family: sans-serif;">
-              ${new XMLSerializer().serializeToString(clone)}
-            </div>
-          </foreignObject>
-        </svg>
-      `;
-
-      const img = new Image();
-      const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-      const url = URL.createObjectURL(svgBlob);
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = width * 2;
-        canvas.height = height * 2;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.scale(2, 2);
-          ctx.fillStyle = "#0a0a0b";
-          ctx.fillRect(0, 0, width, height);
-          ctx.drawImage(img, 0, 0);
+      if ((window as any)[globalVar]) {
+        resolve((window as any)[globalVar]);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = url;
+      script.onload = () => {
+        if ((window as any)[globalVar]) {
+          resolve((window as any)[globalVar]);
+        } else {
+          reject(new Error(`Incapaz de carregar a biblioteca ${globalVar}`));
         }
-        URL.revokeObjectURL(url);
-        resolve(canvas);
       };
-      img.onerror = (e) => {
-        URL.revokeObjectURL(url);
-        reject(e);
-      };
-      img.src = url;
+      script.onerror = () => reject(new Error(`Erro de rede ao buscar script ${url}`));
+      document.body.appendChild(script);
     });
   };
 
-  // Download direto sem abrir CTRL + P
+  // Processo de Exportação 100% Direto para Arquivo (PNG/PDF) sem abrir CTRL + P
   const handleExport = async (format: "png" | "pdf") => {
     if (!reportRef.current) return;
     setIsExporting(format);
 
     try {
-      let canvas: HTMLCanvasElement | null = null;
+      const html2canvas = await loadCDN(
+        "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+        "html2canvas"
+      );
 
-      try {
-        const html2canvasModule = await import("html2canvas");
-        const html2canvas = html2canvasModule.default || html2canvasModule;
-        canvas = await html2canvas(reportRef.current, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#0a0a0b",
-          logging: false,
-        });
-      } catch (e) {
-        canvas = await renderSvgCanvas(reportRef.current);
-      }
-
-      if (!canvas) {
-        throw new Error("Não foi possível gerar a captura do relatório.");
-      }
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#0a0a0b",
+        logging: false,
+      });
 
       const safeName = (name || "Colaborador").trim().replace(/\s+/g, "-");
-      const dataUrl = canvas.toDataURL("image/png", 1.0);
+      const imgData = canvas.toDataURL("image/png", 1.0);
 
       if (format === "png") {
         const link = document.createElement("a");
         link.download = `Relatorio-DISC-${safeName}.png`;
-        link.href = dataUrl;
+        link.href = imgData;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } else {
-        try {
-          const jspdfModule = await import("jspdf");
-          const { jsPDF } = jspdfModule;
-          const pdf = new jsPDF("p", "mm", "a4");
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = pdf.internal.pageSize.getHeight();
-          const imgWidth = pdfWidth;
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const jspdfObj = await loadCDN(
+          "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+          "jspdf"
+        );
+        const { jsPDF } = jspdfObj;
 
-          let heightLeft = imgHeight;
-          let position = 0;
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-          pdf.addImage(dataUrl, "PNG", 0, position, imgWidth, imgHeight);
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
           heightLeft -= pdfHeight;
-
-          while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(dataUrl, "PNG", 0, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
-          }
-
-          pdf.save(`Relatorio-DISC-${safeName}.pdf`);
-        } catch (pdfErr) {
-          // Se jsPDF falhar, baixa a imagem em alta definição diretamente
-          const link = document.createElement("a");
-          link.download = `Relatorio-DISC-${safeName}.png`;
-          link.href = dataUrl;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
         }
+
+        pdf.save(`Relatorio-DISC-${safeName}.pdf`);
       }
     } catch (err) {
-      console.error("Erro no processo de exportação:", err);
+      console.error("Erro na geração do arquivo:", err);
     } finally {
       setIsExporting(null);
     }
@@ -407,7 +393,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* Conteúdo Exportado do Relatório - Estrutura Fiel ao PDF */}
+      {/* Conteúdo Exportado do Relatório - Layout Idêntico ao PDF */}
       <div ref={reportRef} className="space-y-8 bg-[#0a0a0b] p-2 md:p-4 rounded-3xl">
         {/* Cartão de Topo */}
         <div 
@@ -416,12 +402,12 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         >
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col md:flex-row items-center gap-6 w-full">
-              {/* Mascote destacado sem caixa ao redor */}
-              <div className="flex h-72 md:h-80 w-full md:w-64 shrink-0 items-center justify-center p-2">
+              {/* Caixa Moldura do Mascotes no Layout do PDF */}
+              <div className={`flex h-36 w-36 shrink-0 items-center justify-center rounded-2xl ${mainDetails.bgClass} border ${mainDetails.borderClass} p-2 shadow-inner`}>
                 <img
                   src={MASCOTS_OFFICIAL[dominantKey]}
                   alt={`Mascote 3D ${PROFILES[dominantKey].label}`}
-                  className="h-full w-full object-contain drop-shadow-2xl"
+                  className="h-32 w-32 object-contain drop-shadow-xl"
                 />
               </div>
 
@@ -633,7 +619,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                   }}
                 >
                   <div className="flex flex-col items-center space-y-2 w-full">
-                    <div className="flex h-44 w-full items-center justify-center p-1">
+                    <div className="flex h-28 w-28 items-center justify-center p-1">
                       <img
                         src={MASCOTS_OFFICIAL[key]}
                         alt={`Mascote Oficial ${pInfo.label}`}
