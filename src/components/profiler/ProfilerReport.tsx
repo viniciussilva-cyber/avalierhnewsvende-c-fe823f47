@@ -10,7 +10,6 @@ interface ProfilerReportProps {
   celebrate?: boolean;
 }
 
-// Imagens Oficiais dos Mascotes VENDE-C
 const MASCOTS_OFFICIAL: Record<ProfileKey, string> = {
   executor: "/mascots/executor.png",
   comunicador: "/mascots/comunicador.png",
@@ -27,6 +26,7 @@ const REPORT_DETAILS: Record<
     pontosFortes: string[];
     pontosAtencao: string[];
     comportamento: Record<string, string>;
+    ondeRendeMais: { area: string; baseScore: number }[];
     ambienteIdeal: string;
     comoLiderar: string;
   }
@@ -58,13 +58,20 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Prioriza entrega e corta o que julgar acessório.",
       "NO TRABALHO EM EQUIPE": "Puxa a frente e define o rumo.",
     },
+    ondeRendeMais: [
+      { area: "Gestão e liderança de times", baseScore: 100 },
+      { area: "Vendas e prospecção", baseScore: 99 },
+      { area: "Inovação e novos negócios", baseScore: 99 },
+      { area: "Tecnologia e produto", baseScore: 88 },
+      { area: "Operações e logística", baseScore: 75 },
+    ],
     ambienteIdeal: "Metas desafiadoras, autonomia real e pouco engessamento burocrático.",
     comoLiderar: "Seja direto, combine o resultado esperado e dê autonomia sobre o caminho.",
   },
   comunicador: {
     tagline: "Conecta pessoas, compartilha ideias e gera movimento.",
     descriptionLong:
-      "Perfil carismático, persuasivo e highly sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
+      "Perfil carismático, persuasivo e altamente sociável. Entusiasma equipes, vende visões e articula parcerias com facilidade.",
     hexColor: "#f97316",
     pontosFortes: [
       "Facilidade de comunicação e engajamento",
@@ -88,6 +95,13 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Mobiliza o time pra ajudar a entregar junto.",
       "NO TRABALHO EM EQUIPE": "Integra e anima o grupo constantemente.",
     },
+    ondeRendeMais: [
+      { area: "Vendas e negociações de alto impacto", baseScore: 100 },
+      { area: "Marketing e comunicação institucional", baseScore: 96 },
+      { area: "Gestão de pessoas e cultura", baseScore: 92 },
+      { area: "Atendimento e experiência do cliente", baseScore: 90 },
+      { area: "Liderança motivacional", baseScore: 86 },
+    ],
     ambienteIdeal: "Ambiente dinâmico, colaborativo, leve e com interação constante.",
     comoLiderar: "Dê reconhecimento público, valorize as ideias e apoie no acompanhamento de detalhes.",
   },
@@ -118,6 +132,13 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Mantém o ritmo firme, tentando não surtar.",
       "NO TRABALHO EM EQUIPE": "Sustenta a rotina e dá apoio prático a todos.",
     },
+    ondeRendeMais: [
+      { area: "Operações e processos continuados", baseScore: 99 },
+      { area: "Recursos Humanos e Acompanhamento", baseScore: 95 },
+      { area: "Sucesso do Cliente (Customer Success)", baseScore: 92 },
+      { area: "Gestão de Projetos e Planejamento", baseScore: 89 },
+      { area: "Suporte e Garantia de Qualidade", baseScore: 84 },
+    ],
     ambienteIdeal: "Ambiente calmo, com rotina estruturada, previsibilidade e cooperação.",
     comoLiderar: "Avise sobre mudanças com antecedência, ofereça suporte e evite pressões agressivas.",
   },
@@ -148,6 +169,13 @@ const REPORT_DETAILS: Record<
       "COM PRAZOS APERTADOS": "Foca no essencial sem abrir mão do padrão de qualidade.",
       "NO TRABALHO EM EQUIPE": "Garante a precisão e revisa as entregas do time.",
     },
+    ondeRendeMais: [
+      { area: "Auditoria, Compliance e Qualidade", baseScore: 99 },
+      { area: "Análise de Dados e Finanças", baseScore: 96 },
+      { area: "Engenharia, TI e Arquitetura", baseScore: 93 },
+      { area: "Jurídico e Contratos", baseScore: 91 },
+      { area: "Pesquisa e Desenvolvimento", baseScore: 86 },
+    ],
     ambienteIdeal: "Ambiente organizado, com diretrizes claras, poucas interrupções e foco na qualidade.",
     comoLiderar: "Forneça informações precisas, respeite seu tempo de análise e reconheça o rigor técnico.",
   },
@@ -202,17 +230,17 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   const competenciesList = calculateCompetencies(pct);
 
-  // Renderizador fallback nativo via Canvas SVG (sem abrir CTRL + P)
-  const renderElementToCanvas = (element: HTMLElement): Promise<HTMLCanvasElement> => {
+  // Renderizador fallback com SVG Canvas
+  const renderSvgCanvas = (element: HTMLElement): Promise<HTMLCanvasElement> => {
     return new Promise((resolve, reject) => {
-      const width = element.offsetWidth || 900;
-      const height = element.offsetHeight || 1400;
+      const width = element.offsetWidth || 850;
+      const height = element.offsetHeight || 1300;
       const clone = element.cloneNode(true) as HTMLElement;
 
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
           <foreignObject width="100%" height="100%">
-            <div xmlns="http://www.w3.org/1999/xhtml" style="background-color: #0a0a0b; color: #ffffff;">
+            <div xmlns="http://www.w3.org/1999/xhtml" style="background-color: #0a0a0b; color: #ffffff; font-family: sans-serif;">
               ${new XMLSerializer().serializeToString(clone)}
             </div>
           </foreignObject>
@@ -245,13 +273,13 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
     });
   };
 
-  // Download 100% Direto no Navegador (Gera o arquivo e baixa pra máquina)
-  const handleExport = async (type: "png" | "pdf") => {
+  // Download direto sem abrir CTRL + P
+  const handleExport = async (format: "png" | "pdf") => {
     if (!reportRef.current) return;
-    setIsExporting(type);
+    setIsExporting(format);
 
     try {
-      let canvas: HTMLCanvasElement;
+      let canvas: HTMLCanvasElement | null = null;
 
       try {
         const html2canvasModule = await import("html2canvas");
@@ -264,22 +292,27 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           logging: false,
         });
       } catch (e) {
-        canvas = await renderElementToCanvas(reportRef.current);
+        canvas = await renderSvgCanvas(reportRef.current);
       }
 
-      const fileName = `Relatorio-DISC-${name.trim().replace(/\s+/g, "-")}`;
-      const imgData = canvas.toDataURL("image/png", 1.0);
+      if (!canvas) {
+        throw new Error("Não foi possível gerar a captura do relatório.");
+      }
 
-      if (type === "png") {
+      const safeName = (name || "Colaborador").trim().replace(/\s+/g, "-");
+      const dataUrl = canvas.toDataURL("image/png", 1.0);
+
+      if (format === "png") {
         const link = document.createElement("a");
-        link.download = `${fileName}.png`;
-        link.href = imgData;
+        link.download = `Relatorio-DISC-${safeName}.png`;
+        link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } else {
         try {
-          const { jsPDF } = await import("jspdf");
+          const jspdfModule = await import("jspdf");
+          const { jsPDF } = jspdfModule;
           const pdf = new jsPDF("p", "mm", "a4");
           const pdfWidth = pdf.internal.pageSize.getWidth();
           const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -289,29 +322,29 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           let heightLeft = imgHeight;
           let position = 0;
 
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          pdf.addImage(dataUrl, "PNG", 0, position, imgWidth, imgHeight);
           heightLeft -= pdfHeight;
 
-          while (heightLeft >= 0) {
+          while (heightLeft > 0) {
             position = heightLeft - imgHeight;
             pdf.addPage();
-            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+            pdf.addImage(dataUrl, "PNG", 0, position, imgWidth, imgHeight);
             heightLeft -= pdfHeight;
           }
 
-          pdf.save(`${fileName}.pdf`);
+          pdf.save(`Relatorio-DISC-${safeName}.pdf`);
         } catch (pdfErr) {
-          // Se a biblioteca de PDF falhar, entrega a imagem em alta resolução diretamente
+          // Se jsPDF falhar, baixa a imagem em alta definição diretamente
           const link = document.createElement("a");
-          link.download = `${fileName}.png`;
-          link.href = imgData;
+          link.download = `Relatorio-DISC-${safeName}.png`;
+          link.href = dataUrl;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
         }
       }
     } catch (err) {
-      console.error("Erro ao gerar arquivo:", err);
+      console.error("Erro no processo de exportação:", err);
     } finally {
       setIsExporting(null);
     }
@@ -374,7 +407,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       )}
 
-      {/* Conteúdo Exportado do Relatório */}
+      {/* Conteúdo Exportado do Relatório - Estrutura Fiel ao PDF */}
       <div ref={reportRef} className="space-y-8 bg-[#0a0a0b] p-2 md:p-4 rounded-3xl">
         {/* Cartão de Topo */}
         <div 
@@ -383,6 +416,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         >
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col md:flex-row items-center gap-6 w-full">
+              {/* Mascote destacado sem caixa ao redor */}
               <div className="flex h-72 md:h-80 w-full md:w-64 shrink-0 items-center justify-center p-2">
                 <img
                   src={MASCOTS_OFFICIAL[dominantKey]}
@@ -527,6 +561,33 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
               <div key={idx} className="rounded-2xl border border-zinc-800 bg-[#1a1a1a] p-4 space-y-1.5">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff0068]">{title}</span>
                 <p className="text-xs text-zinc-300 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Onde esse perfil rende mais */}
+        <div className="rounded-3xl border border-zinc-800/80 bg-[#121214] p-8 space-y-6 font-modern">
+          <div>
+            <h3 className="text-xl font-bold text-white uppercase tracking-wider">Onde esse perfil rende mais</h3>
+            <p className="text-xs text-zinc-400 mt-1">
+              Áreas com maior afinidade natural - não são limites, são pontos de partida.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {mainDetails.ondeRendeMais.map((item, idx) => (
+              <div key={idx} className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-zinc-200">{item.area}</span>
+                  <span className="text-zinc-400">{item.baseScore}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div
+                    className="h-full bg-emerald-500"
+                    style={{ width: `${item.baseScore}%` }}
+                  />
+                </div>
               </div>
             ))}
           </div>
