@@ -250,32 +250,31 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
   return (
     <div className="space-y-10 text-white font-sans">
+      {/* Import de Fonte Limpa e Moderna (Plus Jakarta Sans) */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&display=swap');
-        .font-big-shoulders {
-          font-family: 'Big Shoulders Display', sans-serif;
-          letter-spacing: 0.05em;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+        .font-modern {
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
       `}</style>
 
       {celebrate && (
         <div className="rounded-2xl border border-zinc-800 bg-[#141414] p-6 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-[#ff0068]" />
-          <h2 className="mt-3 text-2xl font-black font-big-shoulders uppercase">Avaliação Concluída com Sucesso!</h2>
+          <h2 className="mt-3 text-2xl font-bold font-modern">Avaliação Concluída com Sucesso!</h2>
           <p className="mt-1 text-xs text-zinc-400">
             Obrigado, {name.split(" ")[0]}. Seu perfil foi mapeado e disponibilizado.
           </p>
         </div>
       )}
 
-      {/* Cartão de Topo - Layout Fiel ao PDF (Mascote Destacado e Solto) */}
+      {/* Cartão de Topo */}
       <div 
         className="rounded-3xl border bg-[#141414] p-6 md:p-8 space-y-6 relative overflow-hidden shadow-2xl transition-all"
         style={{ borderColor: mainDetails.hexColor }}
       >
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col md:flex-row items-center gap-6 w-full">
-            {/* Mascote em tamanho real, sem caixa escura ao redor */}
             <div className="flex h-72 md:h-80 w-full md:w-64 shrink-0 items-center justify-center p-2">
               <img
                 src={MASCOTS_OFFICIAL[dominantKey]}
@@ -285,16 +284,16 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
             </div>
 
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">{name}</h1>
-              <p className="text-base font-semibold text-zinc-400 mt-1">
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight font-modern">{name}</h1>
+              <p className="text-base font-semibold text-zinc-400 mt-2 font-modern">
                 {position || "Colaborador"} {sector ? `· ${sector}` : ""}
               </p>
-              <div className="mt-3 inline-flex items-center gap-2">
+              <div className="mt-4 inline-flex items-center gap-2">
                 <span 
-                  className="text-base font-black uppercase tracking-wider font-big-shoulders"
+                  className="text-sm font-bold uppercase tracking-wider font-modern"
                   style={{ color: mainDetails.hexColor }}
                 >
-                  PERFIL PREDOMINANTEMENTE: {PROFILES[dominantKey].label}
+                  Perfil predominantemente: {PROFILES[dominantKey].label}
                 </span>
               </div>
             </div>
@@ -302,16 +301,16 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
 
         <div className="rounded-2xl border border-zinc-800/80 bg-[#1a1a1a] p-6">
-          <h2 className="text-2xl font-black text-[#ff0068] font-big-shoulders uppercase">{mainDetails.tagline}</h2>
-          <p className="mt-2 text-sm text-zinc-300 leading-relaxed">{mainDetails.descriptionLong}</p>
+          <h2 className="text-2xl font-bold text-[#ff0068] font-modern">{mainDetails.tagline}</h2>
+          <p className="mt-2 text-sm text-zinc-300 leading-relaxed font-modern">{mainDetails.descriptionLong}</p>
         </div>
       </div>
 
       {/* Distribuição do Perfil */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
         <div>
-          <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Distribuição do seu perfil</h3>
-          <p className="text-xs text-zinc-400 mt-1">
+          <h3 className="text-xl font-bold text-white font-modern uppercase tracking-wider">Distribuição do seu perfil</h3>
+          <p className="text-xs text-zinc-400 mt-1 font-modern">
             Todo mundo tem um pouco dos quatro. O que muda é a intensidade de cada um.
           </p>
         </div>
@@ -332,14 +331,14 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                   backgroundColor: isDominant ? `${pDet.hexColor}15` : "rgba(24, 24, 27, 0.4)",
                 }}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between font-modern">
                   <span 
-                    className="text-base font-black font-big-shoulders uppercase"
+                    className="text-sm font-bold uppercase"
                     style={{ color: isDominant ? pDet.hexColor : "#a1a1aa" }}
                   >
                     {pInfo.label}
                   </span>
-                  <span className="text-xl font-black text-white">{percentage}%</span>
+                  <span className="text-lg font-extrabold text-white">{percentage}%</span>
                 </div>
                 <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
                   <div
@@ -361,9 +360,9 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-4">
           <div className="flex items-center gap-2 text-emerald-400">
             <Zap className="h-5 w-5" />
-            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Pontos fortes</h3>
+            <h3 className="text-lg font-bold text-white font-modern uppercase">Pontos fortes</h3>
           </div>
-          <ul className="space-y-2.5 text-xs text-zinc-300">
+          <ul className="space-y-2.5 text-xs text-zinc-300 font-modern">
             {mainDetails.pontosFortes.map((pf, idx) => (
               <li key={idx} className="flex items-start gap-2">
                 <span className="text-emerald-400 font-bold">•</span>
@@ -376,9 +375,9 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-4">
           <div className="flex items-center gap-2 text-amber-400">
             <AlertTriangle className="h-5 w-5" />
-            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Pontos de atenção</h3>
+            <h3 className="text-lg font-bold text-white font-modern uppercase">Pontos de atenção</h3>
           </div>
-          <ul className="space-y-2.5 text-xs text-zinc-300">
+          <ul className="space-y-2.5 text-xs text-zinc-300 font-modern">
             {mainDetails.pontosAtencao.map((pa, idx) => (
               <li key={idx} className="flex items-start gap-2">
                 <span className="text-amber-400 font-bold">•</span>
@@ -391,9 +390,9 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
       {/* Competências */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Competências</h3>
+        <h3 className="text-xl font-bold text-white font-modern uppercase tracking-wider">Competências</h3>
 
-        <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2 font-modern">
           {competenciesList.map((comp, idx) => (
             <div key={idx} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
@@ -413,12 +412,12 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
 
       {/* Como esse perfil se comporta */}
       <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Como esse perfil se comporta</h3>
+        <h3 className="text-xl font-bold text-white font-modern uppercase tracking-wider">Como esse perfil se comporta</h3>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 font-modern">
           {Object.entries(mainDetails.comportamento).map(([title, desc], idx) => (
             <div key={idx} className="rounded-2xl border border-zinc-800 bg-[#1a1a1a] p-4 space-y-1.5">
-              <span className="text-xs font-black uppercase tracking-wider text-[#ff0068] font-big-shoulders">{title}</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff0068]">{title}</span>
               <p className="text-xs text-zinc-300 leading-relaxed">{desc}</p>
             </div>
           ))}
@@ -426,9 +425,9 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       </div>
 
       {/* Onde esse perfil rende mais */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
+      <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6 font-modern">
         <div>
-          <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Onde esse perfil rende mais</h3>
+          <h3 className="text-xl font-bold text-white uppercase tracking-wider">Onde esse perfil rende mais</h3>
           <p className="text-xs text-zinc-400 mt-1">
             Áreas com maior afinidade natural - não são limites, são pontos de partida.
           </p>
@@ -453,11 +452,11 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       </div>
 
       {/* Ambiente Ideal e Como Liderar */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 font-modern">
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-3">
           <div className="flex items-center gap-2 text-[#ff0068]">
             <Building2 className="h-5 w-5" />
-            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Ambiente ideal</h3>
+            <h3 className="text-lg font-bold text-white uppercase">Ambiente ideal</h3>
           </div>
           <p className="text-xs text-zinc-300 leading-relaxed">{mainDetails.ambienteIdeal}</p>
         </div>
@@ -465,15 +464,15 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-6 space-y-3">
           <div className="flex items-center gap-2 text-sky-400">
             <HeartHandshake className="h-5 w-5" />
-            <h3 className="text-xl font-black text-white font-big-shoulders uppercase">Como liderar esse perfil</h3>
+            <h3 className="text-lg font-bold text-white uppercase">Como liderar esse perfil</h3>
           </div>
           <p className="text-xs text-zinc-300 leading-relaxed">{mainDetails.comoLiderar}</p>
         </div>
       </div>
 
       {/* Os Quatro Perfis VENDE-C no Rodapé */}
-      <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6">
-        <h3 className="text-2xl font-black text-white font-big-shoulders uppercase">Os quatro perfis VENDE-C</h3>
+      <div className="rounded-3xl border border-zinc-800 bg-[#141414] p-8 space-y-6 font-modern">
+        <h3 className="text-xl font-bold text-white uppercase tracking-wider">Os quatro perfis VENDE-C</h3>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {(Object.keys(PROFILES) as ProfileKey[]).map((key) => {
@@ -500,14 +499,14 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                     />
                   </div>
                   <h4 
-                    className="text-lg font-black font-big-shoulders uppercase"
+                    className="text-base font-extrabold uppercase"
                     style={{ color: pDet.hexColor }}
                   >
                     {pInfo.label}
                   </h4>
                   <p className="text-xs text-zinc-400 leading-snug">{pDet.tagline}</p>
                 </div>
-                <div className="mt-4 text-2xl font-black text-white">{percentage}%</div>
+                <div className="mt-4 text-xl font-extrabold text-white">{percentage}%</div>
               </div>
             );
           })}
