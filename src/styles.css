@@ -147,3 +147,13 @@
   height: 0;
   pointer-events: none;
 }
+
+@media print {
+  @page { margin: 12mm; }
+  html, body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sticky, header, nav { display: none !important; }
+  section { break-inside: avoid; }
+}
