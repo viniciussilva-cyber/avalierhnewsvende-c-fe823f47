@@ -218,12 +218,11 @@ export const getProfilerAssessment = createServerFn({ method: "GET" })
 export const submitProfilerAssessment = createServerFn({ method: "POST" })
   .inputValidator((d: { employeeId: string; answers: Record<string, ProfileKey> }) => d)
   .handler(async ({ data }): Promise<ProfilerAssessment> => {
-    const { QUESTIONS, scoreAnswers, dominantProfile, toPercentages, competencies, indicators, talentZones } =
+    const { QUESTIONS, scoreAnswers, isBlockAnswered, dominantProfile, toPercentages, competencies, indicators, talentZones } =
       await import("./profiler");
 
-    const answered = Object.keys(data.answers ?? {}).length;
-    if (answered < QUESTIONS.length) {
-      throw new Error("Responda todas as perguntas antes de enviar.");
+    if (!QUESTIONS.every((q) => isBlockAnswered(data.answers ?? {}, q.id))) {
+      throw new Error("Marque o mais e o menos parecido com você em todos os blocos.");
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles, ArrowRight, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { QUESTIONS, scoreAnswers, type ProfileKey } from "@/lib/profiler";
+import { QUESTIONS, isBlockAnswered, scoreAnswers, type ProfileKey } from "@/lib/profiler";
 import { getProfilerEmployee, submitProfilerAssessment } from "@/lib/profiler.functions";
 import { ProfilerReport } from "@/components/profiler/ProfilerReport";
 
@@ -48,12 +48,16 @@ function AssessmentPage() {
 
   const total = QUESTIONS.length;
   const question = QUESTIONS[step]!;
-  const progress = Math.round((Object.keys(answers).length / total) * 100);
+  const answeredCount = QUESTIONS.filter((q) => isBlockAnswered(answers, q.id)).length;
+  const progress = Math.round((answeredCount / total) * 100);
   const scores = useMemo(() => scoreAnswers(answers), [answers]);
 
-  const choose = (profile: ProfileKey) => {
-    setAnswers((prev) => ({ ...prev, [String(question.id)]: profile }));
-    if (step < total - 1) setTimeout(() => setStep((s) => s + 1), 160);
+  const choose = (kind: "m" | "l", profile: ProfileKey) => {
+    const other = kind === "m" ? "l" : "m";
+    const next = { ...answers, [`${question.id}${kind}`]: profile };
+    if (next[`${question.id}${other}`] === profile) delete next[`${question.id}${other}`];
+    setAnswers(next);
+    if (isBlockAnswered(next, question.id) && step < total - 1) setTimeout(() => setStep((s) => s + 1), 350);
   };
 
   if (employeeQuery.isLoading) {
@@ -96,7 +100,7 @@ function AssessmentPage() {
     );
   }
 
-  const allAnswered = Object.keys(answers).length === total;
+  const allAnswered = answeredCount === total;
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,7 +114,8 @@ function AssessmentPage() {
           Descubra seu perfil comportamental
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Em cada bloco, escolha a frase que mais tem a ver com você. Não existe resposta certa ou errada.
+          Em cada bloco, marque a frase <strong className="text-foreground">mais parecida</strong> com você e a{" "}
+          <strong className="text-foreground">menos parecida</strong> com você. Não existe resposta certa ou errada.
         </p>
 
         <div className="mt-8 flex items-center gap-3">
@@ -135,20 +140,41 @@ function AssessmentPage() {
             transition={{ duration: 0.25 }}
             className="mt-8 space-y-3"
           >
+            <h2 className="text-lg font-bold text-foreground">{question.title}</h2>
             {question.options.map((o) => {
-              const selected = answers[String(question.id)] === o.profile;
+              const isMost = answers[`${question.id}m`] === o.profile;
+              const isLeast = answers[`${question.id}l`] === o.profile;
               return (
-                <button
+                <div
                   key={o.profile}
-                  onClick={() => choose(o.profile)}
-                  className={`w-full rounded-2xl border p-4 text-left text-sm transition-all ${
-                    selected
+                  className={`flex flex-col gap-3 rounded-2xl border p-4 text-sm transition-all sm:flex-row sm:items-center ${
+                    isMost
                       ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      : isLeast
+                        ? "border-muted-foreground/40 bg-secondary/60 text-foreground"
+                        : "border-border bg-card text-muted-foreground"
                   }`}
                 >
-                  {o.text}
-                </button>
+                  <p className="flex-1">{o.text}</p>
+                  <div className="flex shrink-0 gap-2">
+                    <button
+                      onClick={() => choose("m", o.profile)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        isMost ? "bg-primary text-primary-foreground" : "border border-border hover:border-primary/60"
+                      }`}
+                    >
+                      Mais parecido
+                    </button>
+                    <button
+                      onClick={() => choose("l", o.profile)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        isLeast ? "bg-foreground text-background" : "border border-border hover:border-foreground/60"
+                      }`}
+                    >
+                      Menos parecido
+                    </button>
+                  </div>
+                </div>
               );
             })}
           </motion.div>

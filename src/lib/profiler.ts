@@ -130,189 +130,130 @@ export interface QuestionOption {
 
 export interface Question {
   id: number;
+  title: string;
   options: QuestionOption[];
 }
 
-/** 20 blocos; em cada um a pessoa escolhe a frase que mais tem a ver com ela. */
+/** Blocos "mais parecido / menos parecido comigo". */
 export const QUESTIONS: Question[] = [
   {
     id: 1,
+    title: "Ao encarar um prazo apertado",
     options: [
-      { profile: "executor", text: "Vou direto ao ponto e decido rápido." },
-      { profile: "comunicador", text: "Gosto de conversar e envolver as pessoas." },
-      { profile: "planejador", text: "Prefiro ouvir antes de me posicionar." },
-      { profile: "analista", text: "Analiso os dados antes de qualquer decisão." },
+      { profile: "executor", text: "Acelero o ritmo e cobro resultado imediato de mim e dos outros" },
+      { profile: "comunicador", text: "Busco animar o time e mantenho o clima leve mesmo sob pressão" },
+      { profile: "planejador", text: "Sigo o ritmo que já vinha seguindo, sem me alterar" },
+      { profile: "analista", text: "Reviso o plano com calma antes de agir, mesmo com o relógio correndo" },
     ],
   },
   {
     id: 2,
+    title: "Numa reunião de equipe",
     options: [
-      { profile: "executor", text: "Assumo o comando quando algo está parado." },
-      { profile: "comunicador", text: "Animo o time quando a energia cai." },
-      { profile: "planejador", text: "Mantenho a calma quando tudo aperta." },
-      { profile: "analista", text: "Reviso tudo antes de entregar." },
+      { profile: "executor", text: "Vou direto ao ponto e proponho a decisão" },
+      { profile: "comunicador", text: "Falo bastante, envolvo todo mundo na conversa" },
+      { profile: "planejador", text: "Escuto mais do que falo, espero minha vez" },
+      { profile: "analista", text: "Anoto os detalhes e questiono pontos que não ficaram claros" },
     ],
   },
   {
     id: 3,
+    title: "Diante de uma mudança repentina de planos",
     options: [
-      { profile: "executor", text: "Prefiro resultado a processo." },
-      { profile: "comunicador", text: "Prefiro pessoas a planilhas." },
-      { profile: "planejador", text: "Prefiro rotina previsível a improviso." },
-      { profile: "analista", text: "Prefiro critério claro a intuição." },
+      { profile: "executor", text: "Vejo como oportunidade de assumir o controle da situação" },
+      { profile: "comunicador", text: "Me adapto rápido e tento contagiar os outros com otimismo" },
+      { profile: "planejador", text: "Preciso de um tempo para me ajustar, prefiro previsibilidade" },
+      { profile: "analista", text: "Quero entender o motivo da mudança antes de aceitar" },
     ],
   },
   {
     id: 4,
+    title: "Ao tomar uma decisão importante",
     options: [
-      { profile: "executor", text: "Corro risco quando vejo oportunidade." },
-      { profile: "comunicador", text: "Confio na minha leitura das pessoas." },
-      { profile: "planejador", text: "Evito mudanças sem necessidade." },
-      { profile: "analista", text: "Só avanço quando o cenário está claro." },
+      { profile: "executor", text: "Decido rápido, com base no resultado que quero alcançar" },
+      { profile: "comunicador", text: "Busco gerar entusiasmo no grupo em torno da escolha que defendo" },
+      { profile: "planejador", text: "Prefiro buscar consenso com o grupo, mesmo que leve mais tempo" },
+      { profile: "analista", text: "Levanto dados e analiso prós e contras com cuidado" },
     ],
   },
   {
     id: 5,
+    title: "Recebendo uma crítica ou feedback",
     options: [
-      { profile: "executor", text: "Fico impaciente com reuniões longas." },
-      { profile: "comunicador", text: "Aproveito reuniões para conectar ideias." },
-      { profile: "planejador", text: "Uso reuniões para alinhar o time." },
-      { profile: "analista", text: "Levo dados preparados para a reunião." },
+      { profile: "executor", text: "Encaro de frente e já penso no que fazer diferente" },
+      { profile: "comunicador", text: "Comento logo com alguém por perto e sigo animado(a)" },
+      { profile: "planejador", text: "Levo a sério e prefiro processar em silêncio" },
+      { profile: "analista", text: "Peço exemplos concretos para entender exatamente o que errei" },
     ],
   },
   {
     id: 6,
+    title: "Em situação de conflito",
     options: [
-      { profile: "executor", text: "Cobro entrega quando o prazo aperta." },
-      { profile: "comunicador", text: "Motivo o time quando o prazo aperta." },
-      { profile: "planejador", text: "Reorganizo a rotina quando o prazo aperta." },
-      { profile: "analista", text: "Reviso o plano quando o prazo aperta." },
+      { profile: "executor", text: "Confronto diretamente, prefiro resolver logo" },
+      { profile: "comunicador", text: "Tento amenizar com bom humor ou conversa" },
+      { profile: "planejador", text: "Evito o confronto, busco manter a harmonia" },
+      { profile: "analista", text: "Analiso os fatos antes de tomar partido" },
     ],
   },
   {
     id: 7,
+    title: "No dia a dia de trabalho",
     options: [
-      { profile: "executor", text: "Falo o que penso, mesmo que incomode." },
-      { profile: "comunicador", text: "Escolho as palavras para engajar." },
-      { profile: "planejador", text: "Evito criar atrito desnecessário." },
-      { profile: "analista", text: "Prefiro argumentar com fatos." },
+      { profile: "executor", text: "Gosto de ambientes com desafio e meta clara pra bater" },
+      { profile: "comunicador", text: "Prefiro dias com bastante troca e conversa com o time" },
+      { profile: "planejador", text: "Gosto de manter o mesmo ritmo, sem sobressaltos" },
+      { profile: "analista", text: "Prefiro caprichar nos detalhes a entregar rápido e com falhas" },
     ],
   },
   {
     id: 8,
+    title: "Ao errar em alguma tarefa",
     options: [
-      { profile: "executor", text: "Gosto de metas difíceis." },
-      { profile: "comunicador", text: "Gosto de reconhecimento público." },
-      { profile: "planejador", text: "Gosto de estabilidade e segurança." },
-      { profile: "analista", text: "Gosto de trabalho bem-feito." },
+      { profile: "executor", text: "Sigo em frente rápido, não gosto de ficar remoendo" },
+      { profile: "comunicador", text: "Comento abertamente, não escondo o erro" },
+      { profile: "planejador", text: "Fico incomodado, mas evito criar alarde" },
+      { profile: "analista", text: "Investigo a fundo o que causou o erro para não repetir" },
     ],
   },
   {
     id: 9,
+    title: "Em relação a regras e processos",
     options: [
-      { profile: "executor", text: "Tomo a frente em situações de crise." },
-      { profile: "comunicador", text: "Busco aliados em situações de crise." },
-      { profile: "planejador", text: "Sustento o time em situações de crise." },
-      { profile: "analista", text: "Mapeio as causas em situações de crise." },
+      { profile: "executor", text: "Sigo as regras até onde elas não travam o resultado" },
+      { profile: "comunicador", text: "Sigo as regras, mas não abro mão de manter um bom clima com todo mundo" },
+      { profile: "planejador", text: "Sigo as regras como forma de manter a ordem" },
+      { profile: "analista", text: "Sigo as regras à risca, questiono quando não fazem sentido" },
     ],
   },
   {
     id: 10,
+    title: "Liderando ou influenciando outras pessoas",
     options: [
-      { profile: "executor", text: "Delego e cobro resultado." },
-      { profile: "comunicador", text: "Delego explicando o propósito." },
-      { profile: "planejador", text: "Delego acompanhando de perto." },
-      { profile: "analista", text: "Delego com instruções detalhadas." },
+      { profile: "executor", text: "Dou direção clara e cobro entrega" },
+      { profile: "comunicador", text: "Inspiro e motivo pelo entusiasmo" },
+      { profile: "planejador", text: "Apoio e dou suporte constante ao time" },
+      { profile: "analista", text: "Oriento com base em dados e processos bem definidos" },
     ],
   },
   {
     id: 11,
+    title: "Ao começar um projeto novo",
     options: [
-      { profile: "executor", text: "Mudança para mim é oportunidade." },
-      { profile: "comunicador", text: "Mudança para mim é novidade boa." },
-      { profile: "planejador", text: "Mudança para mim precisa de tempo." },
-      { profile: "analista", text: "Mudança para mim precisa de justificativa." },
+      { profile: "executor", text: "Já penso nas metas finais e no impacto" },
+      { profile: "comunicador", text: "Já penso em quem vou envolver e como vender a ideia" },
+      { profile: "planejador", text: "Prefiro ir no ritmo que já conheço, sem pressa pra mudar a forma de trabalhar" },
+      { profile: "analista", text: "Levanto todas as informações antes de dar o primeiro passo" },
     ],
   },
   {
     id: 12,
+    title: "Sob estresse prolongado",
     options: [
-      { profile: "executor", text: "Prefiro decidir sozinho e seguir." },
-      { profile: "comunicador", text: "Prefiro decidir conversando com gente." },
-      { profile: "planejador", text: "Prefiro decidir em consenso." },
-      { profile: "analista", text: "Prefiro decidir com evidência." },
-    ],
-  },
-  {
-    id: 13,
-    options: [
-      { profile: "executor", text: "Meu ritmo é acelerado." },
-      { profile: "comunicador", text: "Meu ritmo é variado e animado." },
-      { profile: "planejador", text: "Meu ritmo é constante." },
-      { profile: "analista", text: "Meu ritmo é cuidadoso." },
-    ],
-  },
-  {
-    id: 14,
-    options: [
-      { profile: "executor", text: "Erro faz parte, sigo em frente." },
-      { profile: "comunicador", text: "Erro eu compartilho e aprendo junto." },
-      { profile: "planejador", text: "Erro eu corrijo com calma." },
-      { profile: "analista", text: "Erro eu investigo a fundo." },
-    ],
-  },
-  {
-    id: 15,
-    options: [
-      { profile: "executor", text: "Gosto de autonomia total." },
-      { profile: "comunicador", text: "Gosto de trabalhar cercado de pessoas." },
-      { profile: "planejador", text: "Gosto de saber o que esperar do dia." },
-      { profile: "analista", text: "Gosto de regras e padrões definidos." },
-    ],
-  },
-  {
-    id: 16,
-    options: [
-      { profile: "executor", text: "Sou movido por desafio." },
-      { profile: "comunicador", text: "Sou movido por conexão." },
-      { profile: "planejador", text: "Sou movido por propósito e time." },
-      { profile: "analista", text: "Sou movido por excelência." },
-    ],
-  },
-  {
-    id: 17,
-    options: [
-      { profile: "executor", text: "Cobro de mim e dos outros." },
-      { profile: "comunicador", text: "Elogio bastante o time." },
-      { profile: "planejador", text: "Apoio quem está com dificuldade." },
-      { profile: "analista", text: "Aponto o que precisa ser corrigido." },
-    ],
-  },
-  {
-    id: 18,
-    options: [
-      { profile: "executor", text: "Prefiro começar e ajustar no caminho." },
-      { profile: "comunicador", text: "Prefiro alinhar com todos e começar." },
-      { profile: "planejador", text: "Prefiro combinar tudo antes de começar." },
-      { profile: "analista", text: "Prefiro planejar em detalhes antes de começar." },
-    ],
-  },
-  {
-    id: 19,
-    options: [
-      { profile: "executor", text: "Fico incomodado com lentidão." },
-      { profile: "comunicador", text: "Fico incomodado com ambiente frio." },
-      { profile: "planejador", text: "Fico incomodado com pressão e conflito." },
-      { profile: "analista", text: "Fico incomodado com desorganização." },
-    ],
-  },
-  {
-    id: 20,
-    options: [
-      { profile: "executor", text: "Quero ser lembrado pelos resultados." },
-      { profile: "comunicador", text: "Quero ser lembrado pelas pessoas que impactei." },
-      { profile: "planejador", text: "Quero ser lembrado pela confiança que passei." },
-      { profile: "analista", text: "Quero ser lembrado pela qualidade do que fiz." },
+      { profile: "executor", text: "Fico impaciente e mais direto do que de costume" },
+      { profile: "comunicador", text: "Fico mais falante e busco apoio social" },
+      { profile: "planejador", text: "Me fecho um pouco, evito mudanças adicionais" },
+      { profile: "analista", text: "Fico mais crítico e exigente com detalhes" },
     ],
   },
 ];
@@ -333,13 +274,34 @@ export const EMPTY_SCORES: Scores = {
   analista: 0,
 };
 
-/** Converte as respostas (id da questão → perfil) em pontuação bruta. */
+/**
+ * Converte as respostas em pontuação bruta.
+ * Formato atual: chaves "<id>m" (mais parecido) e "<id>l" (menos parecido).
+ * Mais = 2 pontos, não marcada = 1, menos = 0. Chaves antigas ("<id>") valem 1.
+ */
 export function scoreAnswers(answers: Record<string, ProfileKey>): Scores {
   const s: Scores = { ...EMPTY_SCORES };
-  for (const value of Object.values(answers)) {
-    if (value && value in s) s[value] += 1;
+  for (const [key, value] of Object.entries(answers)) {
+    if (!value || !(value in s)) continue;
+    if (/^\d+$/.test(key)) s[value] += 1;
+  }
+  for (const q of QUESTIONS) {
+    const most = answers[`${q.id}m`];
+    const least = answers[`${q.id}l`];
+    if (!most || !least) continue;
+    for (const o of q.options) {
+      if (o.profile === most) s[o.profile] += 2;
+      else if (o.profile !== least) s[o.profile] += 1;
+    }
   }
   return s;
+}
+
+/** Bloco respondido = tem "mais" e "menos" diferentes. */
+export function isBlockAnswered(answers: Record<string, ProfileKey>, id: number): boolean {
+  const m = answers[`${id}m`];
+  const l = answers[`${id}l`];
+  return !!m && !!l && m !== l;
 }
 
 /** Percentual de cada perfil (0–100), somando 100. */
