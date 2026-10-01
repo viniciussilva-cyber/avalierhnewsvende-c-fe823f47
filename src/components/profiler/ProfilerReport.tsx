@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Download, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Download, FileText, Image as ImageIcon, Loader2, User } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   PROFILES,
@@ -18,13 +18,13 @@ interface ProfilerReportProps {
   position?: string;
   sector?: string;
   scores: Scores;
-  /** Mostra o bloco de boas-vindas ao colaborador que acabou de responder. */
   celebrate?: boolean;
 }
 
 export function ProfilerReport({ name, position, sector, scores, celebrate }: ProfilerReportProps) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState<"png" | "pdf" | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   const pct = toPercentages(scores);
   const dominant = dominantProfile(scores);
@@ -35,7 +35,11 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
   const inds = indicators(dominant);
   const topZones = zones.slice(0, 5);
 
-  // Download Direto de Imagem / PDF via html2canvas
+  const handleImageError = (key: string) => {
+    setImageErrors((prev) => ({ ...prev, [key]: true }));
+  };
+
+  // Download direto sem acionar o Ctrl + P
   const handleExport = async (type: "png" | "pdf") => {
     if (!reportRef.current) return;
     setIsExporting(type);
@@ -89,11 +93,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
       }
     } catch (err) {
       console.error("Erro na exportação do relatório:", err);
-      // Fallback para o modo de impressão nativo
-      const prevTitle = document.title;
-      document.title = `Relatorio-DISC-${name.replace(/\s+/g, "-")}`;
-      window.print();
-      document.title = prevTitle;
+      alert("Não foi possível gerar o arquivo. Verifique se as imagens estão disponíveis na pasta public/mascots.");
     } finally {
       setIsExporting(null);
     }
@@ -107,7 +107,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         }
       `}</style>
 
-      {/* Toolbar Executiva de Download Direto */}
+      {/* Toolbar de Ações */}
       <div className="no-print flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 shadow-xl">
         <div className="flex items-center gap-2">
           <Download className="h-4 w-4 text-muted-foreground" />
@@ -147,9 +147,9 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
         </div>
       </div>
 
-      {/* Conteúdo Exportado do Relatório */}
-      <div ref={reportRef} className="space-y-8 p-1 md:p-2 rounded-3xl bg-background">
-        {/* Cabeçalho + personagem predominante */}
+      {/* Área Mapeada do Relatório */}
+      <div ref={reportRef} className="space-y-8 p-2 md:p-4 rounded-3xl bg-background">
+        {/* Cabeçalho + Mascote Predominante */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -185,18 +185,28 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
               <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">{info.summary}</p>
             </div>
 
-            <motion.img
-              initial={{ opacity: 0, scale: 0.9, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              src={info.mascot}
-              alt={`Personagem ${info.label} da VENDE-C`}
-              className="mx-auto h-64 w-auto object-contain drop-shadow-2xl sm:h-80"
-            />
+            <div className="flex h-64 sm:h-80 w-auto items-center justify-center">
+              {!imageErrors[`main_${dominant}`] ? (
+                <motion.img
+                  initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                  src={info.mascot}
+                  alt={`Personagem ${info.label} da VENDE-C`}
+                  onError={() => handleImageError(`main_${dominant}`)}
+                  className="mx-auto h-full w-auto object-contain drop-shadow-2xl"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center p-6 border border-dashed border-zinc-700 rounded-2xl">
+                  <User className="h-16 w-16 text-zinc-500 mb-2" />
+                  <span className="text-xs text-zinc-400 font-bold">{info.label}</span>
+                </div>
+              )}
+            </div>
           </div>
         </motion.section>
 
-        {/* Distribuição dos quatro perfis */}
+        {/* Distribuição do perfil */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Distribuição do seu perfil</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -318,7 +328,7 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           </section>
         </div>
 
-        {/* Os quatro personagens */}
+        {/* Os quatro personagens do rodapé */}
         <section className="rounded-3xl border border-border bg-card p-6 sm:p-8">
           <h2 className="text-lg font-bold text-foreground">Os quatro perfis VENDE-C</h2>
           <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -333,11 +343,18 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
                   }`}
                   style={isMain ? { backgroundColor: `${p.color}18`, borderColor: `${p.color}66` } : undefined}
                 >
-                  <img
-                    src={p.mascot}
-                    alt={`Personagem ${p.label}`}
-                    className={`mx-auto w-auto object-contain ${isMain ? "h-40" : "h-28"}`}
-                  />
+                  {!imageErrors[`footer_${key}`] ? (
+                    <img
+                      src={p.mascot}
+                      alt={`Personagem ${p.label}`}
+                      onError={() => handleImageError(`footer_${key}`)}
+                      className={`mx-auto w-auto object-contain ${isMain ? "h-40" : "h-28"}`}
+                    />
+                  ) : (
+                    <div className="flex h-28 items-center justify-center">
+                      <User className="h-10 w-10 text-zinc-500" />
+                    </div>
+                  )}
                   <p className="mt-3 text-sm font-bold" style={{ color: p.color }}>
                     {p.label}
                   </p>
