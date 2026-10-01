@@ -1,11 +1,10 @@
 # Roadmap
 
-## Migração VENDE-C Profiler → plataforma interna
-- [x] Tabelas do Profiler no Lovable Cloud (colaboradores + avaliações)
-- [x] Recorte e publicação dos 4 personagens (Analista, Planejador, Executor, Comunicador)
-- [x] Biblioteca de perfis, questionário, competências, indicadores e zonas de talento
-- [x] Server functions do Profiler
-- [x] Telas: painel RH (/app/profiler), relatório individual, questionário, visão do líder
-- [x] Personagens exibidos no final do resultado
-- [x] Card do módulo no hub /app com login unificado
-- [ ] Importar os dados existentes da conta antiga (aguarda export do outro projeto)
+## Profiler
+- [x] Migração do Profiler, telas, personagens, acesso dos líderes
+- [x] Remover módulo R&S
+- [ ] Busca por e-mail das avaliações (painel RH e Meu time)
+- [ ] Baixar relatório em PDF
+- [ ] E-mail ao líder com o resultado ao concluir (aguarda domínio de e-mail do usuário)
+- [ ] Relatório no design do PDF de referência (aguarda o PDF — não chegou anexo)
+- [ ] Importar os dados da conta antiga (aguarda export)

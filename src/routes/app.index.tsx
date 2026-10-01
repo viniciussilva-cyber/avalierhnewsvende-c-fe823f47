@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Newspaper, Users, Loader2, LogOut, Sparkles, ArrowRight, IdCard } from "lucide-react";
+import { Newspaper, Loader2, LogOut, Sparkles, ArrowRight, IdCard } from "lucide-react";
 import { logout, useAuth } from "@/lib/auth";
 import { useRole } from "@/lib/roles";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,17 +22,6 @@ const modules = [
     gradient: "from-primary/25 via-primary/5 to-transparent",
     accent: "text-primary",
     allowGestor: false,
-  },
-  {
-    id: "rs",
-    to: "/app/rs" as const,
-    label: "R&S",
-    tag: "Recrutamento & Seleção",
-    description: "Crie vagas, cadastre candidatos e receba a avaliação dos gestores da área.",
-    icon: Users,
-    gradient: "from-fuchsia-500/25 via-fuchsia-500/5 to-transparent",
-    accent: "text-fuchsia-300",
-    allowGestor: true,
   },
   {
     id: "profiler",
