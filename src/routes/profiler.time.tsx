@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Home, Loader2, LogOut, Sparkles } from "lucide-react";
+import { Home, Loader2, LogOut, Search, Sparkles } from "lucide-react";
 import { PageTransition, StaggerItem } from "@/components/PageTransition";
 import { PROFILES, PROFILE_KEYS, toPercentages } from "@/lib/profiler";
 import { listProfilerAssessments, listProfilerEmployees } from "@/lib/profiler.functions";
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/profiler/time")({
 function LeaderTeam() {
   const navigate = useNavigate();
   const { leader, loading } = useLeaderSession();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!loading && !leader) navigate({ to: "/profiler", replace: true });
@@ -52,6 +53,12 @@ function LeaderTeam() {
     if (!leader) return [];
     return (employeesQuery.data ?? []).filter((e) => leadsEmployee(leader, e.leaderEmail));
   }, [employeesQuery.data, leader]);
+
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return team;
+    return team.filter((e) => `${e.email} ${e.fullName}`.toLowerCase().includes(q));
+  }, [team, search]);
 
   const assessmentByEmployee = useMemo(() => {
     const map = new Map<string, NonNullable<typeof assessmentsQuery.data>[number]>();
@@ -108,6 +115,17 @@ function LeaderTeam() {
           {team.length} {team.length === 1 ? "pessoa" : "pessoas"} sob sua liderança.
         </p>
 
+        <div className="relative mt-6 max-w-md">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Pesquisar por e-mail ou nome"
+            className="w-full rounded-lg border border-input bg-card py-2.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40"
+          />
+        </div>
+
         {team.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center">
             <p className="text-sm text-muted-foreground">
@@ -117,7 +135,7 @@ function LeaderTeam() {
           </div>
         ) : (
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            {team.map((e, i) => {
+            {shown.map((e, i) => {
               const assessment = assessmentByEmployee.get(e.id);
               const pct = assessment ? toPercentages(assessment.scores) : null;
               const profile = assessment ? PROFILES[assessment.dominant] : null;
