@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   PROFILES,
@@ -230,6 +231,21 @@ export function ProfilerReport({ name, position, sector, scores, celebrate }: Pr
           })}
         </div>
       </section>
+
+      <div className="flex justify-center print:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            const prev = document.title;
+            document.title = `Relatorio-Profiler-${name.replace(/\s+/g, "-")}`;
+            window.print();
+            document.title = prev;
+          }}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-95"
+        >
+          <Download className="h-4 w-4" /> Baixar relatório em PDF
+        </button>
+      </div>
     </div>
   );
 }
